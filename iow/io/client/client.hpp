@@ -4,7 +4,7 @@
 
 #include <iow/logger.hpp>
 #include <iow/io/client/connection.hpp>
-#include <iow/workflow/workflow.hpp>
+#include <wflow/workflow.hpp>
 
 #include <memory>
 #include <cassert>
@@ -243,7 +243,7 @@ private:
   bool _ready_for_write;
   time_t _reconnect_timeout_ms;
   output_handler_t _output_handler;
-  std::shared_ptr< ::iow::workflow > _workflow;
+  std::shared_ptr< wflow::workflow > _workflow;
 };
 
 }}}

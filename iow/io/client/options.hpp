@@ -2,7 +2,7 @@
 
 #include <string>
 #include <iow/system.hpp>
-#include <iow/workflow/workflow.hpp>
+#include <wflow/workflow.hpp>
 
 namespace iow{ namespace io{ namespace client{
 
@@ -17,7 +17,7 @@ struct options
   int threads = 0;
   int connect_count = 1;
   struct {
-    std::shared_ptr< ::iow::workflow > workflow;
+    std::shared_ptr< wflow::workflow > workflow;
     std::function<void()> connect_handler;
     std::function<void( ::iow::system::error_code )> error_handler;
   } args;

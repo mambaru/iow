@@ -9,16 +9,18 @@ set( SUITE_LIST
 )
 
 add_executable( io_test ${FAS_TESTING_CPP} io_test.cpp ${SUITE_LIST} )
-target_link_libraries( io_test ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
-target_link_libraries(io_test iow)
+link_directories("${CMAKE_SOURCE_DIR}/../wflow/build")
+
+target_link_libraries(io_test ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
+target_link_libraries(io_test iow )
 
 add_executable( tcp_acceptor tcp_acceptor.cpp)
-target_link_libraries( tcp_acceptor ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
+target_link_libraries(tcp_acceptor ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
 target_link_libraries(tcp_acceptor iow)
 
 add_executable( tcp_client tcp_client.cpp)
 target_link_libraries( tcp_client ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
-target_link_libraries( tcp_client iow)
+target_link_libraries( tcp_client iow wflow)
 
 add_executable( udp_test udp_test.cpp)
 target_link_libraries( udp_test ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )

@@ -3,7 +3,7 @@
 #include <iow/ip/tcp/server/server.hpp>
 #include <iow/ip/tcp/server/options.hpp>
 #include <iow/ip/tcp/client/client.hpp>
-#include <iow/workflow/workflow.hpp>
+#include <wflow/workflow.hpp>
 #include <thread>
 #include <mutex>
 #include <memory>
@@ -59,7 +59,7 @@ int main()
   opt.addr = "0.0.0.0";
   opt.port = "12345";
   opt.reconnect_timeout_ms = 1000;
-  auto workflow = std::make_shared< iow::workflow>(g_io_service);
+  auto workflow = std::make_shared< wflow::workflow>(g_io_service);
   opt.args.workflow = workflow;
   opt.connection.input_handler=[](iow::io::data_ptr, iow::io::io_id_t, ::iow::io::output_handler_t)
   {
