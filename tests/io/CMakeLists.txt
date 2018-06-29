@@ -20,11 +20,11 @@ target_link_libraries(tcp_acceptor iow)
 
 add_executable( tcp_client tcp_client.cpp)
 target_link_libraries( tcp_client ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
-target_link_libraries( tcp_client iow wflow)
+target_link_libraries( tcp_client iow )
 
 add_executable( udp_test udp_test.cpp)
 target_link_libraries( udp_test ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
 target_link_libraries( udp_test iow)
 
 add_test( NAME io_test COMMAND io_test WORKING_DIRECTORY ${IOW_TEST_DIR} )
-#add_test( udp_test udp_test)
+add_test( udp_test udp_test)

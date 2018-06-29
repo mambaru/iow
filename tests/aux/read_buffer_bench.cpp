@@ -59,7 +59,7 @@ void run(size_t packsize, size_t readsize, size_t total, size_t count, size_t bu
   for (size_t i =0 ; i < count; ++i)
   {
     for (size_t j =0 ; j < packsize - 2; ++j)
-      indata.push_back('0'+ (j)%packsize);
+      indata.push_back( static_cast<char>('0'+ j%packsize) );
     indata.push_back('\r');
     indata.push_back('\n');
     ++pack_count;

@@ -4,14 +4,11 @@
 .cproject
 .project
 *.o
-*.cmake
 */debug
 */release
 */build
 build
 .tup
-btp/server/debug
-btp/server/release
 *.kch
 autom4te.cache
 *.deps
@@ -20,4 +17,3 @@ CMakeCache.txt
 *.kate-swp
 *build_info.h
 config.h
-Makefile

@@ -56,9 +56,9 @@ struct generator
         
     data_ptr d = std::make_unique<data_type>();
     for ( size_t j = offset; j < offset + size; j++)
-      d->push_back('A'+j%10);
+      d->push_back( static_cast<char>('A'+j%10) );
     
-    return std::move(d);
+    return d;
   }
 };
 

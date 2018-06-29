@@ -35,7 +35,7 @@ public:
   {
   }
   
-  client( io_service_type& io, descriptor_type&& desc)
+  client( io_service_type& , descriptor_type&& desc)
     : super(std::move(desc) )
     , _started(false)
     , _ready_for_write(false)
