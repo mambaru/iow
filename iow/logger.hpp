@@ -1,10 +1,15 @@
 //
-// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2015, 2017
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2015, 2018
 //
 // Copyright: See COPYING file that comes with this distribution
 //
 
 #pragma once
+
+namespace iow{
+  template<typename ...Args>
+  inline void only_for_log( Args&& ... ){}
+}
 
 #ifndef IOW_DISABLE_LOG
 

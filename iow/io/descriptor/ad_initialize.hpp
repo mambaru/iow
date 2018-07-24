@@ -35,47 +35,12 @@ struct ad_initialize
     {
       cntx.fatal_handler = [](int code, std::string message)
       {
+        only_for_log(code, message);
         IOW_LOG_FATAL("iow::io::descriptor: Default fatal handler (" << code << ") " << message)
       };
     }
 
-    /*
-    iow::asio::socket_base::non_blocking non_blocking(opt.nonblocking);
-    t.descriptor().io_control(non_blocking);
-    */
     t.descriptor().non_blocking(opt.nonblocking);
-
-    /*
-    if ( opt.receive_buffer_size != 0 )
-    {
-      boost::asio::socket_base::receive_buffer_size option(opt.receive_buffer_size);
-      boost::system::error_code ec;
-      t.descriptor().set_option(option, ec);
-      if ( ec )
-      {
-        IOW_LOG_FATAL("socket::set_option receive_buffer_size=" << opt.receive_buffer_size << " error: " << ec.message() );
-      }
-      else
-      {
-        IOW_LOG_MESSAGE("socket::set_option receive_buffer_size=" << opt.receive_buffer_size );
-      }
-    }
-
-    if ( opt.send_buffer_size != 0 )
-    {
-      boost::asio::socket_base::send_buffer_size option(opt.send_buffer_size);
-      boost::system::error_code ec;
-      t.descriptor().set_option(option, ec);
-      if ( ec )
-      {
-        IOW_LOG_FATAL("socket::set_option send_buffer_size=" << opt.send_buffer_size << " error: " << ec.message() );
-      }
-      else
-      {
-        IOW_LOG_MESSAGE("socket::set_option send_buffer_size=" << opt.send_buffer_size );
-      }
-    }
-    */
 
     t.get_aspect().template get< TgInitialize >()( t, std::forward<O>(opt) );
   }

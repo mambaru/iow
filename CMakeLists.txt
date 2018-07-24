@@ -4,7 +4,6 @@ project(iow)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(mambaru)
-
 include(FindThreads)
 find_package(Boost COMPONENTS system date_time REQUIRED)
 
@@ -15,17 +14,11 @@ add_library(
   iow/io/aux/global_pool.cpp
 )
 
-if (NOT IOW_DISABLE_LOG)
-  target_link_libraries(iow ${WFLOW_LIB} ${WLOG_LIB} ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
-else()
-  target_link_libraries(iow ${WFLOW_LIB} ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
-  add_definitions(-DIOW_DISABLE_LOG=ON)
-endif()
+target_link_libraries(iow ${WFLOW_LIB} ${WLOG_LIB} ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
 
 if ( BUILD_TESTING )
   enable_testing()
   add_subdirectory(tests)
-  #add_subdirectory(examples)
 endif()
 
 set(CPACK_PACKAGE_NAME "iow")

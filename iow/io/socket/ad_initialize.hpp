@@ -33,6 +33,7 @@ struct ad_initialize
   
   static void check(const boost::system::error_code& ec, const char* name, size_t value)
   {
+    only_for_log(name, value);
     if ( ec )
     {
       IOW_LOG_FATAL("socket::set_option " << name << "=" << value << " error: " << ec.message() );

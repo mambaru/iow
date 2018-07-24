@@ -234,6 +234,7 @@ private:
       opt2.connection.input_handler
         = [wthis]( data_ptr d, io_id_t /*o_id*/, output_handler_t /*output*/)
       {
+        only_for_log(d);
         IOW_LOG_ERROR("Client input_handler not set [" << d << "]" )
       }; 
     }
