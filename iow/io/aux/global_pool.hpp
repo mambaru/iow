@@ -11,7 +11,6 @@ typedef std::function< void(data_ptr) > free_fun;
 class global_pool
 {
 public:
-  
   static void initialize(data_map_options);
   static create_fun get_create();
   static free_fun get_free();

@@ -8,7 +8,7 @@ add_executable(read_buffer_bench_big read_buffer_bench_big.cpp ../../iow/io/aux/
 #target_link_libraries(write_buffer_test iow)
 #target_link_libraries(read_buffer_test iow)
 #target_link_libraries(write_buffer_bench iow)
-#target_link_libraries(read_buffer_bench iow)
+target_link_libraries(read_buffer_bench iow)
 #target_link_libraries(read_buffer_bench_big iow)
 
 

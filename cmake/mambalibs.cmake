@@ -51,7 +51,7 @@ MACRO(get_mambaru LIBNAME LIBDIR LIBBIN PARAMS_FOR_CMAKE)
     execute_process(COMMAND bash -c "git remote -v | head -q -n 1" 
                     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE remote_url )
     message(STATUS "remote_url=${remote_url}")
-    if ( "${remote_url}" MATCHES "github\.lan1" )
+    if ( "${remote_url}" MATCHES "github\.lan" )
       message(STATUS "Clone from LAN repositary")
       clone_library(${LIBNAME} ${LIBDIR} "git@github.lan:cpp/${LIBNAME}.git" "${PARAMS_FOR_CMAKE}")
     else()
