@@ -46,7 +46,15 @@ MACRO(get_mambaru LIBNAME LIBDIR LIBBIN PARAMS_FOR_CMAKE)
     PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
     PATH_SUFFIXES "build/${LIBNAME}" "../build/${LIBNAME}" "${LIBNAME}" "../${LIBNAME}"
   )
-  if ( "${${LIBDIR}}" STREQUAL "${LIBDIR}-NOTFOUND") 
+  
+  unset(${${LIBBIN}} CACHE)
+  find_library( 
+    ${LIBBIN} NAMES "${LIBNAME}"
+    PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
+    PATH_SUFFIXES "build/${LIBNAME}" "../build/${LIBNAME}" "${LIBNAME}" "../${LIBNAME}" "${LIBNAME}/build" "../${LIBNAME}/build"
+  )
+  
+  if ( ("${${LIBDIR}}" STREQUAL "${LIBDIR}-NOTFOUND") OR ("${${LIBBIN}}" STREQUAL "${LIBBIN}-NOTFOUND")) 
     unset(${LIBDIR} CACHE)
     execute_process(COMMAND bash -c "git remote -v | head -q -n 1" 
                     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE remote_url )
@@ -58,16 +66,19 @@ MACRO(get_mambaru LIBNAME LIBDIR LIBBIN PARAMS_FOR_CMAKE)
       message(STATUS "Clone from github.com")
       clone_library(${LIBNAME} ${LIBDIR} "https://github.com/mambaru/${LIBNAME}.git" "${PARAMS_FOR_CMAKE}")
     endif()
+    
+    unset(${${LIBBIN}} CACHE)
+    find_library( 
+      ${LIBBIN} NAMES "${LIBNAME}"
+      PATHS "${CMAKE_SOURCE_DIR}" 
+      PATH_SUFFIXES "build/${LIBNAME}"
+    )
+
   endif()
   MESSAGE(STATUS "${LIBDIR} = ${${LIBDIR}}")
   include_directories("${${LIBDIR}}")
   
-  unset(${${LIBBIN}} CACHE)
-  find_library( 
-    ${LIBBIN} NAMES "${LIBNAME}"
-    PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
-    PATH_SUFFIXES "build/${LIBNAME}" "../build/${LIBNAME}" "${LIBNAME}" "../${LIBNAME}" "${LIBNAME}/build" "../${LIBNAME}/build"
-  )
+  
   if ( ${${LIBBIN}} )
     link_directories("${${LIBBIN}}")
     MESSAGE(STATUS "${LIBBIN} = ${${LIBBIN}}")
