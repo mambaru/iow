@@ -41,7 +41,6 @@ public:
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
   {
-    //_workflow = std::make_shared< ::iow::workflow >(io, ::iow::queue_options() );
   }
   
   template<typename Opt>
