@@ -14,6 +14,9 @@ add_library(
   iow/io/aux/global_pool.cpp
 )
 
+message(STATUS "${WFLOW_LIB}")
+message(STATUS "${WLOG_LIB}")
+
 target_link_libraries(iow ${WFLOW_LIB} ${WLOG_LIB} ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
 
 if ( BUILD_TESTING )
