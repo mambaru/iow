@@ -150,7 +150,7 @@ namespace iow{ namespace io{
     {
       resbuf->resize( bufsize - _sep_size);
     }
-    return std::move(resbuf);
+    return resbuf;
   }
 
   /*constexpr read_buffer::diff_type read_buffer::npos()
@@ -223,20 +223,6 @@ namespace iow{ namespace io{
   /**************************************************************************/
   /***************************** detach helper ******************************/
   /**************************************************************************/
-
-  /*size_t read_buffer::last_buff_() const
-  {
-    if ( _readbuf==~0ul || (_readpos > 0ul && _readpos!=~0ul) )
-    {
-      return _buffers.size() - 1;
-    }
-    else if (_buffers.size() > 1 )
-    {
-      return _buffers.size() - 2;
-    }
-    return ~0ul;
-  }
-  */
 
   read_buffer::const_iterator read_buffer::begin_(size_t pos) const
   {
@@ -463,7 +449,7 @@ namespace iow{ namespace io{
 
     // Если блок готов в первом буфере
     if ( result != nullptr )
-      return std::move(result);
+      return result;
 
     // Расчитываем необходимый резерв
     size_t reserve = 0;
@@ -493,7 +479,7 @@ namespace iow{ namespace io{
       }
     }
 
-    return std::move(result);
+    return result;
   }
 
   data_ptr read_buffer::make_result_if_first_(const search_pair& p)
@@ -524,7 +510,7 @@ namespace iow{ namespace io{
         result->begin() 
       );
     }
-    return std::move(result);
+    return result;
   }
 
 }}

@@ -20,7 +20,7 @@ target_link_libraries(tcp_acceptor iow)
 
 add_executable( tcp_client tcp_client.cpp)
 target_link_libraries( tcp_client ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
-target_link_libraries( tcp_client iow wflow)
+target_link_libraries( tcp_client iow )
 
 add_executable( udp_test udp_test.cpp)
 target_link_libraries( udp_test ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )

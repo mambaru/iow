@@ -57,7 +57,7 @@ UNIT(stream_holder_unit, "")
   auto h2 = std::make_shared<stream_holder_t>(std::move(d2));
   const char* instr = "Hello world!\r\nBuy!";
   t << message("write...");
-  res1 = write(f1[1], instr, std::strlen(instr) );
+  res1 = int(write(f1[1], instr, std::strlen(instr) ));
   t << message("...write:") << res1;
   
   options_type opt;
@@ -78,7 +78,7 @@ UNIT(stream_holder_unit, "")
   
   
   char outstr[128];
-  int size = read(f2[0], outstr, 128);
+  ssize_t size = read(f2[0], outstr, 128);
   outstr[size]='\0';
   t << message("outstr: ") << outstr << std::endl;
   t << nothing;

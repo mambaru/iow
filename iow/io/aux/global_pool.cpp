@@ -27,7 +27,7 @@ data_ptr global_pool::create(size_t bufsize, size_t maxbuf)
   {*/
     auto p = std::make_unique<data_type>(maxbuf);
     p->resize(bufsize);
-    return std::move(p);
+    return p;
   /*}
   return static_pool->create(bufsize, maxbuf);*/
 }

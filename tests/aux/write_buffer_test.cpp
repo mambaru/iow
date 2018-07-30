@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iow/io/aux/write_buffer.hpp>
+#include <iow/io/aux/data_pool.hpp>
 #include <fas/testing.hpp>
 #include <algorithm>
 #include <cstring>
@@ -56,9 +57,9 @@ struct generator
         
     data_ptr d = std::make_unique<data_type>();
     for ( size_t j = offset; j < offset + size; j++)
-      d->push_back('A'+j%10);
+      d->push_back( static_cast<char>('A'+j%10) );
     
-    return std::move(d);
+    return d;
   }
 };
 
@@ -94,6 +95,8 @@ struct init_line
 UNIT(init_test, "")
 {
   using namespace fas::testing;
+  
+  
   auto test_opt = std::make_shared<data_line_test_options>();
   t.get_aspect().template get<_test_options_>() = test_opt;
   t.get_aspect().template get<_init_line_>()(t);

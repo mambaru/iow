@@ -159,6 +159,7 @@ UNIT(pipe_unit, "")
 {
   using namespace fas::testing;
   
+  
   ::iow::asio::io_service io;
   writer1 f(io);
   

@@ -35,7 +35,7 @@ public:
   {
   }
   
-  client( io_service_type& io, descriptor_type&& desc)
+  client( io_service_type& , descriptor_type&& desc)
     : super(std::move(desc) )
     , _started(false)
     , _ready_for_write(false)
@@ -234,6 +234,7 @@ private:
       opt2.connection.input_handler
         = [wthis]( data_ptr d, io_id_t /*o_id*/, output_handler_t /*output*/)
       {
+        only_for_log(d);
         IOW_LOG_ERROR("Client input_handler not set [" << d << "]" )
       }; 
     }

@@ -1,33 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 project(iow)
 
-if ( "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}" )
-  INCLUDE(FindThreads)
-  SET(CMAKE_CXX_FLAGS       "${CXX_FLAGS} -std=c++11 -ftemplate-backtrace-limit=0")
-  SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -ggdb -DNDEBUG -march=core2 ") 
-  SET(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb ")
-  if (PARANOID_WARNING)
-    if(UNIX)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-align \
-                         -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization\
-                         -Wformat=2 -Winit-self -Wmissing-declarations \
-                         -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
-                         -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo \
-                         -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror")
-      # -Wlogical-op -Wnoexcept -Wstrict-null-sentinel 
-    endif()
-  endif ()
-
-  set(FASLIB_DIR "${CMAKE_SOURCE_DIR}/../faslib")
-  set(FAS_TESTING_CPP "${FASLIB_DIR}/fas/testing/testing.cpp")
-  find_package(Boost COMPONENTS system date_time REQUIRED)
-  include_directories(../faslib)
-  include_directories(../wjson)
-  include_directories(../wflow)
-endif()
-
-include_directories(.)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(mambaru)
+include(FindThreads)
+find_package(Boost COMPONENTS system date_time REQUIRED)
 
 add_library(
   iow
@@ -36,11 +14,24 @@ add_library(
   iow/io/aux/global_pool.cpp
 )
 
-target_link_libraries(iow ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES})
+message(STATUS "${WFLOW_LIB}")
+message(STATUS "${WLOG_LIB}")
+
+target_link_libraries(iow ${WFLOW_LIB} ${WLOG_LIB} ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
 
 if ( BUILD_TESTING )
   enable_testing()
-  add_definitions(-DIOW_DISABLE_LOG)
   add_subdirectory(tests)
 endif()
 
+set(CPACK_PACKAGE_NAME "iow")
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "7")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/Readme.md")
+set(CPACK_PACKAGE_CONTACT "migashko@gmail.com")
+
+install(DIRECTORY iow DESTINATION include FILES_MATCHING PATTERN "*.hpp" )
+install(TARGETS iow LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+include(CPack)

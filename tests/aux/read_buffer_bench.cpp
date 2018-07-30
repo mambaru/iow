@@ -1,6 +1,8 @@
 #include <iostream>
 #include <iow/io/aux/read_buffer.hpp>
+#include <iow/io/aux/global_pool.hpp>
 #include <iow/io/aux/data_pool.hpp>
+
 #include <chrono>
 
 #include <fcntl.h>
@@ -23,6 +25,8 @@ void run(size_t packsize, size_t readsize, size_t total, size_t count, size_t bu
 
 void run(size_t packsize, size_t readsize, size_t total, size_t count, size_t bufsize, size_t minbuf, size_t maxbuf, bool use_pool)
 {
+  ::iow::io::global_pool::initialize( ::iow::io::data_map_options() );
+  
   std::cout << "*****************************************" << std::endl;
   data_pool::options_type opt;
   opt.poolsize = 10;
@@ -59,7 +63,7 @@ void run(size_t packsize, size_t readsize, size_t total, size_t count, size_t bu
   for (size_t i =0 ; i < count; ++i)
   {
     for (size_t j =0 ; j < packsize - 2; ++j)
-      indata.push_back('0'+ (j)%packsize);
+      indata.push_back( static_cast<char>('0'+ j%packsize) );
     indata.push_back('\r');
     indata.push_back('\n');
     ++pack_count;
