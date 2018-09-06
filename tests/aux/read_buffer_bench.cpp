@@ -1,7 +1,6 @@
 #include <iostream>
 #include <iow/io/aux/read_buffer.hpp>
-#include <iow/io/aux/global_pool.hpp>
-#include <iow/io/aux/data_pool.hpp>
+
 
 #include <chrono>
 
@@ -18,22 +17,22 @@
 typedef ::iow::io::data_type data_type;
 typedef ::iow::io::data_ptr data_ptr;
 typedef ::iow::io::read_buffer  read_buffer;
-typedef ::iow::io::data_pool<data_type>  data_pool;
+//typedef ::iow::io::data_pool<data_type>  data_pool;
 
 
 void run(size_t packsize, size_t readsize, size_t total, size_t count, size_t bufsize, size_t minbuf, size_t maxbuf, bool use_pool);
 
 void run(size_t packsize, size_t readsize, size_t total, size_t count, size_t bufsize, size_t minbuf, size_t maxbuf, bool use_pool)
 {
-  ::iow::io::global_pool::initialize( ::iow::io::data_map_options() );
+  //::iow::io::global_pool::initialize( ::iow::io::data_map_options() );
   
   std::cout << "*****************************************" << std::endl;
-  data_pool::options_type opt;
-  opt.poolsize = 10;
-  opt.maxbuf = maxbuf;
-  opt.minbuf = maxbuf;
-  data_pool pool;
-  pool.set_options(opt);
+  //data_pool::options_type opt;
+  //opt.poolsize = 10;
+  //opt.maxbuf = maxbuf;
+  //opt.minbuf = maxbuf;
+  //data_pool pool;
+  //pool.set_options(opt);
   
   read_buffer buf;
   if ( bufsize != 0 )
@@ -46,8 +45,8 @@ void run(size_t packsize, size_t readsize, size_t total, size_t count, size_t bu
     rb_opt.sep = "\r\n";
     if ( use_pool )
     {
-      rb_opt.create = std::bind( static_cast<data_ptr(data_pool::*)(size_t, size_t)>(&data_pool::create), std::ref(pool), std::placeholders::_1, std::placeholders::_2);
-      rb_opt.free = std::bind(&data_pool::free, std::ref(pool), std::placeholders::_1);
+      //rb_opt.create = std::bind( static_cast<data_ptr(data_pool::*)(size_t, size_t)>(&data_pool::create), std::ref(pool), std::placeholders::_1, std::placeholders::_2);
+      //rb_opt.free = std::bind(&data_pool::free, std::ref(pool), std::placeholders::_1);
     }
     buf.set_options(rb_opt);
     std::cout << "bufsize=" << rb_opt.bufsize 
@@ -93,10 +92,6 @@ void run(size_t packsize, size_t readsize, size_t total, size_t count, size_t bu
       );
       buf.confirm(p);
       
-      /*if ( buf.count() > 1 )
-      {
-        std::cout << "count " << buf.count() << std::endl;
-      }*/
       auto d = buf.detach();
       while ( d!=nullptr )
       {
@@ -110,7 +105,7 @@ void run(size_t packsize, size_t readsize, size_t total, size_t count, size_t bu
           abort();
         }
         ++parse_pack;
-        pool.free( std::move(d) );
+        //pool.free( std::move(d) );
         d = buf.detach();
       }
       pos += static_cast<std::ptrdiff_t>(p.second);
