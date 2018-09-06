@@ -8,16 +8,20 @@ MACRO(CLONE_LIBRARY LIBNAME VARDIR LIBURI PARAMS_FOR_CMAKE)
     if ( HAVE_INCLUDE_${LIBNAME} )
       set(${VARDIR} "${HAVE_INCLUDE_${LIBNAME}}")
     else()
+      if ( NOT EXISTS "${CMAKE_SOURCE_DIR}/build" )
+        execute_process(COMMAND mkdir build WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+      endif()
       if ( NOT EXISTS "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
-        execute_process(COMMAND git rev-parse --abbrev-ref HEAD 
-                        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE current_branch )
+        execute_process(COMMAND git rev-parse --abbrev-ref HEAD WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE current_branch )
         execute_process(COMMAND git clone "${LIBURI}" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build")
         if ( "${current_branch}" MATCHES "devel" )
           message(STATUS "DEBUG VERSION! checkout devel!!!")
           execute_process(COMMAND git checkout devel WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
         endif()
-        execute_process(COMMAND cmake . ${PARAMS_FOR_CMAKE} WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
-        execute_process(COMMAND make WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
+        
+        execute_process(COMMAND mkdir build WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
+        execute_process(COMMAND cmake ${PARAMS_FOR_CMAKE1} ..  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}/build")
+        execute_process(COMMAND cmake --build . --config Release WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build/${LIBNAME}/build")
       endif()
       set(${VARDIR} "${CMAKE_SOURCE_DIR}/build/${LIBNAME}")
     endif()
@@ -29,11 +33,24 @@ MACRO(get_faslib)
   find_path( 
     FASLIB_DIR NAMES "fas/aop.hpp"
     PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
-    PATH_SUFFIXES "../faslib" "faslib" "build/faslib" "../build/faslib" 
+    PATH_SUFFIXES 
+      "build/faslib" 
+      "faslib" 
+      "../faslib" 
+      "../../faslib" 
+      "../../../faslib" 
   )
   if ( "${FASLIB_DIR}" STREQUAL "FASLIB_DIR-NOTFOUND") 
     unset(FASLIB_DIR CACHE)
-    clone_library(faslib "FASLIB_DIR" "https://github.com/migashko/faslib.git" "")
+    execute_process(COMMAND bash -c "git remote -v | head -q -n 1" 
+                    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE remote_url )
+    if ( "${remote_url}" MATCHES "\.lan" )
+      message(STATUS "Clone from LAN repositary")
+      clone_library(faslib "FASLIB_DIR" "git@github.lan:cpp/faslib.git" "")
+    else()
+      message(STATUS "Clone from github.com")
+      clone_library(faslib "FASLIB_DIR" "https://github.com/migashko/faslib.git" "")
+    endif()
   endif()
   include_directories("${FASLIB_DIR}")
   set(FAS_TESTING_CPP "${FASLIB_DIR}/fas/testing/testing.cpp")
@@ -44,17 +61,14 @@ MACRO(get_mambaru LIBNAME LIBDIR LIBBIN PARAMS_FOR_CMAKE)
   find_path( 
     ${LIBDIR} NAMES "${LIBNAME}/${LIBNAME}.hpp"
     PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
-    PATH_SUFFIXES "build/${LIBNAME}" "../build/${LIBNAME}" "${LIBNAME}" "../${LIBNAME}"
+    PATH_SUFFIXES
+      "build/${LIBNAME}" 
+      "${LIBNAME}" 
+      "../${LIBNAME}"  
+      "../../${LIBNAME}" 
+      "../../../${LIBNAME}" 
   )
-  
-  unset(${${LIBBIN}} CACHE)
-  find_library( 
-    ${LIBBIN} NAMES "${LIBNAME}"
-    PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
-    PATH_SUFFIXES "build/${LIBNAME}" "../build/${LIBNAME}" "${LIBNAME}" "../${LIBNAME}" "${LIBNAME}/build" "../${LIBNAME}/build"
-  )
-  
-  if ( ("${${LIBDIR}}" STREQUAL "${LIBDIR}-NOTFOUND") OR ("${${LIBBIN}}" STREQUAL "${LIBBIN}-NOTFOUND")) 
+  if ( "${${LIBDIR}}" STREQUAL "${LIBDIR}-NOTFOUND") 
     unset(${LIBDIR} CACHE)
     execute_process(COMMAND bash -c "git remote -v | head -q -n 1" 
                     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE remote_url )
@@ -66,19 +80,21 @@ MACRO(get_mambaru LIBNAME LIBDIR LIBBIN PARAMS_FOR_CMAKE)
       message(STATUS "Clone from github.com")
       clone_library(${LIBNAME} ${LIBDIR} "https://github.com/mambaru/${LIBNAME}.git" "${PARAMS_FOR_CMAKE}")
     endif()
-    
-    unset(${${LIBBIN}} CACHE)
-    find_library( 
-      ${LIBBIN} NAMES "${LIBNAME}"
-      PATHS "${CMAKE_SOURCE_DIR}" 
-      PATH_SUFFIXES "build/${LIBNAME}"
-    )
-
   endif()
   MESSAGE(STATUS "${LIBDIR} = ${${LIBDIR}}")
   include_directories("${${LIBDIR}}")
   
-  
+  unset(${${LIBBIN}} CACHE)
+  find_library( 
+    ${LIBBIN} NAMES "${LIBNAME}"
+    PATHS "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" 
+    PATH_SUFFIXES 
+      "build/${LIBNAME}/build" 
+      "${LIBNAME}/build" 
+      "../${LIBNAME}/build" 
+      "../../${LIBNAME}/build" 
+      "../../../${LIBNAME}/build"
+  )
   if ( ${${LIBBIN}} )
     link_directories("${${LIBBIN}}")
     MESSAGE(STATUS "${LIBBIN} = ${${LIBBIN}}")
