@@ -1,6 +1,5 @@
 #include <iostream>
 #include <iow/io/aux/read_buffer.hpp>
-#include <iow/io/aux/global_pool.hpp>
 #include <fas/testing.hpp>
 #include <cstring>
 #include <mutex>

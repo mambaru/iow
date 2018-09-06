@@ -1,6 +1,5 @@
 #include <iostream>
 #include <iow/io/aux/write_buffer.hpp>
-#include <iow/io/aux/data_pool.hpp>
 #include <fas/testing.hpp>
 #include <algorithm>
 #include <cstring>
