@@ -11,7 +11,6 @@ add_library(
   iow
   iow/io/aux/read_buffer.cpp
   iow/io/aux/write_buffer.cpp
-  iow/io/aux/global_pool.cpp
 )
 
 message(STATUS "${WFLOW_LIB}")
