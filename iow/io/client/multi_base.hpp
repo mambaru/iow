@@ -23,14 +23,14 @@ public:
   {}
   
   template<typename Opt>
-  void start(Opt opt, size_t count)
+  void start(Opt opt, int count)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     if ( !_clients.empty() )
       return;
     
-    _clients.reserve(count);
-    for (size_t i = 0; i < count; ++i)
+    _clients.reserve( size_t(count) );
+    for (int i = 0; i < count; ++i)
     {
       _clients.push_back( std::make_shared<client_type>(_io_service) );
       _clients.back()->start( opt );
@@ -38,7 +38,7 @@ public:
   }
 
   template<typename Opt>
-  void reconfigure(Opt opt, size_t count)
+  void reconfigure(Opt opt, int count)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     while ( _clients.size() > count )
@@ -47,7 +47,7 @@ public:
       _clients.pop_back();
     }
     
-    while ( _clients.size() < count )
+    while ( int( _clients.size() ) < count )
     {
       _clients.push_back( std::make_shared<client_type>(_io_service) );
       _clients.back()->start( opt );

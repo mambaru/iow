@@ -33,7 +33,7 @@ public:
 private: 
   
   template<typename Opt>
-  static size_t threads_(Opt& opt) 
+  static int threads_(Opt& opt) 
   {
     return opt.threads==0 ? 1 : opt.threads;
   }
