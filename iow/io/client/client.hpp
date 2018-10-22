@@ -153,15 +153,23 @@ private:
   {
     if ( _workflow!= nullptr )
     {
-      _workflow->post( 
+      std::weak_ptr<self> wthis = this->shared_from_this();
+      _workflow->safe_post( 
         std::chrono::milliseconds( this->_reconnect_timeout_ms ),
-        [opt, this]() mutable
-        {
-          this->upgrate_options_(opt);
-          this->connect_( *this, opt );
-        }, 
-        [](){ IOW_LOG_FATAL("Client Reconnect FAILED. Workflow overflow")  }
-      );
+        this->wrap_(
+          *this,
+          [opt, wthis]() mutable
+          {
+            if (auto pthis = wthis.lock() )
+            {
+              std::lock_guard<mutex_type> lk( pthis->mutex() );
+              pthis->upgrate_options_(opt);
+              pthis->connect_( *pthis, opt );
+            }
+          }, 
+          [](){ IOW_LOG_ERROR("Client Reconnect ERROR. Owner is destroyed.")}
+        ) // wrap_
+      ); // safe_post
     } 
     else
     {
@@ -174,7 +182,7 @@ private:
   {
     Opt opt2 = opt;
     std::weak_ptr<self> wthis = this->shared_from_this();
-    opt.args.connect_handler = this->wrap([wthis, opt2]()
+    opt.args.connect_handler = this->wrap_(*this, [wthis, opt2]()
     {
       if ( opt2.args.connect_handler!=nullptr ) 
         opt2.args.connect_handler();
@@ -186,7 +194,7 @@ private:
       }
     }, nullptr);
 
-    opt.args.error_handler = this->wrap([wthis, opt2](::iow::system::error_code ec)
+    opt.args.error_handler = this->wrap_(*this, [wthis, opt2](::iow::system::error_code ec)
     {
       IOW_LOG_MESSAGE("iow::io::client error handler" )
       
@@ -200,7 +208,7 @@ private:
       }
     }, nullptr);
     
-    opt.connection.shutdown_handler = this->wrap([wthis, opt2]( io_id_t io_id) 
+    opt.connection.shutdown_handler = this->wrap_(*this, [wthis, opt2]( io_id_t io_id) 
     {
       IOW_LOG_MESSAGE("iow::io::client connection shutdown handler" )
       if ( opt2.connection.shutdown_handler!=nullptr ) 
@@ -214,7 +222,7 @@ private:
       }
     }, nullptr);
 
-    opt.connection.startup_handler = [wthis, opt2]( io_id_t io_id, output_handler_t output)
+    opt.connection.startup_handler = this->wrap_(*this, [wthis, opt2]( io_id_t io_id, output_handler_t output)
     {
       if ( auto pthis = wthis.lock() )
       {
@@ -226,7 +234,7 @@ private:
       {
         opt2.connection.startup_handler( io_id, output);
       }
-    };
+    }, nullptr);
 
     if ( opt2.connection.input_handler == nullptr )
     {

@@ -22,7 +22,7 @@ public:
   typedef Holder holder_type;
   typedef std::shared_ptr<holder_type> holder_ptr;
   typedef std::thread thread_type;
-  typedef std::mutex mutex_type;
+  typedef std::recursive_mutex mutex_type;
   typedef std::shared_ptr<thread_type> thread_ptr;
   typedef ::iow::asio::io_service io_service_type;
   typedef std::shared_ptr<io_service_type> io_service_ptr;

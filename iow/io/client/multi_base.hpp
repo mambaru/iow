@@ -15,7 +15,7 @@ public:
   typedef std::shared_ptr<client_type> client_ptr;
   typedef std::vector<client_ptr> client_list;
   typedef typename client_type::io_service_type io_service_type;
-  typedef std::mutex mutex_type;
+  typedef std::recursive_mutex mutex_type;
   
   explicit multi_base(io_service_type& io)
     : _current(0)

@@ -23,7 +23,7 @@ public:
   typedef std::vector<io_service_ptr> service_list;
   
 
-  typedef std::mutex mutex_type;
+  typedef std::recursive_mutex mutex_type;
 
   mtholder(io_service_type& io)
     : _io_ref(io)
