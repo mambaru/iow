@@ -48,7 +48,7 @@ public:
   
 private:
   
-  std::atomic<bool> value;
+  std::atomic_bool value;
 };
 
 class longspinlock : public spinlock {
