@@ -55,7 +55,7 @@ UNIT(stream_holder_unit, "")
   
   auto h1 = std::make_shared<stream_holder_t>(std::move(d1));
   auto h2 = std::make_shared<stream_holder_t>(std::move(d2));
-  const char* instr = "Hello world!\r\nBuy!";
+  const char* instr = "Hello world!\r\nBye!";
   t << message("write...");
   res1 = int(write(f1[1], instr, std::strlen(instr) ));
   t << message("...write:") << res1;

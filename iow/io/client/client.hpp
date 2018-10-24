@@ -27,6 +27,10 @@ public:
   typedef typename super::output_handler_type output_handler_t;
   typedef std::vector< data_ptr > wait_data_t;
   
+  ~client()
+  {
+  }
+  
   explicit client( io_service_type& io)
     : super(std::move(descriptor_type(io)) )
     , _started(false)
@@ -70,7 +74,7 @@ public:
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
     this->upgrate_options_(opt);
-    super::connect_( *this, /*std::forward<Opt>(*/opt/*)*/ );
+    super::connect_( *this, opt );
   }
 
   void stop()
@@ -151,24 +155,31 @@ private:
   template<typename Opt>
   void delayed_reconnect_(Opt opt)
   {
+    if (!this->_started)
+      return;
+    
     if ( _workflow!= nullptr )
     {
       std::weak_ptr<self> wthis = this->shared_from_this();
+      // Здесь owner wrap не нужен, т.к. объект сбрасывается после постановки задания в очередь 
       _workflow->safe_post( 
         std::chrono::milliseconds( this->_reconnect_timeout_ms ),
-        this->wrap_(
-          *this,
-          [opt, wthis]() mutable
+        [opt, wthis]() mutable
+        {
+          if (auto pthis = wthis.lock() )
           {
-            if (auto pthis = wthis.lock() )
+            std::lock_guard<mutex_type> lk( pthis->mutex() );
+            if ( pthis->_started )
             {
-              std::lock_guard<mutex_type> lk( pthis->mutex() );
               pthis->upgrate_options_(opt);
               pthis->connect_( *pthis, opt );
             }
-          }, 
-          [](){ IOW_LOG_ERROR("Client Reconnect ERROR. Owner is destroyed.")}
-        ) // wrap_
+            else
+            {
+              IOW_LOG_ERROR("Client Reconnect ERROR. Owner is destroyed.");
+            }
+          }
+        } 
       ); // safe_post
     } 
     else
@@ -194,7 +205,7 @@ private:
       }
     }, nullptr);
 
-    opt.args.error_handler = this->wrap_(*this, [wthis, opt2](::iow::system::error_code ec)
+    opt.args.error_handler = [wthis, opt2](::iow::system::error_code ec)
     {
       IOW_LOG_MESSAGE("iow::io::client error handler" )
       
@@ -206,9 +217,9 @@ private:
         pthis->_ready_for_write = false;
         pthis->delayed_reconnect_(opt2);
       }
-    }, nullptr);
+    };
     
-    opt.connection.shutdown_handler = this->wrap_(*this, [wthis, opt2]( io_id_t io_id) 
+    opt.connection.shutdown_handler = [wthis, opt2]( io_id_t io_id) 
     {
       IOW_LOG_MESSAGE("iow::io::client connection shutdown handler" )
       if ( opt2.connection.shutdown_handler!=nullptr ) 
@@ -220,7 +231,7 @@ private:
         pthis->_ready_for_write = false;
         pthis->delayed_reconnect_(opt2);
       }
-    }, nullptr);
+    };
 
     opt.connection.startup_handler = this->wrap_(*this, [wthis, opt2]( io_id_t io_id, output_handler_t output)
     {
@@ -239,7 +250,7 @@ private:
     if ( opt2.connection.input_handler == nullptr )
     {
       opt2.connection.input_handler
-        = [wthis]( data_ptr d, io_id_t /*o_id*/, output_handler_t /*output*/)
+        = []( data_ptr d, io_id_t /*o_id*/, output_handler_t /*output*/)
       {
         only_for_log(d);
         IOW_LOG_ERROR("Client input_handler not set [" << d << "]" )
