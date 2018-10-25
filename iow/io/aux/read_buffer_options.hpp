@@ -18,7 +18,6 @@ struct read_buffer_options
   size_t maxbuf=4096*2;
   size_t minbuf=0;
   size_t maxsize=0;
-  bool fast_mode = false;
   bool trimsep = true; // Отрезать сепаратор 
   std::function< data_ptr(size_t, size_t) > create;
   std::function< void(data_ptr) > free;

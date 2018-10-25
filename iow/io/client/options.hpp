@@ -10,7 +10,7 @@ template<typename ConnectionOptions>
 struct options
 {
   ConnectionOptions connection;
-  bool async_connect = true;
+  bool async_connect = false;
   time_t reconnect_timeout_ms = 1000;
   std::string addr;
   std::string port;

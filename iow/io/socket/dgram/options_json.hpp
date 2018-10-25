@@ -17,9 +17,9 @@ struct options_json
   typedef ::wjson::object<
     options_type,
     ::wjson::member_list<
-        ::wjson::base< iow::io::rw::options_json >,
         ::wjson::member<n_receive_buffer_size, desc_options_type, size_t, &desc_options_type::receive_buffer_size>,
-        ::wjson::member<n_send_buffer_size, desc_options_type, size_t, &desc_options_type::send_buffer_size >
+        ::wjson::member<n_send_buffer_size, desc_options_type, size_t, &desc_options_type::send_buffer_size >,
+        ::wjson::base< iow::io::rw::options_json >
     >,
     ::wjson::strict_mode
   > type;

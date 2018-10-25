@@ -42,6 +42,7 @@ struct ad_connect
     }, nullptr);
 
 
+    
     IOW_LOG_BEGIN("Client connect to '" << opt.addr << ":" << opt.port << "' ..." )
     if ( opt.async_connect )
     {
