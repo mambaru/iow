@@ -15,10 +15,10 @@ struct options_json
   typedef ::wjson::object<
     options,
     wjson::member_list<
-      wjson::base< ::iow::io::socket::dgram::options_json >,
       wjson::member<n_threads, options, int, &options::threads>,
       wjson::member< n_addr, options, std::string, &options::addr>,
-      wjson::member< n_port, options, std::string, &options::port>
+      wjson::member< n_port, options, std::string, &options::port>,
+      wjson::base< ::iow::io::socket::dgram::options_json >
     >,
     ::wjson::strict_mode
   > type;

@@ -22,16 +22,16 @@ struct options_json
   JSON_NAME(reconnect_timeout_ms)
   JSON_NAME(connect_count)
   
-  typedef ::wjson::object<
+  typedef wjson::object<
     option_type,
-    ::wjson::member_list<
-      ::wjson::member< n_addr, option_type, std::string, &option_type::addr>,
-      ::wjson::member< n_port, option_type, std::string, &option_type::port>,
-      ::wjson::member< n_connect_count, option_type, int, &option_type::connect_count>,
-      ::wjson::member< n_threads, option_type, int, &option_type::threads>,
-      ::wjson::member< n_async_connect, option_type, bool, &option_type::async_connect>,
-      ::wjson::member< n_reconnect_timeout_ms, option_type, time_t, &option_type::reconnect_timeout_ms>,
-      ::wjson::member< n_connection, option_type, connection_options, &option_type::connection, connection_json>
+    wjson::member_list<
+      wjson::member< n_addr, option_type, std::string, &option_type::addr>,
+      wjson::member< n_port, option_type, std::string, &option_type::port>,
+      wjson::member< n_connect_count, option_type, int, &option_type::connect_count>,
+      wjson::member< n_threads, option_type, int, &option_type::threads>,
+      wjson::member< n_async_connect, option_type, bool, &option_type::async_connect>,
+      wjson::member< n_reconnect_timeout_ms, option_type, time_t, &option_type::reconnect_timeout_ms>,
+      wjson::member< n_connection, option_type, connection_options, &option_type::connection, connection_json>
     >,
     ::wjson::strict_mode
   > type;
