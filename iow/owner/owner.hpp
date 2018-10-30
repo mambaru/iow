@@ -1,5 +1,5 @@
 //
-// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2015
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -11,18 +11,22 @@
 #include <iow/mutex.hpp>
 #include <memory>
 #include <atomic>
+#include <memory>
+#include <map>
 
 namespace iow{
 
 class owner
 {
 public:
+  typedef size_t io_id_t;
+  
   typedef std::shared_ptr<int> alive_type;
   typedef std::weak_ptr<int>   weak_type;
 
   typedef std::function<void()> double_call_fun_t;
   typedef std::function<void()> no_call_fun_t;
-  typedef rwlock<spinlock> mutex_type;
+  typedef rwlock<std::mutex> mutex_type;
 
   owner() 
   : _alive( std::make_shared<int>(1) ) 
@@ -68,6 +72,59 @@ public:
     ;
   }
   
+  void release(io_id_t io_id) 
+  {
+    if ( _tracking_flag )
+    {
+      std::lock_guard<mutex_type> lk(_mutex);
+      _tracking_map.erase(io_id);
+    }
+  }
+  
+  void enable_tracking(bool value)
+  {
+    if ( _tracking_flag == value )
+      return;
+  
+    _tracking_flag = value;
+    if (!value)
+    {
+      std::lock_guard<mutex_type> lk(_mutex);
+      _tracking_map.clear();
+    }
+  }
+
+  template<typename Handler, typename AltHandler>
+  owner_handler< 
+    typename std::remove_reference<Handler>::type, 
+    typename std::remove_reference<AltHandler>::type
+  >
+  tracking(io_id_t io_id, Handler&& h, AltHandler&& nh) 
+  {
+    std::weak_ptr<int> wc;
+    std::lock_guard<mutex_type> lk(_mutex);
+    auto itr = _tracking_map.find(io_id);
+    if ( itr!=_tracking_map.end() )
+    {
+      ++*(itr->second);
+      wc=itr->second;
+    }
+    else
+    {
+      wc = _tracking_map.insert( std::make_pair(io_id, std::make_shared<int>(1)) ).first->second;
+    }
+
+    return 
+      owner_handler<
+        typename std::remove_reference<Handler>::type, 
+        typename std::remove_reference<AltHandler>::type
+      >(
+          std::forward<Handler>(h),
+          std::forward<AltHandler>(nh),
+          std::weak_ptr<int>(wc)
+       );
+  }
+  
   template<typename Handler>
   callback_handler< 
     typename std::remove_reference<Handler>::type
@@ -103,7 +160,8 @@ private:
   double_call_fun_t _double_call;
   no_call_fun_t _no_call;
   mutable mutex_type _mutex;
-
+  std::atomic_bool _tracking_flag;
+  std::map<io_id_t, std::shared_ptr<int> > _tracking_map;
 };
 
 }
