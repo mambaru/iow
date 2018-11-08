@@ -94,12 +94,8 @@ public:
     }
   }
 
-  template<typename Handler, typename AltHandler>
-  owner_handler< 
-    typename std::remove_reference<Handler>::type, 
-    typename std::remove_reference<AltHandler>::type
-  >
-  tracking(io_id_t io_id, Handler&& h, AltHandler&& nh) 
+  
+  std::weak_ptr<int> tracking(io_id_t io_id)
   {
     std::weak_ptr<int> wc;
     std::lock_guard<mutex_type> lk(_mutex);
@@ -113,7 +109,17 @@ public:
     {
       wc = _tracking_map.insert( std::make_pair(io_id, std::make_shared<int>(1)) ).first->second;
     }
-
+    return wc;
+  }
+  
+  template<typename Handler, typename AltHandler>
+  owner_handler< 
+    typename std::remove_reference<Handler>::type, 
+    typename std::remove_reference<AltHandler>::type
+  >
+  tracking(io_id_t io_id, Handler&& h, AltHandler&& nh) 
+  {
+    std::weak_ptr<int> wc = this->tracking(io_id);
     return 
       owner_handler<
         typename std::remove_reference<Handler>::type, 
@@ -121,7 +127,7 @@ public:
       >(
           std::forward<Handler>(h),
           std::forward<AltHandler>(nh),
-          std::weak_ptr<int>(wc)
+          wc
        );
   }
   
@@ -155,6 +161,12 @@ public:
     _no_call = nc;
   };
  
+  size_t tracking_size() const
+  {
+    read_lock<mutex_type> lk(_mutex);
+    return _tracking_map.size();
+  }
+  
 private:
   mutable alive_type _alive;
   double_call_fun_t _double_call;
