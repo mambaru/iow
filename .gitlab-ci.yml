@@ -152,6 +152,7 @@ push-to-github:
     - git submodule deinit -f .
     - rm -rf .git/modules
     - git rm -rf external 
+    - git submodule add git@github.com:mambaru/cmake-ci.git external/cmake-ci
     - git commit -m "autocommit github.com export"
     - git push -f ${REMOTE_SSH} mambaru
     - git push -f --tags ${REMOTE_SSH} mambaru
