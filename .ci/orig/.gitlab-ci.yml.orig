@@ -12,6 +12,7 @@ variables:
 before_script:
   - git checkout -f ${CI_COMMIT_REF_NAME}
   - git pull
+  - git submodule sync
   - git submodule update --init --force
 
 stages:
