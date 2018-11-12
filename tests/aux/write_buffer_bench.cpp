@@ -28,9 +28,13 @@ void proccess(write_buffer& buf)
   auto d = buf.next();
   while ( d.first )
   {
-    write(fd, d.first, d.second);
-    buf.confirm(d);
-    d = buf.next();
+    if ( -1 != write(fd, d.first, d.second) )
+    {
+      buf.confirm(d);
+      d = buf.next();
+    }
+    else
+      break;
   }
 }
 
