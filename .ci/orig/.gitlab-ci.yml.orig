@@ -10,6 +10,8 @@ variables:
 # wip-devel
 
 before_script:
+  - git checkout -f ${CI_COMMIT_REF_NAME}
+  - git pull
   - git submodule update --init --force
 
 stages:
@@ -104,8 +106,6 @@ devel-any:
 pre-release:
   stage: merge
   script:
-    - git checkout -f ${CI_COMMIT_REF_NAME}
-    - git pull
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:pre-release
   only:
     - devel
@@ -128,8 +128,6 @@ master-hotfix:
 release:
   stage: merge
   script:
-    - git checkout -f ${CI_COMMIT_REF_NAME}
-    - git pull
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${RELEASE_BRANCH}
   only:
     - master
