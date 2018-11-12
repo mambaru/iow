@@ -2,21 +2,24 @@ cmake_minimum_required(VERSION 3.1)
 
 project(iow)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(mambaru)
-include(FindThreads)
-find_package(Boost COMPONENTS system date_time REQUIRED)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(ci)
 
+if ( STANDALONE )
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external/wfc/cmake)
+  getlibs(faslib wjson wlog wflow)
+endif()
+
+include_directories(.)
 add_library(
   iow
   iow/io/aux/read_buffer.cpp
   iow/io/aux/write_buffer.cpp
 )
 
-message(STATUS "${WFLOW_LIB}")
-message(STATUS "${WLOG_LIB}")
-
-target_link_libraries(iow ${WFLOW_LIB} ${WLOG_LIB} ${CMAKE_THREAD_LIBS_INIT}  ${Boost_LIBRARIES} )
+if ( STANDALONE )
+  target_link_libraries(iow wlog wflow)
+endif()
 
 if ( BUILD_TESTING )
   enable_testing()
