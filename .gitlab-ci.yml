@@ -125,6 +125,15 @@ master-hotfix:
   only:
     - /^hotfix-.*$/
 
+release:
+  stage: merge
+  script:
+    - git checkout -f ${CI_COMMIT_REF_NAME}
+    - git pull
+    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${RELEASE_BRANCH}
+  only:
+    - master
+
 delete-branches:
   stage: clean
   script:
@@ -132,15 +141,7 @@ delete-branches:
   only:
     - /^build.*$/
     - /^check.*$/
-    
-release:
-  stage: publish
-  script:
-    - git checkout -f ${CI_COMMIT_REF_NAME}
-    - git pull
-    - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${RELEASE_BRANCH}
-  only:
-    - master
+   
     
 push-to-github:
   stage: publish
@@ -152,7 +153,7 @@ push-to-github:
     - git submodule deinit -f .
     - rm -rf .git/modules
     - git rm -rf external 
-    - git submodule add git@github.com:mambaru/cmake-ci.git external/cmake-ci
+    - git submodule add https://github.com/mambaru/cmake-ci.git external/cmake-ci
     - git commit -m "autocommit github.com export"
     - git push -f ${REMOTE_SSH} mambaru
     - git push -f --tags ${REMOTE_SSH} mambaru
