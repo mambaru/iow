@@ -16,12 +16,10 @@ add_library(
   iow/io/aux/write_buffer.cpp
 )
 
-if ( STANDALONE )
-  target_link_libraries(iow wlog wflow)
-endif()
-
 if ( BUILD_TESTING )
   enable_testing()
+  include_directories(.)
+  target_link_libraries(iow wlog wflow)
   add_subdirectory(tests)
 endif()
 
