@@ -19,7 +19,10 @@ add_library(
 if ( BUILD_TESTING )
   enable_testing()
   include_directories(.)
-  target_link_libraries(iow wlog wflow)
+ 
+  include(FindThreads)
+  find_package(Boost REQUIRED system )
+  target_link_libraries(iow wlog wflow ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
   add_subdirectory(tests)
 endif()
 
