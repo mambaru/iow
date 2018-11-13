@@ -10,7 +10,10 @@ variables:
 # wip-devel
 
 before_script:
-  - git submodule update --init
+  - git checkout -f ${CI_COMMIT_REF_NAME}
+  - git pull
+  - git submodule sync
+  - git submodule update --init --force
 
 stages:
   - build
@@ -104,8 +107,6 @@ devel-any:
 pre-release:
   stage: merge
   script:
-    - git checkout -f ${CI_COMMIT_REF_NAME}
-    - git pull
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:pre-release
   only:
     - devel
@@ -128,8 +129,6 @@ master-hotfix:
 release:
   stage: merge
   script:
-    - git checkout -f ${CI_COMMIT_REF_NAME}
-    - git pull
     - git push ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:${RELEASE_BRANCH}
   only:
     - master
@@ -153,7 +152,7 @@ push-to-github:
     - git submodule deinit -f .
     - rm -rf .git/modules
     - git rm -rf external 
-    - git submodule add https://github.com/mambaru/cmake-ci.git external/cmake-ci
+    - git submodule add --force https://github.com/mambaru/cmake-ci.git external/cmake-ci
     - git commit -m "autocommit github.com export"
     - git push -f ${REMOTE_SSH} mambaru
     - git push -f --tags ${REMOTE_SSH} mambaru
