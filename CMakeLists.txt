@@ -5,9 +5,7 @@ project(iow)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(ci)
 
-if ( STANDALONE )
-  getlibs(faslib wjson wlog wflow)
-endif()
+rootlibs(faslib wjson wlog wflow)
 
 include_directories(.)
 add_library(
@@ -22,7 +20,6 @@ if ( BUILD_TESTING )
   include(FindThreads)
   find_package(Boost REQUIRED system )
   target_link_libraries(iow wlog wflow ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${UNIT_TEST_BIN_OUTPUT_DIR})                                                                                                                 
   add_subdirectory(tests)
 endif()
 
