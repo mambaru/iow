@@ -28,7 +28,7 @@ sudo -u wwwrun cp $dir/* $PWD || exit 1
 rm -rf $dir
 
 echo "Перезапуск $dname"
-while killall -q $dname; do
+while sudo -u wwwrun killall -q $dname; do
   sleep 1;
   tail $log
 done
