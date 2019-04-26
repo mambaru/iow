@@ -56,7 +56,7 @@ namespace iow{ namespace io{
   
   read_buffer::data_pair read_buffer::next()
   {
-    data_pair result(0,0);
+    data_pair result(nullptr,0);
 
     if ( this->waiting() )
       return result;

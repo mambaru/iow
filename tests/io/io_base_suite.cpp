@@ -65,6 +65,7 @@ class iobase
 {
 
 public:
+  virtual ~iobase() {}
   void start(int val) { this->start_(*this, val ); }
   void stop() { this->stop_(*this); }
   void reset() { this->reset_(*this); }
