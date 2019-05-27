@@ -153,13 +153,13 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _double_call = dc;
-  };
+  }
 
   void set_no_call_handler(const no_call_fun_t& nc)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _no_call = nc;
-  };
+  }
  
   size_t tracking_size() const
   {
