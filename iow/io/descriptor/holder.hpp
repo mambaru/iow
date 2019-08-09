@@ -102,7 +102,7 @@ protected:
     typedef typename dup_descriptor_type::native_handle_type dup_native_type;
     dup_native_type d = ::dup( this->descriptor().native_handle() );
     dup_descriptor_type dup_descriptor(io, protocol, d);
-    return std::move(dup_descriptor);
+    return dup_descriptor;
   }
 
   using super::start_;
