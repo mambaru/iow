@@ -1,4 +1,5 @@
 syntaxError:./iow/ip/tcp/acceptor/aspect/ad_sync_resover.hpp:11
 syntaxError:./iow/ip/udp/server/aspect.hpp:21
 unusedFunction:./tests/aux/write_buffer_test.cpp:330
+useStlAlgorithm:./tests/aux/read_buffer_bench_big.cpp:131
 

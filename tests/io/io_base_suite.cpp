@@ -50,7 +50,7 @@ struct ad_reset
 };
 
 class iobase
-  : public ::iow::io::io_base< fas::aspect< 
+  : public ::iow::io::io_base< fas::aspect<
       ::iow::io::basic::aspect< std::recursive_mutex >::advice_list,
       fas::advice<_start_, ad_start>,
       fas::advice<_init_,  ad_init>,
@@ -70,12 +70,12 @@ public:
   void stop() { this->stop_(*this); }
   void reset() { this->reset_(*this); }
   void reconfigure(int val) { this->reconfigure_(*this, val ); }
-  virtual void virt() { ++virtval ;};
+  virtual void virt() { ++virtval ;}
   int  value = -1;
   int  resetval = 0;
   int  virtval = 0;
   bool started = false;
-  
+
 };
 
 UNIT(init, "")
@@ -124,11 +124,11 @@ UNIT(start, "")
 UNIT(owner, "")
 {
   using namespace fas::testing;
-  
+
   iobase io;
   int value = 0;
   auto test1= io.wrap([&value](int val) { value = val; }, nullptr);
-  
+
   test1(10);
   t << is_true< assert >(value==10) << value << FAS_TESTING_FILE_LINE;
   io.reset();
@@ -142,7 +142,7 @@ UNIT(owner, "")
   io.reset();
   test2(40);
   t << is_true< assert >(value==-40) << value << FAS_TESTING_FILE_LINE;
-  
+
 }
 
 BEGIN_SUITE(io_base,"")
