@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - iow-coverage.info - iow/io/writer/data/aspect.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../../index.html">top level</a> - <a href="index.html">iow/io/writer/data</a> - aspect.hpp<span style="font-size: 80%;"> (source / <a href="aspect.hpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">iow-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">3</td>
+            <td class="headerCovTableEntry">3</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-16</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #pragma once</a>
+<span class="lineNum">       2 </span>            : 
+<span class="lineNum">       3 </span>            : #include &lt;iow/io/writer/data/ad_clear.hpp&gt;
+<span class="lineNum">       4 </span>            : #include &lt;iow/io/writer/data/ad_initialize.hpp&gt;
+<span class="lineNum">       5 </span>            : #include &lt;iow/io/writer/data/ad_attach.hpp&gt;
+<span class="lineNum">       6 </span>            : #include &lt;iow/io/writer/data/ad_next.hpp&gt;
+<span class="lineNum">       7 </span>            : #include &lt;iow/io/writer/data/ad_confirm.hpp&gt;
+<span class="lineNum">       8 </span>            : #include &lt;iow/io/writer/data/ad_rollback.hpp&gt;
+<span class="lineNum">       9 </span>            : #include &lt;iow/io/writer/data/tags.hpp&gt;
+<span class="lineNum">      10 </span>            : #include &lt;iow/io/writer/aspect.hpp&gt;
+<span class="lineNum">      11 </span>            : #include &lt;iow/io/aux/write_buffer.hpp&gt;
+<span class="lineNum">      12 </span>            : #include &lt;iow/io/basic/tags.hpp&gt;
+<span class="lineNum">      13 </span>            : #include &lt;fas/aop.hpp&gt;
+<span class="lineNum">      14 </span>            : 
+<a name="15"><span class="lineNum">      15 </span>            : namespace iow{ namespace io{ namespace writer{ namespace data{</a>
+<span class="lineNum">      16 </span>            : 
+<span class="lineNum">      17 </span><span class="lineCov">          4 : struct ad_can_write</span>
+<a name="18"><span class="lineNum">      18 </span>            : {</a>
+<span class="lineNum">      19 </span>            :   template&lt;typename T, typename P&gt;
+<span class="lineNum">      20 </span><span class="lineCov">          9 :   bool operator()(T&amp; , P p) const</span>
+<span class="lineNum">      21 </span>            :   {
+<span class="lineNum">      22 </span><span class="lineCov">          9 :     return p.second!=0 &amp;&amp; p.first!=nullptr;</span>
+<span class="lineNum">      23 </span>            :   }
+<span class="lineNum">      24 </span>            : };
+<span class="lineNum">      25 </span>            : 
+<span class="lineNum">      26 </span>            : struct aspect: fas::aspect&lt;
+<span class="lineNum">      27 </span>            :   ::iow::io::writer::aspect::advice_list,
+<span class="lineNum">      28 </span>            :   fas::advice&lt; _initialize_, ad_initialize&gt;,
+<span class="lineNum">      29 </span>            :   fas::advice&lt; _clear_, ad_clear&gt;,
+<span class="lineNum">      30 </span>            :   fas::group&lt; ::iow::io::_after_stop_, _clear_&gt;,
+<span class="lineNum">      31 </span>            :   fas::group&lt; ::iow::io::_after_reset_, _clear_&gt;,
+<span class="lineNum">      32 </span>            :   fas::advice&lt; ::iow::io::writer::_next_, ad_next &gt;,
+<span class="lineNum">      33 </span>            :   fas::advice&lt; ::iow::io::writer::_confirm_, ad_confirm&gt;,
+<span class="lineNum">      34 </span>            :   fas::advice&lt; ::iow::io::writer::_attach_,  ad_attach&gt;,
+<span class="lineNum">      35 </span>            :   fas::advice&lt; ::iow::io::writer::_can_write_, ad_can_write&gt;,
+<span class="lineNum">      36 </span>            :   fas::advice&lt; ::iow::io::writer::_rollback_, ad_rollback&gt;,
+<span class="lineNum">      37 </span>            :   fas::value&lt; _write_buffer_, ::iow::io::write_buffer &gt;
+<span class="lineNum">      38 </span>            : 
+<span class="lineNum">      39 </span>            : &gt;{};
+<span class="lineNum">      40 </span>            : 
+<span class="lineNum">      41 </span>            : }}}}
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

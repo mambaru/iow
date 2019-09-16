@@ -1,0 +1,268 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - iow-coverage.info - iow/io/descriptor/holder.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../index.html">top level</a> - <a href="index.html">iow/io/descriptor</a> - holder.hpp<span style="font-size: 80%;"> (source / <a href="holder.hpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">iow-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">24</td>
+            <td class="headerCovTableEntry">26</td>
+            <td class="headerCovTableEntryHi">92.3 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-16</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">17</td>
+            <td class="headerCovTableEntry">20</td>
+            <td class="headerCovTableEntryMed">85.0 %</td>
+          </tr>
+          <tr><td><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #pragma once</a>
+<span class="lineNum">       2 </span>            : #include &lt;iow/io/io_base.hpp&gt;
+<span class="lineNum">       3 </span>            : #include &lt;iow/io/descriptor/tags.hpp&gt;
+<span class="lineNum">       4 </span>            : #include &lt;unistd.h&gt;
+<span class="lineNum">       5 </span>            : #include &lt;functional&gt;
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : namespace iow{ namespace io{ namespace descriptor{
+<a name="8"><span class="lineNum">       8 </span>            : </a>
+<span class="lineNum">       9 </span>            : template&lt;typename A&gt;
+<span class="lineNum">      10 </span><span class="lineCov">          3 : class holder_base</span>
+<span class="lineNum">      11 </span>            :   : public io_base&lt;A&gt;
+<span class="lineNum">      12 </span>            : {
+<span class="lineNum">      13 </span>            : public:
+<span class="lineNum">      14 </span>            :   typedef holder_base&lt;A&gt; self;
+<span class="lineNum">      15 </span>            :   typedef io_base&lt;A&gt; super;
+<span class="lineNum">      16 </span>            : 
+<span class="lineNum">      17 </span>            : public:
+<span class="lineNum">      18 </span>            :   typedef typename super::mutex_type mutex_type;
+<span class="lineNum">      19 </span>            :   typedef typename super::aspect::template advice_cast&lt;_descriptor_type_&gt;::type descriptor_type;
+<span class="lineNum">      20 </span>            :   typedef typename super::aspect::template advice_cast&lt;_context_&gt;::type context_type;
+<span class="lineNum">      21 </span>            :   typedef typename context_type::data_ptr data_ptr;
+<span class="lineNum">      22 </span>            :   typedef typename context_type::output_handler_type output_handler_type;
+<span class="lineNum">      23 </span>            :   typedef typename context_type::input_handler_type input_handler_type;
+<span class="lineNum">      24 </span>            :   typedef typename context_type::startup_handler_type  startup_handler_type;
+<span class="lineNum">      25 </span>            :   typedef typename context_type::shutdown_handler_type shutdown_handler_type;
+<span class="lineNum">      26 </span>            : 
+<span class="lineNum">      27 </span>            : public:
+<span class="lineNum">      28 </span>            : 
+<span class="lineNum">      29 </span>            :   holder_base(const holder_base&amp; ) = delete;
+<a name="30"><span class="lineNum">      30 </span>            :   void operator=(const holder_base&amp; ) = delete;</a>
+<span class="lineNum">      31 </span>            :   
+<span class="lineNum">      32 </span><span class="lineCov">          3 :   explicit holder_base(descriptor_type&amp;&amp; desc)</span>
+<span class="lineNum">      33 </span>            :     : super()
+<span class="lineNum">      34 </span><span class="lineCov">          3 :     , _descriptor(std::move(desc))</span>
+<span class="lineNum">      35 </span><span class="lineCov">          3 :   {}</span>
+<span class="lineNum">      36 </span>            : 
+<span class="lineNum">      37 </span>            :   void attach(descriptor_type&amp;&amp; desc)
+<span class="lineNum">      38 </span>            :   {
+<span class="lineNum">      39 </span>            :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );
+<span class="lineNum">      40 </span>            :     _descriptor = std::move(desc);
+<span class="lineNum">      41 </span>            :   }
+<span class="lineNum">      42 </span>            : 
+<span class="lineNum">      43 </span>            :   descriptor_type&amp;&amp; detach()
+<span class="lineNum">      44 </span>            :   {
+<span class="lineNum">      45 </span>            :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );
+<span class="lineNum">      46 </span>            :     return std::move(_descriptor);
+<span class="lineNum">      47 </span>            :   }
+<span class="lineNum">      48 </span>            : 
+<a name="49"><span class="lineNum">      49 </span>            :   const descriptor_type&amp; descriptor() const { return _descriptor;}</a>
+<span class="lineNum">      50 </span>            : 
+<span class="lineNum">      51 </span><span class="lineCov">          9 :   descriptor_type&amp; descriptor() { return _descriptor;}</span>
+<span class="lineNum">      52 </span>            : 
+<span class="lineNum">      53 </span>            :   template&lt;typename Descriptor, typename IOServiceType, typename ProtocolType&gt;
+<span class="lineNum">      54 </span>            :   Descriptor dup(IOServiceType&amp; io, const ProtocolType&amp; protocol)
+<span class="lineNum">      55 </span>            :   {
+<span class="lineNum">      56 </span>            :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );
+<span class="lineNum">      57 </span>            :     return std::move(this-&gt;dup_&lt;Descriptor&gt;(io, protocol));
+<span class="lineNum">      58 </span>            :   }
+<span class="lineNum">      59 </span>            : 
+<span class="lineNum">      60 </span>            :   template&lt;typename Descriptor, typename IOServiceType&gt;
+<span class="lineNum">      61 </span>            :   Descriptor dup(IOServiceType&amp; io)
+<span class="lineNum">      62 </span>            :   {
+<span class="lineNum">      63 </span>            :     typedef Descriptor dup_descriptor_type;
+<span class="lineNum">      64 </span>            :     typedef typename dup_descriptor_type::protocol_type dup_protocol_type;
+<span class="lineNum">      65 </span>            :     return std::move( this-&gt;dup&lt;Descriptor&gt;(io, dup_protocol_type::v4()) );
+<span class="lineNum">      66 </span>            :   }
+<span class="lineNum">      67 </span>            : 
+<span class="lineNum">      68 </span>            :   template&lt;typename Descriptor&gt;
+<span class="lineNum">      69 </span>            :   Descriptor dup()
+<span class="lineNum">      70 </span>            :   {
+<span class="lineNum">      71 </span>            :     return std::move( this-&gt;dup&lt;Descriptor&gt;(this-&gt;get_io_service()) );
+<span class="lineNum">      72 </span>            :   }
+<span class="lineNum">      73 </span>            : 
+<span class="lineNum">      74 </span>            : protected:
+<span class="lineNum">      75 </span>            :   
+<span class="lineNum">      76 </span>            :   template&lt;typename T&gt;
+<span class="lineNum">      77 </span>            :   void close_(T&amp; t)
+<span class="lineNum">      78 </span>            :   {
+<span class="lineNum">      79 </span>            :     t.get_aspect().template get&lt;_close_&gt;()(t);
+<span class="lineNum">      80 </span>            :   }
+<a name="81"><span class="lineNum">      81 </span>            :   </a>
+<span class="lineNum">      82 </span>            :   template&lt;typename T, typename Opt&gt;
+<span class="lineNum">      83 </span><span class="lineCov">          1 :   void reconfigure_(T&amp; t, Opt&amp;&amp; opt)</span>
+<span class="lineNum">      84 </span>            :   {
+<span class="lineNum">      85 </span><span class="lineCov">          1 :     super::reconfigure_(t, opt);</span>
+<span class="lineNum">      86 </span><span class="lineCov">          1 :     this-&gt;initialize_(t, std::forward&lt;Opt&gt;(opt) );</span>
+<span class="lineNum">      87 </span><span class="lineCov">          1 :   }</span>
+<a name="88"><span class="lineNum">      88 </span>            : </a>
+<span class="lineNum">      89 </span>            :   template&lt;typename T, typename Opt&gt;
+<a name="90"><span class="lineNum">      90 </span><span class="lineCov">          1 :   void initialize_(T&amp; t, Opt&amp;&amp; opt)</span></a>
+<span class="lineNum">      91 </span>            :   {
+<span class="lineNum">      92 </span><span class="lineCov">          6 :     _start_with_opt = [&amp;t, opt](){</span>
+<span class="lineNum">      93 </span><span class="lineNoCov">          0 :       t.start(std::move(opt));</span>
+<span class="lineNum">      94 </span><span class="lineNoCov">          0 :     };</span>
+<span class="lineNum">      95 </span><span class="lineCov">          1 :   }</span>
+<span class="lineNum">      96 </span>            : 
+<span class="lineNum">      97 </span>            : 
+<span class="lineNum">      98 </span>            :   template&lt;typename Descriptor, typename IOServiceType, typename ProtocolType&gt;
+<span class="lineNum">      99 </span>            :   Descriptor dup_(IOServiceType&amp; io, const ProtocolType&amp; protocol)
+<span class="lineNum">     100 </span>            :   {
+<span class="lineNum">     101 </span>            :     typedef Descriptor dup_descriptor_type;
+<span class="lineNum">     102 </span>            :     typedef typename dup_descriptor_type::native_handle_type dup_native_type;
+<span class="lineNum">     103 </span>            :     dup_native_type d = ::dup( this-&gt;descriptor().native_handle() );
+<span class="lineNum">     104 </span>            :     dup_descriptor_type dup_descriptor(io, protocol, d);
+<span class="lineNum">     105 </span>            :     return dup_descriptor;
+<span class="lineNum">     106 </span>            :   }
+<span class="lineNum">     107 </span>            : 
+<span class="lineNum">     108 </span>            :   using super::start_;
+<span class="lineNum">     109 </span>            :   template&lt;typename T&gt;
+<span class="lineNum">     110 </span>            :   void start_(T&amp; /*t*/)
+<span class="lineNum">     111 </span>            :   {
+<span class="lineNum">     112 </span>            :     if ( _start_with_opt!= nullptr)
+<span class="lineNum">     113 </span>            :       _start_with_opt();  
+<span class="lineNum">     114 </span>            :   }
+<span class="lineNum">     115 </span>            :   
+<span class="lineNum">     116 </span>            : private:
+<span class="lineNum">     117 </span>            :   descriptor_type _descriptor;
+<span class="lineNum">     118 </span>            :   std::function&lt;void()&gt; _start_with_opt;
+<span class="lineNum">     119 </span>            : };
+<span class="lineNum">     120 </span>            : 
+<a name="121"><span class="lineNum">     121 </span>            : </a>
+<span class="lineNum">     122 </span>            : template&lt;typename A&gt;
+<span class="lineNum">     123 </span><span class="lineCov">          3 : class holder</span>
+<span class="lineNum">     124 </span>            :   : public holder_base&lt;A&gt;
+<span class="lineNum">     125 </span>            :   , public std::enable_shared_from_this&lt; holder&lt;A&gt; &gt;
+<span class="lineNum">     126 </span>            : {
+<span class="lineNum">     127 </span>            :   typedef holder_base&lt;A&gt; super;
+<span class="lineNum">     128 </span>            : public:
+<span class="lineNum">     129 </span>            :   typedef typename super::mutex_type mutex_type;
+<a name="130"><span class="lineNum">     130 </span>            :   typedef typename super::descriptor_type descriptor_type;</a>
+<span class="lineNum">     131 </span>            :   
+<span class="lineNum">     132 </span><span class="lineCov">          3 :   explicit holder(descriptor_type&amp;&amp; desc)</span>
+<span class="lineNum">     133 </span><span class="lineCov">          3 :     : super(std::move(desc) )</span>
+<span class="lineNum">     134 </span><span class="lineCov">          3 :   {}</span>
+<span class="lineNum">     135 </span>            : 
+<span class="lineNum">     136 </span>            :   void reset()
+<span class="lineNum">     137 </span>            :   {
+<span class="lineNum">     138 </span>            :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );
+<span class="lineNum">     139 </span>            :     super::reset_(*this);
+<span class="lineNum">     140 </span>            :   }
+<a name="141"><span class="lineNum">     141 </span>            : </a>
+<span class="lineNum">     142 </span>            :   template&lt;typename O&gt;
+<span class="lineNum">     143 </span><span class="lineCov">          2 :   void start(O&amp;&amp; opt)</span>
+<span class="lineNum">     144 </span>            :   {
+<span class="lineNum">     145 </span><span class="lineCov">          2 :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );</span>
+<span class="lineNum">     146 </span><span class="lineCov">          2 :     super::start_(*this, std::forward&lt;O&gt;(opt));</span>
+<span class="lineNum">     147 </span><span class="lineCov">          2 :   }</span>
+<span class="lineNum">     148 </span>            : 
+<span class="lineNum">     149 </span>            :   void start()
+<span class="lineNum">     150 </span>            :   {
+<span class="lineNum">     151 </span>            :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );
+<span class="lineNum">     152 </span>            :     super::start_(*this);
+<span class="lineNum">     153 </span>            :   }
+<span class="lineNum">     154 </span>            : 
+<span class="lineNum">     155 </span>            :   template&lt;typename O&gt;
+<span class="lineNum">     156 </span>            :   void initialize(O&amp;&amp; opt)
+<span class="lineNum">     157 </span>            :   {
+<span class="lineNum">     158 </span>            :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );
+<span class="lineNum">     159 </span>            :     super::initialize_(*this, std::forward&lt;O&gt;(opt));
+<span class="lineNum">     160 </span>            :   }
+<a name="161"><span class="lineNum">     161 </span>            : </a>
+<span class="lineNum">     162 </span>            :   template&lt;typename O&gt;
+<span class="lineNum">     163 </span><span class="lineCov">          1 :   void reconfigure(O&amp;&amp; opt)</span>
+<span class="lineNum">     164 </span>            :   {
+<span class="lineNum">     165 </span><span class="lineCov">          1 :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );</span>
+<span class="lineNum">     166 </span><span class="lineCov">          1 :     super::reconfigure_(*this, std::forward&lt;O&gt;(opt));</span>
+<span class="lineNum">     167 </span><span class="lineCov">          1 :   }</span>
+<span class="lineNum">     168 </span>            : 
+<span class="lineNum">     169 </span>            :   void close()
+<span class="lineNum">     170 </span>            :   {
+<span class="lineNum">     171 </span>            :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );
+<span class="lineNum">     172 </span>            :     this-&gt;close_(*this);
+<span class="lineNum">     173 </span>            :   }
+<span class="lineNum">     174 </span>            :   
+<span class="lineNum">     175 </span>            :   void stop()
+<span class="lineNum">     176 </span>            :   {
+<span class="lineNum">     177 </span>            :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );
+<span class="lineNum">     178 </span>            :     super::stop_(*this);
+<span class="lineNum">     179 </span>            :   }
+<span class="lineNum">     180 </span>            : 
+<span class="lineNum">     181 </span>            :   template&lt;typename Handler&gt;
+<span class="lineNum">     182 </span>            :   void shutdown(Handler&amp;&amp; handler)
+<span class="lineNum">     183 </span>            :   {
+<span class="lineNum">     184 </span>            :     std::lock_guard&lt; mutex_type &gt; lk( super::mutex() );
+<span class="lineNum">     185 </span>            :     super::shutdown_(*this, std::forward&lt;Handler&gt;(handler));
+<span class="lineNum">     186 </span>            :   }
+<span class="lineNum">     187 </span>            : 
+<span class="lineNum">     188 </span>            :   
+<span class="lineNum">     189 </span>            : };
+<span class="lineNum">     190 </span>            : 
+<span class="lineNum">     191 </span>            : }}}
+<span class="lineNum">     192 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

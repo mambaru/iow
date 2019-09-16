@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - iow-coverage.info - tests/io/stream_holder_suite.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">tests/io</a> - stream_holder_suite.cpp<span style="font-size: 80%;"> (source / <a href="stream_holder_suite.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">iow-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">39</td>
+            <td class="headerCovTableEntry">39</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-16</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">11</td>
+            <td class="headerCovTableEntry">11</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #include &lt;iostream&gt;</a>
+<span class="lineNum">       2 </span>            : #include &lt;iow/io/descriptor/holder.hpp&gt;
+<span class="lineNum">       3 </span>            : #include &lt;iow/io/socket/stream/aspect.hpp&gt;
+<span class="lineNum">       4 </span>            : #include &lt;iow/io/socket/stream/options.hpp&gt;
+<span class="lineNum">       5 </span>            : #include &lt;iow/io/reader/asio/aspect.hpp&gt;
+<span class="lineNum">       6 </span>            : #include &lt;iow/io/writer/asio/aspect.hpp&gt;
+<span class="lineNum">       7 </span>            : #include &lt;iow/io/rw/aspect.hpp&gt;
+<span class="lineNum">       8 </span>            : #include &lt;iow/io/basic/aspect.hpp&gt;
+<span class="lineNum">       9 </span>            : 
+<span class="lineNum">      10 </span>            : #include &lt;fas/testing.hpp&gt;
+<span class="lineNum">      11 </span>            : 
+<span class="lineNum">      12 </span>            : typedef std::vector&lt;char&gt; data_type;
+<span class="lineNum">      13 </span>            : typedef iow::asio::posix::stream_descriptor descriptor_type;
+<span class="lineNum">      14 </span>            : typedef iow::io::socket::stream::options options_type;
+<span class="lineNum">      15 </span>            : 
+<span class="lineNum">      16 </span>            : /*
+<span class="lineNum">      17 </span>            : struct ad_initialize
+<span class="lineNum">      18 </span>            : {
+<span class="lineNum">      19 </span>            :   template&lt;typename T, typename O&gt;
+<span class="lineNum">      20 </span>            :   void operator()(T&amp; t, O&amp;&amp; opt)  const
+<span class="lineNum">      21 </span>            :   {
+<span class="lineNum">      22 </span>            :     t.get_aspect().template get&lt; ::iow::io::rw::_initialize_ &gt;()(t, opt);
+<span class="lineNum">      23 </span>            :   }
+<span class="lineNum">      24 </span>            : };
+<span class="lineNum">      25 </span>            : */
+<span class="lineNum">      26 </span>            : 
+<span class="lineNum">      27 </span>            : struct aspect_stream : fas::aspect&lt;
+<span class="lineNum">      28 </span>            :     fas::type&lt; ::iow::io::descriptor::_descriptor_type_, descriptor_type &gt;,
+<span class="lineNum">      29 </span>            :     fas::type&lt; ::iow::io::_options_type_, options_type &gt;,
+<span class="lineNum">      30 </span>            :     fas::alias&lt; ::iow::io::socket::stream::_initialize_, ::iow::io::rw::_initialize_&gt;,
+<span class="lineNum">      31 </span>            :     ::iow::io::socket::stream::aspect,
+<span class="lineNum">      32 </span>            :     // Заглужка descriptor_type не поддерживает set_options
+<span class="lineNum">      33 </span>            :     
+<span class="lineNum">      34 </span>            :     ::iow::io::reader::asio::aspect,
+<span class="lineNum">      35 </span>            :     ::iow::io::writer::asio::aspect,
+<span class="lineNum">      36 </span>            :     ::iow::io::rw::aspect,
+<span class="lineNum">      37 </span>            :     ::iow::io::basic::aspect&lt; std::recursive_mutex &gt;::advice_list
+<span class="lineNum">      38 </span>            : &gt;{};
+<span class="lineNum">      39 </span>            : 
+<span class="lineNum">      40 </span>            : typedef ::iow::io::descriptor::holder&lt;aspect_stream&gt; stream_holder_t;
+<a name="41"><span class="lineNum">      41 </span>            : </a>
+<span class="lineNum">      42 </span>            : 
+<span class="lineNum">      43 </span><span class="lineCov">          3 : UNIT(stream_holder_unit, &quot;&quot;)</span>
+<span class="lineNum">      44 </span>            : {
+<span class="lineNum">      45 </span>            :   using namespace fas::testing;
+<span class="lineNum">      46 </span><span class="lineCov">          1 :   iow::asio::io_service service;</span>
+<span class="lineNum">      47 </span><span class="lineCov">          1 :   int f1[2]={-1, -1};</span>
+<span class="lineNum">      48 </span><span class="lineCov">          1 :   int f2[2]={-1, -1};</span>
+<span class="lineNum">      49 </span><span class="lineCov">          1 :   int res1 = ::pipe(f1);</span>
+<span class="lineNum">      50 </span><span class="lineCov">          1 :   int res2 = ::pipe(f2);</span>
+<span class="lineNum">      51 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;pipe1: &quot;) &lt;&lt; res1 &lt;&lt; &quot; &quot; &lt;&lt; f1[0] &lt;&lt; &quot; &quot; &lt;&lt; f1[1] &lt;&lt; std::endl;</span>
+<span class="lineNum">      52 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;pipe2: &quot;) &lt;&lt; res2 &lt;&lt; &quot; &quot; &lt;&lt; f2[0] &lt;&lt; &quot; &quot; &lt;&lt; f2[1] &lt;&lt; std::endl;</span>
+<span class="lineNum">      53 </span><span class="lineCov">          2 :   descriptor_type d1(service, f1[0]);</span>
+<span class="lineNum">      54 </span><span class="lineCov">          2 :   descriptor_type d2(service, f2[1]);</span>
+<span class="lineNum">      55 </span>            :   
+<span class="lineNum">      56 </span><span class="lineCov">          2 :   auto h1 = std::make_shared&lt;stream_holder_t&gt;(std::move(d1));</span>
+<span class="lineNum">      57 </span><span class="lineCov">          2 :   auto h2 = std::make_shared&lt;stream_holder_t&gt;(std::move(d2));</span>
+<span class="lineNum">      58 </span><span class="lineCov">          1 :   const char* instr = &quot;Hello world!\r\nBye!&quot;;</span>
+<span class="lineNum">      59 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;write...&quot;);</span>
+<span class="lineNum">      60 </span><span class="lineCov">          1 :   res1 = int(write(f1[1], instr, std::strlen(instr) ));</span>
+<span class="lineNum">      61 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;...write:&quot;) &lt;&lt; res1;</span>
+<a name="62"><span class="lineNum">      62 </span>            :   </a>
+<span class="lineNum">      63 </span><span class="lineCov">          2 :   options_type opt;</span>
+<span class="lineNum">      64 </span><span class="lineCov">          2 :   opt.input_handler = [&amp;]( iow::io::data_ptr d, size_t, options_type::output_handler_type /*callback*/){</span>
+<span class="lineNum">      65 </span><span class="lineCov">          1 :     t &lt;&lt; message(&quot;data: &quot;) &lt;&lt; d ;</span>
+<span class="lineNum">      66 </span><span class="lineCov">          1 :     h2-&gt;get_aspect().get&lt; ::iow::io::writer::_output_&gt;()( *h2, std::move(d) );</span>
+<span class="lineNum">      67 </span><span class="lineCov">          1 :   };</span>
+<span class="lineNum">      68 </span><span class="lineCov">          1 :   opt.reader.sep = &quot;\r\n&quot;;</span>
+<span class="lineNum">      69 </span><span class="lineCov">          1 :   opt.reader.trimsep = true;</span>
+<span class="lineNum">      70 </span><span class="lineCov">          1 :   opt.writer.sep = &quot;&quot;;</span>
+<span class="lineNum">      71 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;start1&quot;);</span>
+<span class="lineNum">      72 </span><span class="lineCov">          1 :   h1-&gt;start(opt);</span>
+<span class="lineNum">      73 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;start2&quot;);</span>
+<span class="lineNum">      74 </span><span class="lineCov">          1 :   h2-&gt;reconfigure(opt);</span>
+<span class="lineNum">      75 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;service.run()...&quot;);</span>
+<span class="lineNum">      76 </span><span class="lineCov">          1 :   service.run_one();</span>
+<span class="lineNum">      77 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;...service.run()&quot;);</span>
+<span class="lineNum">      78 </span>            :   
+<span class="lineNum">      79 </span>            :   
+<span class="lineNum">      80 </span>            :   char outstr[128];
+<span class="lineNum">      81 </span><span class="lineCov">          1 :   ssize_t size = read(f2[0], outstr, 128);</span>
+<span class="lineNum">      82 </span><span class="lineCov">          1 :   outstr[size]='\0';</span>
+<span class="lineNum">      83 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;outstr: &quot;) &lt;&lt; outstr &lt;&lt; std::endl;</span>
+<span class="lineNum">      84 </span><span class="lineCov">          1 :   t &lt;&lt; nothing;</span>
+<span class="lineNum">      85 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect, std::string&gt;(outstr, &quot;Hello world!&quot;) &lt;&lt; FAS_FL;</span>
+<a name="86"><span class="lineNum">      86 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">      87 </span>            : 
+<a name="88"><span class="lineNum">      88 </span><span class="lineCov">          1 : BEGIN_SUITE(stream_holder,&quot;&quot;)</span></a>
+<span class="lineNum">      89 </span>            :   ADD_UNIT(stream_holder_unit)
+<span class="lineNum">      90 </span><span class="lineCov">          7 : END_SUITE(stream_holder)</span>
+<span class="lineNum">      91 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

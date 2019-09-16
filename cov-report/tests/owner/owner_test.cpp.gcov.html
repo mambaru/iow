@@ -1,0 +1,327 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - iow-coverage.info - tests/owner/owner_test.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">tests/owner</a> - owner_test.cpp<span style="font-size: 80%;"> (source / <a href="owner_test.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">iow-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">170</td>
+            <td class="headerCovTableEntry">170</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-16</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">60</td>
+            <td class="headerCovTableEntry">60</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #include &lt;fas/testing.hpp&gt;</a>
+<span class="lineNum">       2 </span>            : #include &lt;iow/owner/owner.hpp&gt;
+<span class="lineNum">       3 </span>            : #include &lt;boost/concept_check.hpp&gt;
+<span class="lineNum">       4 </span>            : 
+<span class="lineNum">       5 </span>            : class foo
+<a name="6"><span class="lineNum">       6 </span>            : {</a>
+<a name="7"><span class="lineNum">       7 </span>            : public:</a>
+<a name="8"><span class="lineNum">       8 </span><span class="lineCov">          2 :   foo() {++ctor;}</span></a>
+<span class="lineNum">       9 </span><span class="lineCov">         18 :   foo(const foo&amp; ) {++cctor;}</span>
+<span class="lineNum">      10 </span><span class="lineCov">         11 :   foo(foo&amp;&amp; ) {++mctor;}</span>
+<span class="lineNum">      11 </span>            : public:
+<span class="lineNum">      12 </span>            :   static int ctor ;
+<span class="lineNum">      13 </span>            :   static int cctor ;
+<span class="lineNum">      14 </span>            :   static int mctor ;
+<span class="lineNum">      15 </span>            : };
+<span class="lineNum">      16 </span>            : 
+<span class="lineNum">      17 </span>            : int foo::ctor = 0;
+<span class="lineNum">      18 </span>            : int foo::cctor = 0;
+<span class="lineNum">      19 </span>            : int foo::mctor = 0;
+<span class="lineNum">      20 </span>            : 
+<span class="lineNum">      21 </span>            : int inc(int i);
+<a name="22"><span class="lineNum">      22 </span>            : int dec(int i);</a>
+<span class="lineNum">      23 </span>            : 
+<span class="lineNum">      24 </span><span class="lineCov">          4 : int inc(int i)</span>
+<span class="lineNum">      25 </span>            : {
+<span class="lineNum">      26 </span><span class="lineCov">          4 :   return i+1;</span>
+<span class="lineNum">      27 </span>            : }
+<a name="28"><span class="lineNum">      28 </span>            : </a>
+<span class="lineNum">      29 </span>            : 
+<span class="lineNum">      30 </span><span class="lineCov">          2 : int dec(int i)</span>
+<span class="lineNum">      31 </span>            : {
+<span class="lineNum">      32 </span><span class="lineCov">          2 :   return i-1;</span>
+<a name="33"><span class="lineNum">      33 </span>            : }</a>
+<a name="34"><span class="lineNum">      34 </span>            : </a>
+<span class="lineNum">      35 </span><span class="lineCov">          2 : struct finc{ int operator()(int val) const { return val+1;}};</span>
+<span class="lineNum">      36 </span><span class="lineCov">          2 : struct fdec{ int operator()(int dec) const { return dec-1;}};</span>
+<a name="37"><span class="lineNum">      37 </span>            : </a>
+<span class="lineNum">      38 </span>            : template&lt;typename Handle&gt;
+<span class="lineNum">      39 </span><span class="lineCov">         42 : void rec(Handle&amp;&amp; h, int i)</span>
+<span class="lineNum">      40 </span>            : {
+<span class="lineNum">      41 </span><span class="lineCov">         42 :   if ( i == 0 ) h();</span>
+<span class="lineNum">      42 </span><span class="lineCov">         38 :   else rec( std::forward&lt;Handle&gt;(h), i-1);</span>
+<span class="lineNum">      43 </span><span class="lineCov">         42 : }</span>
+<a name="44"><span class="lineNum">      44 </span>            : </a>
+<span class="lineNum">      45 </span>            : template&lt;typename Handle&gt;
+<span class="lineNum">      46 </span><span class="lineCov">          2 : void rec2(Handle h, int i)</span>
+<span class="lineNum">      47 </span>            : {
+<span class="lineNum">      48 </span><span class="lineCov">          2 :   if ( i == 0 ) h();</span>
+<span class="lineNum">      49 </span><span class="lineCov">          2 :   else rec( h, i-1);</span>
+<a name="50"><span class="lineNum">      50 </span><span class="lineCov">          2 : }</span></a>
+<span class="lineNum">      51 </span>            : 
+<span class="lineNum">      52 </span><span class="lineCov">          3 : UNIT(wrap, &quot;&quot;)</span>
+<span class="lineNum">      53 </span>            : {
+<span class="lineNum">      54 </span>            :   using namespace fas::testing;
+<span class="lineNum">      55 </span>            : 
+<span class="lineNum">      56 </span><span class="lineCov">          1 :   foo::ctor = 0;</span>
+<span class="lineNum">      57 </span><span class="lineCov">          1 :   foo::cctor = 0;</span>
+<span class="lineNum">      58 </span><span class="lineCov">          1 :   foo::mctor = 0;</span>
+<span class="lineNum">      59 </span>            : 
+<span class="lineNum">      60 </span><span class="lineCov">          1 :   ::iow::owner own;</span>
+<span class="lineNum">      61 </span><span class="lineCov">          2 :   auto test1 = own.wrap(&amp;inc, nullptr);</span>
+<span class="lineNum">      62 </span><span class="lineCov">          1 :   int val = 0;</span>
+<span class="lineNum">      63 </span><span class="lineCov">          1 :   val = test1(1);</span>
+<span class="lineNum">      64 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 2) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      65 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">      66 </span><span class="lineCov">          1 :   val = test1(1);</span>
+<span class="lineNum">      67 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 0) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      68 </span>            :   
+<span class="lineNum">      69 </span><span class="lineCov">          2 :   auto test2 = own.wrap(&amp;inc, &amp;dec);</span>
+<span class="lineNum">      70 </span><span class="lineCov">          1 :   val = test2(2);</span>
+<span class="lineNum">      71 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 3) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      72 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">      73 </span><span class="lineCov">          1 :   val = test2(2);</span>
+<span class="lineNum">      74 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 1) &lt;&lt; FAS_FL;</span>
+<a name="75"><span class="lineNum">      75 </span>            :   </a>
+<span class="lineNum">      76 </span><span class="lineCov">          1 :   foo f;</span>
+<span class="lineNum">      77 </span><span class="lineCov">          4 :   auto test3 = own.wrap([f](int v)-&gt;int { return v + 1;}, nullptr);</span>
+<span class="lineNum">      78 </span><span class="lineCov">          1 :   val = test3(1);</span>
+<span class="lineNum">      79 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 2) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      80 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::ctor, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      81 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::cctor, 1) &lt;&lt; foo::cctor &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      82 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::mctor, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      83 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">      84 </span><span class="lineCov">          1 :   val = test3(1);</span>
+<span class="lineNum">      85 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 0) &lt;&lt; FAS_FL;</span>
+<a name="86"><span class="lineNum">      86 </span>            : </a>
+<span class="lineNum">      87 </span>            : 
+<span class="lineNum">      88 </span><span class="lineCov">          9 :   auto test4 = own.wrap([f](int v)-&gt;int { return v + 1;}, [f](int v)-&gt;int { return v - 1;});</span>
+<span class="lineNum">      89 </span><span class="lineCov">          1 :   val = test4(2);</span>
+<span class="lineNum">      90 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 3) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      91 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">      92 </span><span class="lineCov">          1 :   val = test4(2);</span>
+<span class="lineNum">      93 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      94 </span>            : 
+<span class="lineNum">      95 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::ctor, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">      96 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::cctor, 3) &lt;&lt; foo::cctor &lt;&lt; FAS_FL;</span>
+<a name="97"><span class="lineNum">      97 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::mctor, 3) &lt;&lt; foo::mctor &lt;&lt; FAS_FL;</span></a>
+<span class="lineNum">      98 </span>            :   
+<span class="lineNum">      99 </span><span class="lineCov">          2 :   rec([f](){}, 10);</span>
+<span class="lineNum">     100 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::cctor, 4) &lt;&lt; foo::cctor &lt;&lt; FAS_FL;</span>
+<a name="101"><span class="lineNum">     101 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::mctor, 3) &lt;&lt; foo::mctor &lt;&lt; FAS_FL;</span></a>
+<span class="lineNum">     102 </span>            : 
+<span class="lineNum">     103 </span><span class="lineCov">          2 :   rec2([f](){}, 10);</span>
+<span class="lineNum">     104 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::cctor, 5) &lt;&lt; foo::cctor &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     105 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::mctor, 3) &lt;&lt; foo::mctor &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     106 </span>            :   
+<span class="lineNum">     107 </span><span class="lineCov">          2 :   auto test5 = test4;</span>
+<span class="lineNum">     108 </span><span class="lineCov">          1 :   val = test5(2);</span>
+<a name="109"><span class="lineNum">     109 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 1) &lt;&lt; FAS_FL;</span></a>
+<span class="lineNum">     110 </span>            : 
+<span class="lineNum">     111 </span><span class="lineCov">          5 :   auto test6 = own.wrap([f](int v)-&gt;int { return v + 1;}, nullptr);</span>
+<span class="lineNum">     112 </span><span class="lineCov">          2 :   auto test7 = test6;</span>
+<span class="lineNum">     113 </span><span class="lineCov">          1 :   val = test7(2);</span>
+<span class="lineNum">     114 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 3) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     115 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">     116 </span><span class="lineCov">          1 :   val = test7(2);</span>
+<span class="lineNum">     117 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 0) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     118 </span>            :   
+<span class="lineNum">     119 </span><span class="lineCov">          2 :   auto test8 = own.wrap(finc(), fdec());</span>
+<span class="lineNum">     120 </span>            :   //auto test8 = own.wrap(&amp;inc, &amp;dec);
+<span class="lineNum">     121 </span>            :   //auto test8 = own.wrap([f](int val)-&gt;int { return val + 1;}, [f](int val)-&gt;int { return val - 1;});
+<span class="lineNum">     122 </span><span class="lineCov">          2 :   auto test9 = test8;</span>
+<span class="lineNum">     123 </span><span class="lineCov">          1 :   val = test9(2);</span>
+<span class="lineNum">     124 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 3) &lt;&lt; val &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     125 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">     126 </span><span class="lineCov">          1 :   val = test9(2);</span>
+<span class="lineNum">     127 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;(val, 1) &lt;&lt; val &lt;&lt; FAS_FL;</span>
+<a name="128"><span class="lineNum">     128 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">     129 </span>            : 
+<span class="lineNum">     130 </span><span class="lineCov">          3 : UNIT(wrap_callback, &quot;&quot;)</span>
+<span class="lineNum">     131 </span>            : {
+<span class="lineNum">     132 </span>            :   using namespace fas::testing;
+<span class="lineNum">     133 </span><span class="lineCov">          1 :   foo::ctor = 0;</span>
+<span class="lineNum">     134 </span><span class="lineCov">          1 :   foo::cctor = 0;</span>
+<span class="lineNum">     135 </span><span class="lineCov">          1 :   foo::mctor = 0;</span>
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span><span class="lineCov">          1 :   ::iow::owner own;</span>
+<span class="lineNum">     138 </span><span class="lineCov">          2 :   auto test1 =own.wrap(  own.callback( &amp;inc), nullptr );</span>
+<span class="lineNum">     139 </span><span class="lineCov">          1 :   int val = 0;</span>
+<span class="lineNum">     140 </span><span class="lineCov">          1 :   val = test1(1);</span>
+<span class="lineNum">     141 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 2) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     142 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">     143 </span><span class="lineCov">          1 :   val = test1(1);</span>
+<span class="lineNum">     144 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 0) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     145 </span>            :   
+<span class="lineNum">     146 </span><span class="lineCov">          2 :   auto test2 =own.wrap(  own.callback( &amp;inc), &amp;dec );</span>
+<span class="lineNum">     147 </span><span class="lineCov">          1 :   val = test2(2);</span>
+<span class="lineNum">     148 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 3) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     149 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">     150 </span><span class="lineCov">          1 :   val = test2(2);</span>
+<span class="lineNum">     151 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 1) &lt;&lt; FAS_FL;</span>
+<a name="152"><span class="lineNum">     152 </span>            :   </a>
+<span class="lineNum">     153 </span><span class="lineCov">          1 :   foo f;</span>
+<span class="lineNum">     154 </span><span class="lineCov">          5 :   auto test3 = own.wrap( own.callback([f](int v)-&gt;int { return v + 1;}), nullptr);</span>
+<span class="lineNum">     155 </span><span class="lineCov">          1 :   val = test3(1);</span>
+<span class="lineNum">     156 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 2) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     157 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::ctor, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     158 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::cctor, 1) &lt;&lt;  FAS_FL;</span>
+<span class="lineNum">     159 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::mctor, 2) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     160 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">     161 </span><span class="lineCov">          1 :   val = test3(1);</span>
+<span class="lineNum">     162 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 0) &lt;&lt; FAS_FL;</span>
+<a name="163"><span class="lineNum">     163 </span>            : </a>
+<span class="lineNum">     164 </span>            : 
+<span class="lineNum">     165 </span><span class="lineCov">         10 :   auto test4 = own.wrap( own.callback([f](int v)-&gt;int { return v + 1;}), [f](int v)-&gt;int { return v - 1;});</span>
+<span class="lineNum">     166 </span><span class="lineCov">          1 :   val = test4(2);</span>
+<span class="lineNum">     167 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 3) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     168 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">     169 </span><span class="lineCov">          1 :   val = test4(2);</span>
+<span class="lineNum">     170 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     171 </span>            : 
+<span class="lineNum">     172 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::ctor, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     173 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::cctor, 3) &lt;&lt; foo::cctor &lt;&lt; FAS_FL;</span>
+<a name="174"><span class="lineNum">     174 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::mctor, 5) &lt;&lt; foo::mctor &lt;&lt; FAS_FL;</span></a>
+<span class="lineNum">     175 </span>            :   
+<span class="lineNum">     176 </span><span class="lineCov">          2 :   rec([f](){}, 10);</span>
+<span class="lineNum">     177 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::cctor, 4) &lt;&lt; foo::cctor &lt;&lt; FAS_FL;</span>
+<a name="178"><span class="lineNum">     178 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::mctor, 5) &lt;&lt; foo::mctor &lt;&lt; FAS_FL;</span></a>
+<span class="lineNum">     179 </span>            : 
+<span class="lineNum">     180 </span><span class="lineCov">          2 :   rec2([f](){}, 10);</span>
+<span class="lineNum">     181 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::cctor, 5) &lt;&lt; foo::cctor &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     182 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(foo::mctor, 5) &lt;&lt; foo::mctor &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     183 </span>            :   
+<span class="lineNum">     184 </span><span class="lineCov">          2 :   auto test5 = test4;</span>
+<span class="lineNum">     185 </span><span class="lineCov">          1 :   val = test5(2);</span>
+<a name="186"><span class="lineNum">     186 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 1) &lt;&lt; FAS_FL;</span></a>
+<span class="lineNum">     187 </span>            : 
+<span class="lineNum">     188 </span><span class="lineCov">          6 :   auto test6 = own.wrap( own.callback([f](int v)-&gt;int { return v + 1;}), nullptr);</span>
+<span class="lineNum">     189 </span><span class="lineCov">          2 :   auto test7 = test6;</span>
+<span class="lineNum">     190 </span><span class="lineCov">          1 :   val = test7(2);</span>
+<span class="lineNum">     191 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 3) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     192 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">     193 </span><span class="lineCov">          1 :   val = test7(2);</span>
+<span class="lineNum">     194 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 0) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     195 </span>            :   
+<span class="lineNum">     196 </span><span class="lineCov">          2 :   auto test8 = own.wrap( own.callback(finc()), fdec());</span>
+<span class="lineNum">     197 </span>            :   //auto test8 = own.wrap(&amp;inc, &amp;dec);
+<span class="lineNum">     198 </span>            :   //auto test8 = own.wrap([f](int val)-&gt;int { return val + 1;}, [f](int val)-&gt;int { return val - 1;});
+<span class="lineNum">     199 </span><span class="lineCov">          2 :   auto test9 = test8;</span>
+<span class="lineNum">     200 </span><span class="lineCov">          1 :   val = test9(2);</span>
+<span class="lineNum">     201 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(val, 3) &lt;&lt; val &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     202 </span><span class="lineCov">          1 :   own.reset();</span>
+<span class="lineNum">     203 </span><span class="lineCov">          1 :   val = test9(2);</span>
+<span class="lineNum">     204 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;(val, 1) &lt;&lt; val &lt;&lt; FAS_FL;</span>
+<a name="205"><span class="lineNum">     205 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">     206 </span>            : 
+<span class="lineNum">     207 </span><span class="lineCov">          3 : UNIT(callback1, &quot;&quot;)</span>
+<span class="lineNum">     208 </span>            : {
+<span class="lineNum">     209 </span>            :   using namespace fas::testing;
+<span class="lineNum">     210 </span><span class="lineCov">          1 :   int count = 0;</span>
+<span class="lineNum">     211 </span><span class="lineCov">          1 :   int dcount = 0;</span>
+<span class="lineNum">     212 </span><span class="lineCov">          1 :   int ncount = 0;</span>
+<a name="213"><span class="lineNum">     213 </span>            :   </a>
+<span class="lineNum">     214 </span><span class="lineCov">          1 :   ::iow::owner own;</span>
+<span class="lineNum">     215 </span><span class="lineCov">          3 :   auto cb1 = own.callback([&amp;count](){count++;});</span>
+<span class="lineNum">     216 </span><span class="lineCov">          1 :   cb1();</span>
+<span class="lineNum">     217 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(count, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     218 </span><span class="lineCov">          1 :   cb1();</span>
+<a name="219"><span class="lineNum">     219 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(count, 1) &lt;&lt; FAS_FL;</span></a>
+<a name="220"><span class="lineNum">     220 </span>            :   </a>
+<span class="lineNum">     221 </span><span class="lineCov">          2 :   own.set_double_call_handler([&amp;dcount](){++dcount;});</span>
+<a name="222"><span class="lineNum">     222 </span><span class="lineCov">          2 :   own.set_no_call_handler([&amp;ncount](){++ncount;});</span></a>
+<span class="lineNum">     223 </span>            : 
+<span class="lineNum">     224 </span><span class="lineCov">          3 :   auto cb2 = own.callback([&amp;count](){count++;});</span>
+<span class="lineNum">     225 </span><span class="lineCov">          1 :   cb1();</span>
+<span class="lineNum">     226 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(count, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     227 </span><span class="lineCov">          1 :   cb2();</span>
+<span class="lineNum">     228 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(count, 2) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     229 </span><span class="lineCov">          1 :   cb2();</span>
+<span class="lineNum">     230 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(count, 2) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     231 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(dcount, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     232 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(ncount, 0) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     233 </span>            :   {
+<span class="lineNum">     234 </span><span class="lineCov">          1 :     auto cb3 = own.callback([&amp;count](){count++;});</span>
+<span class="lineNum">     235 </span>            :   }
+<span class="lineNum">     236 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(count, 2) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     237 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect&gt;(dcount, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     238 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;(ncount, 1) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     239 </span>            : 
+<a name="240"><span class="lineNum">     240 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">     241 </span>            : 
+<span class="lineNum">     242 </span><span class="lineCov">          1 : BEGIN_SUITE(owner, &quot;&quot;)</span>
+<span class="lineNum">     243 </span>            :   ADD_UNIT(wrap)
+<a name="244"><span class="lineNum">     244 </span>            :   ADD_UNIT(wrap_callback)  </a>
+<span class="lineNum">     245 </span>            :   ADD_UNIT(callback1)  
+<span class="lineNum">     246 </span><span class="lineCov">          4 : END_SUITE(owner)</span>
+<a name="247"><span class="lineNum">     247 </span>            : </a>
+<span class="lineNum">     248 </span>            : 
+<a name="249"><span class="lineNum">     249 </span><span class="lineCov">          1 : BEGIN_TEST</span></a>
+<span class="lineNum">     250 </span><span class="lineCov">          1 :   RUN_SUITE(owner)</span>
+<span class="lineNum">     251 </span><span class="lineCov">          4 : END_TEST</span>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

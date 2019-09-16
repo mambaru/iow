@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - iow-coverage.info - iow/io/io_base.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">iow/io</a> - io_base.hpp<span style="font-size: 80%;"> (source / <a href="io_base.hpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">iow-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">30</td>
+            <td class="headerCovTableEntry">30</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-16</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">48</td>
+            <td class="headerCovTableEntry">49</td>
+            <td class="headerCovTableEntryHi">98.0 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #pragma once</a>
+<span class="lineNum">       2 </span>            : 
+<span class="lineNum">       3 </span>            : #include &lt;iow/io/basic/tags.hpp&gt;
+<span class="lineNum">       4 </span>            : #include &lt;fas/aop.hpp&gt;
+<span class="lineNum">       5 </span>            : #include &lt;mutex&gt;
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : // Удалить
+<span class="lineNum">       8 </span>            : #include &lt;iow/owner/owner_handler.hpp&gt;
+<span class="lineNum">       9 </span>            : 
+<span class="lineNum">      10 </span>            : 
+<span class="lineNum">      11 </span>            : namespace iow{ namespace io{
+<span class="lineNum">      12 </span>            :   
+<span class="lineNum">      13 </span>            : /**
+<span class="lineNum">      14 </span>            :  * start()
+<span class="lineNum">      15 </span>            :  * stop()
+<span class="lineNum">      16 </span>            :  * reset()
+<span class="lineNum">      17 </span>            :  * initialize()
+<a name="18"><span class="lineNum">      18 </span>            :  */</a>
+<span class="lineNum">      19 </span>            : template&lt;typename A &gt;
+<span class="lineNum">      20 </span><span class="lineCov">         18 : class io_base</span>
+<span class="lineNum">      21 </span>            :   : public ::fas::aspect_class&lt;A&gt;
+<span class="lineNum">      22 </span>            : {
+<span class="lineNum">      23 </span>            : private:
+<span class="lineNum">      24 </span>            :   typedef io_base&lt;A&gt; self;
+<span class="lineNum">      25 </span>            :   typedef ::fas::aspect_class&lt;A&gt; super;
+<span class="lineNum">      26 </span>            :   typedef typename super::aspect::template advice_cast&lt; basic::_context_ &gt;::type context_type;
+<span class="lineNum">      27 </span>            :   
+<span class="lineNum">      28 </span>            : public:
+<span class="lineNum">      29 </span>            :   typedef typename context_type::mutex_type mutex_type;
+<span class="lineNum">      30 </span>            :   typedef typename context_type::io_id_type io_id_type;
+<span class="lineNum">      31 </span>            :   typedef typename context_type::status_type status_type;
+<a name="32"><span class="lineNum">      32 </span>            :   typedef typename context_type::shutdown_complete shutdown_complete;</a>
+<span class="lineNum">      33 </span>            : 
+<span class="lineNum">      34 </span><span class="lineCov">         10 :   mutex_type&amp; mutex() const</span>
+<span class="lineNum">      35 </span>            :   {
+<span class="lineNum">      36 </span><span class="lineCov">         10 :     return _mutex;</span>
+<a name="37"><span class="lineNum">      37 </span>            :   }</a>
+<span class="lineNum">      38 </span>            :   
+<span class="lineNum">      39 </span><span class="lineCov">          4 :   io_id_type get_id() const </span>
+<span class="lineNum">      40 </span>            :   { 
+<span class="lineNum">      41 </span><span class="lineCov">          4 :     std::lock_guard&lt; mutex_type &gt; lk(_mutex);</span>
+<span class="lineNum">      42 </span><span class="lineCov">          4 :     return this-&gt;get_id_(*this);</span>
+<a name="43"><span class="lineNum">      43 </span>            :   }</a>
+<span class="lineNum">      44 </span>            : 
+<span class="lineNum">      45 </span><span class="lineCov">          4 :   status_type status() const </span>
+<span class="lineNum">      46 </span>            :   {
+<span class="lineNum">      47 </span><span class="lineCov">          4 :     std::lock_guard&lt; mutex_type &gt; lk(_mutex);</span>
+<span class="lineNum">      48 </span><span class="lineCov">          4 :     return this-&gt;status_(*this);</span>
+<span class="lineNum">      49 </span>            :   }
+<span class="lineNum">      50 </span>            : 
+<span class="lineNum">      51 </span>            :   void reset()
+<span class="lineNum">      52 </span>            :   {
+<span class="lineNum">      53 </span>            :     std::lock_guard&lt; mutex_type &gt; lk(_mutex);
+<span class="lineNum">      54 </span>            :     this-&gt;reset_(*this);
+<span class="lineNum">      55 </span>            :   }
+<span class="lineNum">      56 </span>            : 
+<span class="lineNum">      57 </span>            :   template&lt;typename O&gt;
+<span class="lineNum">      58 </span>            :   void start(O&amp;&amp; opt)
+<span class="lineNum">      59 </span>            :   {
+<span class="lineNum">      60 </span>            :     std::lock_guard&lt; mutex_type &gt; lk(_mutex);
+<span class="lineNum">      61 </span>            :     this-&gt;start_(*this, std::forward&lt;O&gt;(opt));
+<span class="lineNum">      62 </span>            :   }
+<span class="lineNum">      63 </span>            : 
+<span class="lineNum">      64 </span>            :   template&lt;typename O&gt;
+<span class="lineNum">      65 </span>            :   void reconfigure(O&amp;&amp; opt)
+<span class="lineNum">      66 </span>            :   {
+<span class="lineNum">      67 </span>            :     std::lock_guard&lt; mutex_type &gt; lk(_mutex);
+<span class="lineNum">      68 </span>            :     this-&gt;reconfigure_(*this, std::forward&lt;O&gt;(opt));
+<span class="lineNum">      69 </span>            :   }
+<span class="lineNum">      70 </span>            : 
+<span class="lineNum">      71 </span>            :   void stop()
+<span class="lineNum">      72 </span>            :   {
+<span class="lineNum">      73 </span>            :     std::lock_guard&lt; mutex_type &gt; lk(_mutex);
+<span class="lineNum">      74 </span>            :     this-&gt;stop_(*this);
+<span class="lineNum">      75 </span>            :   }
+<span class="lineNum">      76 </span>            : 
+<span class="lineNum">      77 </span>            :   void shutdown(shutdown_complete&amp;&amp; handler)
+<span class="lineNum">      78 </span>            :   {
+<span class="lineNum">      79 </span>            :     std::lock_guard&lt; mutex_type &gt; lk(_mutex);
+<span class="lineNum">      80 </span>            :     this-&gt;shutdown_(*this, std::forward&lt;shutdown_complete&gt;(handler));
+<span class="lineNum">      81 </span>            :   }
+<span class="lineNum">      82 </span>            :   
+<span class="lineNum">      83 </span>            :   template&lt;typename Tg, typename ...Args&gt;
+<span class="lineNum">      84 </span>            :   struct result_of
+<span class="lineNum">      85 </span>            :   {
+<span class="lineNum">      86 </span>            :     typedef typename super::aspect::template advice_cast&lt;Tg&gt;::type advice_type;
+<span class="lineNum">      87 </span>            :     typedef typename std::result_of&lt;advice_type(self&amp;, Args...) &gt;::type type;
+<span class="lineNum">      88 </span>            :   };
+<a name="89"><span class="lineNum">      89 </span>            :   </a>
+<span class="lineNum">      90 </span>            :   template&lt;typename Handler, typename AltHandler&gt;
+<span class="lineNum">      91 </span><span class="lineCov">         12 :   auto wrap(Handler&amp;&amp; h, AltHandler&amp;&amp; ah) const</span>
+<span class="lineNum">      92 </span>            :     -&gt; typename result_of&lt;_wrap_, Handler, AltHandler&gt;::type
+<span class="lineNum">      93 </span>            :   {
+<span class="lineNum">      94 </span><span class="lineCov">         12 :     std::lock_guard&lt; mutex_type &gt; lk(_mutex);</span>
+<span class="lineNum">      95 </span><span class="lineCov">         12 :     return this-&gt;wrap_( *this, std::forward&lt;Handler&gt;(h), std::forward&lt;AltHandler&gt;(ah) );</span>
+<span class="lineNum">      96 </span>            :   }
+<span class="lineNum">      97 </span>            : 
+<span class="lineNum">      98 </span>            : public:
+<a name="99"><span class="lineNum">      99 </span>            :   </a>
+<span class="lineNum">     100 </span>            :   template&lt;typename T&gt;
+<span class="lineNum">     101 </span><span class="lineCov">          4 :   status_type status_(T&amp; t) const</span>
+<span class="lineNum">     102 </span>            :   {
+<span class="lineNum">     103 </span><span class="lineCov">          4 :     return t.get_aspect().template get&lt; basic::_context_&gt;().status;</span>
+<span class="lineNum">     104 </span>            :   }
+<a name="105"><span class="lineNum">     105 </span>            : </a>
+<span class="lineNum">     106 </span>            :   template&lt;typename T&gt;
+<span class="lineNum">     107 </span><span class="lineCov">         12 :   io_id_type get_id_(T&amp; t) const</span>
+<span class="lineNum">     108 </span>            :   {
+<span class="lineNum">     109 </span><span class="lineCov">         12 :     return t.get_aspect().template get&lt; basic::_context_&gt;().io_id;</span>
+<span class="lineNum">     110 </span>            :   }
+<a name="111"><span class="lineNum">     111 </span>            : </a>
+<span class="lineNum">     112 </span>            :   template&lt;typename T&gt;
+<span class="lineNum">     113 </span><span class="lineCov">          3 :   void reset_(T&amp; t)</span>
+<span class="lineNum">     114 </span>            :   {
+<span class="lineNum">     115 </span><span class="lineCov">          3 :     t.get_aspect().template get&lt;_reset_&gt;()(t);</span>
+<span class="lineNum">     116 </span><span class="lineCov">          3 :   }</span>
+<a name="117"><span class="lineNum">     117 </span>            : </a>
+<span class="lineNum">     118 </span>            :   template&lt;typename T, typename O&gt;
+<span class="lineNum">     119 </span><span class="lineCov">          6 :   void start_(T&amp; t, O&amp;&amp; opt )</span>
+<span class="lineNum">     120 </span>            :   {
+<span class="lineNum">     121 </span><span class="lineCov">          6 :     t.get_aspect().template get&lt;_start_&gt;()(t, std::forward&lt;O&gt;(opt) );</span>
+<span class="lineNum">     122 </span><span class="lineCov">          6 :   }</span>
+<a name="123"><span class="lineNum">     123 </span>            : </a>
+<span class="lineNum">     124 </span>            :   template&lt;typename T, typename O&gt;
+<span class="lineNum">     125 </span><span class="lineCov">          2 :   void reconfigure_(T&amp; t, O&amp;&amp; opt )</span>
+<span class="lineNum">     126 </span>            :   {
+<span class="lineNum">     127 </span>            :     // Определяет пользователь
+<span class="lineNum">     128 </span><span class="lineCov">          2 :     t.get_aspect().template get&lt;_initialize_&gt;()(t, std::forward&lt;O&gt;(opt) );</span>
+<span class="lineNum">     129 </span><span class="lineCov">          2 :   }</span>
+<a name="130"><span class="lineNum">     130 </span>            : </a>
+<span class="lineNum">     131 </span>            :   template&lt;typename T&gt;
+<span class="lineNum">     132 </span><span class="lineCov">          1 :   void stop_(T&amp; t)</span>
+<span class="lineNum">     133 </span>            :   {
+<span class="lineNum">     134 </span><span class="lineCov">          1 :     t.get_aspect().template get&lt;_stop_&gt;()(t);</span>
+<span class="lineNum">     135 </span><span class="lineCov">          1 :   }</span>
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span>            :   template&lt;typename T&gt;
+<span class="lineNum">     138 </span>            :   void shutdown_(T&amp; t, shutdown_complete&amp;&amp; handler)
+<span class="lineNum">     139 </span>            :   {
+<span class="lineNum">     140 </span>            :     t.get_aspect().template get&lt;_shutdown_&gt;()(t, std::forward&lt;shutdown_complete&gt;(handler));
+<span class="lineNum">     141 </span>            :   }
+<a name="142"><span class="lineNum">     142 </span>            : </a>
+<span class="lineNum">     143 </span>            :   template&lt;typename T, typename Handler, typename AltHandler&gt;
+<span class="lineNum">     144 </span><span class="lineCov">         12 :   auto wrap_( T&amp; t, Handler&amp;&amp; h, AltHandler&amp;&amp; ah) const</span>
+<span class="lineNum">     145 </span>            :     -&gt; typename result_of&lt;_wrap_, Handler, AltHandler&gt;::type
+<span class="lineNum">     146 </span>            :   {
+<span class="lineNum">     147 </span><span class="lineCov">         12 :     return t.get_aspect().template get&lt;_wrap_&gt;()(t, std::forward&lt;Handler&gt;(h), std::forward&lt;AltHandler&gt;(ah) );</span>
+<span class="lineNum">     148 </span>            :   }
+<span class="lineNum">     149 </span>            : 
+<span class="lineNum">     150 </span>            : private:
+<span class="lineNum">     151 </span>            :   
+<span class="lineNum">     152 </span>            :   mutable mutex_type _mutex;
+<span class="lineNum">     153 </span>            : };
+<span class="lineNum">     154 </span>            : 
+<span class="lineNum">     155 </span>            : }}
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

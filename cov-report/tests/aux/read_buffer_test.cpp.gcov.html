@@ -1,0 +1,614 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - iow-coverage.info - tests/aux/read_buffer_test.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">tests/aux</a> - read_buffer_test.cpp<span style="font-size: 80%;"> (source / <a href="read_buffer_test.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">iow-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">56</td>
+            <td class="headerCovTableEntry">56</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-16</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">12</td>
+            <td class="headerCovTableEntry">13</td>
+            <td class="headerCovTableEntryHi">92.3 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #include &lt;iostream&gt;</a>
+<span class="lineNum">       2 </span>            : #include &lt;iow/io/aux/read_buffer.hpp&gt;
+<span class="lineNum">       3 </span>            : #include &lt;fas/testing.hpp&gt;
+<span class="lineNum">       4 </span>            : #include &lt;cstring&gt;
+<span class="lineNum">       5 </span>            : #include &lt;mutex&gt;
+<span class="lineNum">       6 </span>            : #include &lt;cstdlib&gt;
+<span class="lineNum">       7 </span>            : //#include &lt;ucommon/socket.h&gt;
+<span class="lineNum">       8 </span>            : 
+<span class="lineNum">       9 </span>            : typedef std::vector&lt;char&gt; data_type;
+<span class="lineNum">      10 </span>            : typedef std::string sep_type;
+<span class="lineNum">      11 </span>            : typedef ::iow::io::read_buffer read_buffer;
+<span class="lineNum">      12 </span>            : typedef read_buffer::options_type options;
+<span class="lineNum">      13 </span>            : 
+<span class="lineNum">      14 </span>            : UNIT(basic_test, &quot;&quot;)
+<span class="lineNum">      15 </span>            : {
+<span class="lineNum">      16 </span>            :   using namespace fas::testing;
+<span class="lineNum">      17 </span>            :   read_buffer buf;
+<span class="lineNum">      18 </span>            :   options opt;
+<span class="lineNum">      19 </span>            :   buf.get_options(opt);
+<span class="lineNum">      20 </span>            :   opt.bufsize = 3;
+<span class="lineNum">      21 </span>            :   buf.set_options(opt);
+<span class="lineNum">      22 </span>            :   
+<span class="lineNum">      23 </span>            :   //auto tmp = std::make_unique&lt;data_type&gt;(3);
+<span class="lineNum">      24 </span>            :   //! auto att = buf.attach(std::move(tmp));
+<span class="lineNum">      25 </span>            :    
+<span class="lineNum">      26 </span>            :   //t &lt;&lt; is_true&lt;assert&gt;( att == nullptr) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      27 </span>            :   
+<span class="lineNum">      28 </span>            :   // Еще один attach() без next() запрещен
+<span class="lineNum">      29 </span>            :   //tmp = std::make_unique&lt;data_type&gt;(3);
+<span class="lineNum">      30 </span>            :   //! att = buf.attach(std::move(tmp));
+<span class="lineNum">      31 </span>            :   //t &lt;&lt; is_true&lt;assert&gt;( att != nullptr) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      32 </span>            :   
+<span class="lineNum">      33 </span>            :   auto nxt1 = buf.next();
+<span class="lineNum">      34 </span>            :   t &lt;&lt; is_true&lt;assert&gt;( nxt1.first != nullptr) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      35 </span>            :   t &lt;&lt; is_true&lt;assert&gt;( nxt1.second == 3) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      36 </span>            :   std::strcpy(nxt1.first, &quot;ab&quot;);
+<span class="lineNum">      37 </span>            :   // Еще один next() без confirm() запрещен
+<span class="lineNum">      38 </span>            :   auto nxt2 = buf.next();
+<span class="lineNum">      39 </span>            :   t &lt;&lt; is_true&lt;assert&gt;( nxt2.first == nullptr) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      40 </span>            :   t &lt;&lt; is_true&lt;assert&gt;( nxt2.second == 0) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      41 </span>            :   
+<span class="lineNum">      42 </span>            :   // После next() разрешен attach()
+<span class="lineNum">      43 </span>            :   //tmp = std::make_unique&lt;data_type&gt;(3);
+<span class="lineNum">      44 </span>            :   //! att = buf.attach(std::move(tmp));
+<span class="lineNum">      45 </span>            :   //t &lt;&lt; is_true&lt;assert&gt;( att == nullptr) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      46 </span>            : 
+<span class="lineNum">      47 </span>            :   // Но еще один attach() без next() все еще запрещен
+<span class="lineNum">      48 </span>            :   //tmp = std::make_unique&lt;data_type&gt;(3);
+<span class="lineNum">      49 </span>            :   //! att = buf.attach(std::move(tmp));
+<span class="lineNum">      50 </span>            :   //t &lt;&lt; is_true&lt;assert&gt;( att != nullptr) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      51 </span>            :   
+<span class="lineNum">      52 </span>            :   nxt1.second = 2;
+<span class="lineNum">      53 </span>            :   nxt1.first -= 1;
+<span class="lineNum">      54 </span>            :   bool res = buf.confirm(nxt1);
+<span class="lineNum">      55 </span>            :   t &lt;&lt; is_false&lt;assert&gt;( res ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      56 </span>            :   nxt1.first += 2;
+<span class="lineNum">      57 </span>            :   res = buf.confirm(nxt1);
+<span class="lineNum">      58 </span>            :   t &lt;&lt; is_false&lt;assert&gt;( res ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      59 </span>            :   nxt1.first -= 1;
+<span class="lineNum">      60 </span>            :   nxt1.second = 4096 + 1;
+<span class="lineNum">      61 </span>            :   res = buf.confirm(nxt1);
+<span class="lineNum">      62 </span>            :   t &lt;&lt; is_false&lt;assert&gt;( res ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      63 </span>            :   nxt1.second = 2;
+<span class="lineNum">      64 </span>            :   res = buf.confirm(nxt1);
+<span class="lineNum">      65 </span>            :   t &lt;&lt; is_true&lt;assert&gt;( res ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      66 </span>            :   
+<span class="lineNum">      67 </span>            :   auto d = buf.detach();
+<span class="lineNum">      68 </span>            :   t &lt;&lt; is_true&lt;assert&gt;( d != nullptr) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      69 </span>            :   t &lt;&lt; stop;
+<span class="lineNum">      70 </span>            :   
+<span class="lineNum">      71 </span>            :   auto str = std::string(d-&gt;begin(), d-&gt;end());
+<span class="lineNum">      72 </span>            :   t &lt;&lt; equal_str&lt;assert&gt;( std::string(&quot;ab&quot;), str  ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      73 </span>            : }
+<span class="lineNum">      74 </span>            : 
+<span class="lineNum">      75 </span>            : template&lt;typename T&gt;
+<span class="lineNum">      76 </span>            : void test_buff1(T&amp; t, read_buffer&amp; buf, std::vector&lt;std::string&gt; reads, std::vector&lt;std::string&gt; chk)
+<span class="lineNum">      77 </span>            : {
+<span class="lineNum">      78 </span>            :   using namespace fas::testing;
+<span class="lineNum">      79 </span>            :   t &lt;&lt; message(&quot;test_buff1&quot;);
+<span class="lineNum">      80 </span>            :   std::string input;
+<span class="lineNum">      81 </span>            :   std::string result;
+<span class="lineNum">      82 </span>            :   std::vector&lt;std::string&gt; vectres;
+<span class="lineNum">      83 </span>            :   for (auto&amp; s: reads)
+<span class="lineNum">      84 </span>            :   {
+<span class="lineNum">      85 </span>            :     input+= s;
+<span class="lineNum">      86 </span>            :     auto p = buf.next();
+<span class="lineNum">      87 </span>            :     t &lt;&lt; is_true&lt;assert&gt;(s.size() &lt;= p.second) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      88 </span>            :     t &lt;&lt; stop;
+<span class="lineNum">      89 </span>            :     //std::strcpy( p.first, s.c_str());
+<span class="lineNum">      90 </span>            :     std::copy(s.begin(), s.end(), p.first );
+<span class="lineNum">      91 </span>            :     p.second = s.size();
+<span class="lineNum">      92 </span>            :     bool confirm = buf.confirm(p);
+<span class="lineNum">      93 </span>            :     t &lt;&lt; is_true&lt;assert&gt;( confirm ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      94 </span>            :     auto d = buf.detach();
+<span class="lineNum">      95 </span>            :     while ( d!=nullptr )
+<span class="lineNum">      96 </span>            :     {
+<span class="lineNum">      97 </span>            :       t &lt;&lt; is_true&lt;assert&gt;( !d-&gt;empty() ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">      98 </span>            :       t &lt;&lt; stop;
+<span class="lineNum">      99 </span>            :       auto str = std::string(d-&gt;begin(), d-&gt;end());
+<span class="lineNum">     100 </span>            :       vectres.push_back(str);
+<span class="lineNum">     101 </span>            :       result += vectres.back();
+<span class="lineNum">     102 </span>            :       d = buf.detach();
+<span class="lineNum">     103 </span>            :     }
+<span class="lineNum">     104 </span>            :   }
+<span class="lineNum">     105 </span>            :   t &lt;&lt; equal&lt;expect&gt;(input, result) &lt;&lt; input &lt;&lt; &quot;!=&quot; &lt;&lt; result &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     106 </span>            :   if ( !chk.empty() )
+<span class="lineNum">     107 </span>            :     t &lt;&lt; equal&lt;expect&gt;(chk, vectres) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     108 </span>            : }
+<span class="lineNum">     109 </span>            : 
+<span class="lineNum">     110 </span>            : template&lt;typename T&gt;
+<span class="lineNum">     111 </span>            : void test_buff2(T&amp; t, read_buffer&amp; buf, std::vector&lt;std::string&gt; reads, std::vector&lt;std::string&gt; chk)
+<span class="lineNum">     112 </span>            : {
+<span class="lineNum">     113 </span>            :   using namespace fas::testing;
+<span class="lineNum">     114 </span>            :   t &lt;&lt; message(&quot;test_buff2&quot;);
+<span class="lineNum">     115 </span>            :   std::string input;
+<span class="lineNum">     116 </span>            :   std::string result;
+<span class="lineNum">     117 </span>            :   for (auto&amp; s: reads)
+<span class="lineNum">     118 </span>            :   {
+<span class="lineNum">     119 </span>            :     input+= s;
+<span class="lineNum">     120 </span>            :     auto p = buf.next();
+<span class="lineNum">     121 </span>            :     t &lt;&lt; is_true&lt;assert&gt;(s.size() &lt;= p.second) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     122 </span>            :     t &lt;&lt; stop;
+<span class="lineNum">     123 </span>            :     //std::strcpy( p.first, s.c_str());
+<span class="lineNum">     124 </span>            :     std::copy(s.begin(), s.end(), p.first );
+<span class="lineNum">     125 </span>            :     p.second = s.size();
+<span class="lineNum">     126 </span>            :     bool confirm = buf.confirm(p);
+<span class="lineNum">     127 </span>            :     t &lt;&lt; is_true&lt;assert&gt;( confirm ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     128 </span>            :   }
+<span class="lineNum">     129 </span>            :   
+<span class="lineNum">     130 </span>            :   std::vector&lt;std::string&gt; vectres;
+<span class="lineNum">     131 </span>            :   auto d = buf.detach();
+<span class="lineNum">     132 </span>            :   while ( d!=nullptr )
+<span class="lineNum">     133 </span>            :   {
+<span class="lineNum">     134 </span>            :     t &lt;&lt; is_true&lt;assert&gt;( !d-&gt;empty() ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     135 </span>            :     t &lt;&lt; stop;
+<span class="lineNum">     136 </span>            :     auto str = std::string(d-&gt;begin(), d-&gt;end());
+<span class="lineNum">     137 </span>            :     vectres.push_back(str);
+<span class="lineNum">     138 </span>            :     result += str;
+<span class="lineNum">     139 </span>            :     d = buf.detach();
+<span class="lineNum">     140 </span>            :   }
+<span class="lineNum">     141 </span>            : 
+<span class="lineNum">     142 </span>            :   t &lt;&lt; equal&lt;expect&gt;(input, result) &lt;&lt; input &lt;&lt; &quot;!=&quot; &lt;&lt; result &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     143 </span>            :   if ( !chk.empty() )
+<span class="lineNum">     144 </span>            :   {
+<span class="lineNum">     145 </span>            :     options opt;
+<span class="lineNum">     146 </span>            :     buf.get_options(opt);
+<span class="lineNum">     147 </span>            :     if ( !opt.sep.empty() )
+<span class="lineNum">     148 </span>            :     {
+<span class="lineNum">     149 </span>            :       t &lt;&lt; equal&lt;expect&gt;(chk.size(), vectres.size()) &lt;&lt; FAS_FL;
+<span class="lineNum">     150 </span>            :       for (size_t i = 0 ; i != chk.size(); i++)
+<span class="lineNum">     151 </span>            :         if ( i &lt; vectres.size() )
+<span class="lineNum">     152 </span>            :         {
+<span class="lineNum">     153 </span>            :           t &lt;&lt; equal&lt;expect&gt;(chk[i], vectres[i]) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     154 </span>            :         }
+<span class="lineNum">     155 </span>            :     }
+<span class="lineNum">     156 </span>            :   }
+<span class="lineNum">     157 </span>            : }
+<span class="lineNum">     158 </span>            : 
+<span class="lineNum">     159 </span>            : 
+<span class="lineNum">     160 </span>            : template&lt;typename T&gt;
+<span class="lineNum">     161 </span>            : void do_detach(T&amp; t, read_buffer&amp; buf, std::vector&lt;std::string&gt;&amp; vectres, std::string&amp; result)
+<span class="lineNum">     162 </span>            : {
+<span class="lineNum">     163 </span>            :   using namespace fas::testing;
+<span class="lineNum">     164 </span>            :   auto d = buf.detach();
+<span class="lineNum">     165 </span>            :   while ( d!=nullptr )
+<span class="lineNum">     166 </span>            :   {
+<span class="lineNum">     167 </span>            :     t &lt;&lt; is_true&lt;assert&gt;( !d-&gt;empty() ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     168 </span>            :     t &lt;&lt; stop;
+<span class="lineNum">     169 </span>            :     auto str = std::string(d-&gt;begin(), d-&gt;end());
+<span class="lineNum">     170 </span>            :     //t &lt;&lt; message(&quot;detach: &quot;) &lt;&lt; str;
+<span class="lineNum">     171 </span>            :     //t &lt;&lt; message(&quot;-2-&quot;);
+<span class="lineNum">     172 </span>            :     vectres.push_back(str);
+<span class="lineNum">     173 </span>            :     result += vectres.back();
+<span class="lineNum">     174 </span>            :     d = buf.detach();
+<span class="lineNum">     175 </span>            :   }
+<span class="lineNum">     176 </span>            : }
+<span class="lineNum">     177 </span>            : 
+<span class="lineNum">     178 </span>            : template&lt;typename T&gt;
+<span class="lineNum">     179 </span>            : void test_buff3(T&amp; t, read_buffer&amp; buf, std::vector&lt;std::string&gt; reads, std::vector&lt;std::string&gt; chk)
+<span class="lineNum">     180 </span>            : {
+<span class="lineNum">     181 </span>            :   using namespace fas::testing;
+<span class="lineNum">     182 </span>            :   t &lt;&lt; message(&quot;test_buff3&quot;);
+<span class="lineNum">     183 </span>            :   std::string input;
+<span class="lineNum">     184 </span>            :   std::string result;
+<span class="lineNum">     185 </span>            :   std::vector&lt;std::string&gt; vectres;
+<span class="lineNum">     186 </span>            :   for (auto&amp; s: reads)
+<span class="lineNum">     187 </span>            :   {
+<span class="lineNum">     188 </span>            :     // t &lt;&lt; message(&quot;read:   &quot;) &lt;&lt; s ;
+<span class="lineNum">     189 </span>            :     // t &lt;&lt; message(&quot;-1-&quot;);
+<span class="lineNum">     190 </span>            :     input+= s;
+<span class="lineNum">     191 </span>            :     auto p = buf.next();
+<span class="lineNum">     192 </span>            :     t &lt;&lt; is_true&lt;assert&gt;(s.size() &lt;= p.second) &lt;&lt; s.size() &lt;&lt; &quot; &gt; &quot; &lt;&lt; p.second &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     193 </span>            :     t &lt;&lt; stop;
+<span class="lineNum">     194 </span>            :     //std::strcpy( p.first, s.c_str());
+<span class="lineNum">     195 </span>            :     std::copy(s.begin(), s.end(), p.first );
+<span class="lineNum">     196 </span>            :     p.second = s.size();
+<span class="lineNum">     197 </span>            :     do_detach(t, buf, vectres, result);
+<span class="lineNum">     198 </span>            :     bool confirm = buf.confirm(p);
+<span class="lineNum">     199 </span>            :     t &lt;&lt; is_true&lt;assert&gt;( confirm ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     200 </span>            :     t &lt;&lt; stop;
+<span class="lineNum">     201 </span>            :   }
+<span class="lineNum">     202 </span>            :   do_detach(t, buf, vectres, result);
+<span class="lineNum">     203 </span>            :   t &lt;&lt; equal&lt;expect&gt;(input, result) &lt;&lt; input &lt;&lt; &quot;!=&quot; &lt;&lt; result &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     204 </span>            :   if ( !chk.empty() )
+<span class="lineNum">     205 </span>            :     t &lt;&lt; equal&lt;expect&gt;(chk, vectres) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     206 </span>            : }
+<span class="lineNum">     207 </span>            : 
+<span class="lineNum">     208 </span>            : template&lt;typename T&gt;
+<span class="lineNum">     209 </span>            : void test_buff4(T&amp; t, read_buffer&amp; buf, std::vector&lt;std::string&gt; reads, std::vector&lt;std::string&gt; chk)
+<span class="lineNum">     210 </span>            : {
+<span class="lineNum">     211 </span>            :   using namespace fas::testing;
+<span class="lineNum">     212 </span>            :   t &lt;&lt; message(&quot;test_buff4&quot;);
+<span class="lineNum">     213 </span>            :   std::string input;
+<span class="lineNum">     214 </span>            :   std::string result;
+<span class="lineNum">     215 </span>            :   std::vector&lt;std::string&gt; vectres;
+<span class="lineNum">     216 </span>            :   auto p = buf.next();
+<span class="lineNum">     217 </span>            :   for (auto&amp; s: reads)
+<span class="lineNum">     218 </span>            :   {
+<span class="lineNum">     219 </span>            :     input += s;
+<span class="lineNum">     220 </span>            :     t &lt;&lt; is_true&lt;assert&gt;(s.size() &lt;= p.second) &lt;&lt; s.size() &lt;&lt; &quot; &gt; &quot; &lt;&lt; p.second &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     221 </span>            :     t &lt;&lt; stop;
+<span class="lineNum">     222 </span>            :     //std::strcpy( p.first, s.c_str());
+<span class="lineNum">     223 </span>            :     std::copy(s.begin(), s.end(), p.first );
+<span class="lineNum">     224 </span>            :     p.second = s.size();
+<span class="lineNum">     225 </span>            :     
+<span class="lineNum">     226 </span>            :     bool confirm = buf.confirm(p);
+<span class="lineNum">     227 </span>            :     t &lt;&lt; is_true&lt;assert&gt;( confirm ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     228 </span>            :     t &lt;&lt; stop;
+<span class="lineNum">     229 </span>            :     p = buf.next();
+<span class="lineNum">     230 </span>            :     do_detach(t, buf, vectres, result);
+<span class="lineNum">     231 </span>            :   }
+<span class="lineNum">     232 </span>            :   
+<span class="lineNum">     233 </span>            :   p.second = 0;
+<span class="lineNum">     234 </span>            :   bool confirm = buf.confirm(p);
+<span class="lineNum">     235 </span>            :   t &lt;&lt; is_true&lt;assert&gt;( confirm ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     236 </span>            :   t &lt;&lt; stop;
+<span class="lineNum">     237 </span>            :   
+<span class="lineNum">     238 </span>            :   do_detach(t, buf, vectres, result);
+<span class="lineNum">     239 </span>            :   t &lt;&lt; equal&lt;expect&gt;(input, result) &lt;&lt; input &lt;&lt; &quot;!=&quot; &lt;&lt; result &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     240 </span>            :   if ( !chk.empty() )
+<span class="lineNum">     241 </span>            :     t &lt;&lt; equal&lt;expect&gt;(chk, vectres) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     242 </span>            :   t &lt;&lt; equal&lt;assert, size_t&gt;(buf.size(), 0) &lt;&lt; &quot;buf.size()==&quot; &lt;&lt; buf.size() &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     243 </span>            :   t &lt;&lt; equal&lt;assert, size_t&gt;(buf.count(), 0) &lt;&lt; &quot;buf.count()==&quot; &lt;&lt; buf.count() &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     244 </span>            : }
+<span class="lineNum">     245 </span>            : 
+<span class="lineNum">     246 </span>            : 
+<span class="lineNum">     247 </span>            : template&lt;typename T&gt;
+<span class="lineNum">     248 </span>            : void test_buff(T&amp; t, read_buffer&amp; buf, const std::vector&lt;std::string&gt;&amp; reads, const std::vector&lt;std::string&gt;&amp; chk)
+<span class="lineNum">     249 </span>            : {
+<span class="lineNum">     250 </span>            :   test_buff1(t, buf, reads, chk);
+<span class="lineNum">     251 </span>            :   test_buff2(t, buf, reads, chk);
+<span class="lineNum">     252 </span>            :   test_buff3(t, buf, reads, chk);
+<span class="lineNum">     253 </span>            :   test_buff4(t, buf, reads, chk);
+<span class="lineNum">     254 </span>            : }
+<span class="lineNum">     255 </span>            : 
+<span class="lineNum">     256 </span>            : /*
+<span class="lineNum">     257 </span>            : template&lt;typename T&gt;
+<span class="lineNum">     258 </span>            : void test_buff0(T&amp; t, read_buffer&amp; buf, std::vector&lt;std::string&gt; reads, std::vector&lt;std::string&gt; chk)
+<span class="lineNum">     259 </span>            : {
+<span class="lineNum">     260 </span>            :   using namespace fas::testing;
+<span class="lineNum">     261 </span>            :   t &lt;&lt; message(&quot;test_buff0&quot;);
+<span class="lineNum">     262 </span>            :   std::string result;
+<span class="lineNum">     263 </span>            :   std::vector&lt;std::string&gt; vectres;
+<span class="lineNum">     264 </span>            :   auto p = buf.next();
+<span class="lineNum">     265 </span>            :   for (auto&amp; s: reads)
+<span class="lineNum">     266 </span>            :   {
+<span class="lineNum">     267 </span>            :     t &lt;&lt; is_true&lt;assert&gt;(s.size() &lt;= p.second) &lt;&lt; s.size() &lt;&lt; &quot; &gt; &quot; &lt;&lt; p.second &lt;&lt; FAS_FL;
+<span class="lineNum">     268 </span>            :     t &lt;&lt; stop;
+<span class="lineNum">     269 </span>            :     std::strcpy( p.first, s.c_str());
+<span class="lineNum">     270 </span>            :     p.second = s.size();
+<span class="lineNum">     271 </span>            :     
+<span class="lineNum">     272 </span>            :     bool confirm = buf.confirm(p);
+<span class="lineNum">     273 </span>            :     t &lt;&lt; is_true&lt;assert&gt;( confirm ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     274 </span>            :     t &lt;&lt; stop;
+<span class="lineNum">     275 </span>            :     p = buf.next();
+<span class="lineNum">     276 </span>            :     do_detach(t, buf, vectres, result);
+<span class="lineNum">     277 </span>            :   }
+<span class="lineNum">     278 </span>            :   
+<span class="lineNum">     279 </span>            :   p.second = 0;
+<span class="lineNum">     280 </span>            :   bool confirm = buf.confirm(p);
+<span class="lineNum">     281 </span>            :   t &lt;&lt; is_true&lt;assert&gt;( confirm ) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     282 </span>            :   t &lt;&lt; stop;
+<span class="lineNum">     283 </span>            :   
+<span class="lineNum">     284 </span>            :   do_detach(t, buf, vectres, result);
+<span class="lineNum">     285 </span>            :   t &lt;&lt; equal&lt;expect&gt;(input, result) &lt;&lt; input &lt;&lt; &quot;!=&quot; &lt;&lt; result &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     286 </span>            :   if ( !chk.empty() )
+<span class="lineNum">     287 </span>            :     t &lt;&lt; equal&lt;expect&gt;(chk, vectres) &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     288 </span>            :   t &lt;&lt; equal&lt;assert, size_t&gt;(buf.size(), 0) &lt;&lt; &quot;buf.size()==&quot; &lt;&lt; buf.size() &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     289 </span>            :   t &lt;&lt; equal&lt;assert, size_t&gt;(buf.count(), 0) &lt;&lt; &quot;buf.count()==&quot; &lt;&lt; buf.count() &lt;&lt; FAS_TESTING_FILE_LINE;
+<span class="lineNum">     290 </span>            : }
+<span class="lineNum">     291 </span>            : */
+<span class="lineNum">     292 </span>            : 
+<span class="lineNum">     293 </span>            : UNIT(basic_sep0, &quot;&quot;)
+<span class="lineNum">     294 </span>            : {
+<span class="lineNum">     295 </span>            :   using namespace fas::testing;
+<span class="lineNum">     296 </span>            :   read_buffer buf;
+<span class="lineNum">     297 </span>            :   options opt;
+<span class="lineNum">     298 </span>            :   buf.get_options(opt);
+<span class="lineNum">     299 </span>            :   opt.sep=&quot;&quot;;
+<span class="lineNum">     300 </span>            :   opt.bufsize = 6;
+<span class="lineNum">     301 </span>            :   opt.minbuf = 6;
+<span class="lineNum">     302 </span>            :   buf.set_options(opt);
+<span class="lineNum">     303 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     304 </span>            :             {&quot;aa|&quot;, &quot;|&quot;, &quot;bb|&quot;, &quot;|cc|&quot;, &quot;|dd&quot;, &quot;||ee||&quot;}, 
+<span class="lineNum">     305 </span>            :             {&quot;aa|&quot;, &quot;|&quot;, &quot;bb|&quot;, &quot;|cc|&quot;, &quot;|dd&quot;, &quot;||ee||&quot;}
+<span class="lineNum">     306 </span>            :            );
+<span class="lineNum">     307 </span>            :   
+<span class="lineNum">     308 </span>            :   opt.bufsize = 1;
+<span class="lineNum">     309 </span>            :   opt.minbuf = 1;
+<span class="lineNum">     310 </span>            :   buf.set_options(opt);
+<span class="lineNum">     311 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     312 </span>            :             {&quot;a&quot;, &quot;a&quot;, &quot;|&quot;, &quot;|&quot;, &quot;b&quot;, &quot;b&quot;, &quot;|&quot;, &quot;|&quot;, &quot;c&quot;, &quot;c&quot;, &quot;|&quot;, &quot;|&quot;, &quot;d&quot;, &quot;d&quot;, &quot;|&quot;, &quot;|&quot;, &quot;e&quot;, &quot;e&quot;, &quot;|&quot;, &quot;|&quot;},
+<span class="lineNum">     313 </span>            :             {&quot;a&quot;, &quot;a&quot;, &quot;|&quot;, &quot;|&quot;, &quot;b&quot;, &quot;b&quot;, &quot;|&quot;, &quot;|&quot;, &quot;c&quot;, &quot;c&quot;, &quot;|&quot;, &quot;|&quot;, &quot;d&quot;, &quot;d&quot;, &quot;|&quot;, &quot;|&quot;, &quot;e&quot;, &quot;e&quot;, &quot;|&quot;, &quot;|&quot;}
+<span class="lineNum">     314 </span>            :            );
+<span class="lineNum">     315 </span>            :   
+<span class="lineNum">     316 </span>            :   opt.bufsize = 2;
+<span class="lineNum">     317 </span>            :   opt.minbuf = 2;
+<span class="lineNum">     318 </span>            :   buf.set_options(opt);
+<span class="lineNum">     319 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     320 </span>            :             {&quot;aa&quot;, &quot;||&quot;, &quot;bb&quot;, &quot;||&quot;, &quot;cc&quot;, &quot;||&quot;, &quot;dd&quot;, &quot;||&quot;, &quot;ee&quot;, &quot;||&quot;},
+<span class="lineNum">     321 </span>            :             {&quot;aa&quot;, &quot;||&quot;, &quot;bb&quot;, &quot;||&quot;, &quot;cc&quot;, &quot;||&quot;, &quot;dd&quot;, &quot;||&quot;, &quot;ee&quot;, &quot;||&quot;}
+<span class="lineNum">     322 </span>            :            );
+<span class="lineNum">     323 </span>            :   
+<span class="lineNum">     324 </span>            : }
+<span class="lineNum">     325 </span>            : 
+<span class="lineNum">     326 </span>            : UNIT(basic_sep1, &quot;&quot;)
+<span class="lineNum">     327 </span>            : {
+<span class="lineNum">     328 </span>            :   using namespace fas::testing;
+<span class="lineNum">     329 </span>            :   read_buffer buf;
+<span class="lineNum">     330 </span>            :   options opt;
+<span class="lineNum">     331 </span>            :   buf.get_options(opt);
+<span class="lineNum">     332 </span>            :   opt.sep=&quot;|&quot;;
+<span class="lineNum">     333 </span>            :   opt.bufsize = 6;
+<span class="lineNum">     334 </span>            :   opt.minbuf = 6;
+<span class="lineNum">     335 </span>            :   buf.set_options(opt);
+<span class="lineNum">     336 </span>            :   
+<span class="lineNum">     337 </span>            :   
+<span class="lineNum">     338 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     339 </span>            :             {&quot;aa|&quot;, &quot;|&quot;, &quot;bb|&quot;, &quot;|cc|&quot;, &quot;|dd&quot;, &quot;||ee||&quot;}, 
+<span class="lineNum">     340 </span>            :             {&quot;aa|&quot;, &quot;|&quot;, &quot;bb|&quot;, &quot;|&quot;, &quot;cc|&quot;, &quot;|&quot;, &quot;dd|&quot;, &quot;|&quot;, &quot;ee|&quot;, &quot;|&quot;}
+<span class="lineNum">     341 </span>            :            );
+<span class="lineNum">     342 </span>            :   
+<span class="lineNum">     343 </span>            :   
+<span class="lineNum">     344 </span>            :   
+<span class="lineNum">     345 </span>            :   opt.bufsize = 1;
+<span class="lineNum">     346 </span>            :   opt.minbuf = 1;
+<span class="lineNum">     347 </span>            :   buf.set_options(opt);
+<span class="lineNum">     348 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     349 </span>            :             {&quot;a&quot;, &quot;a&quot;, &quot;|&quot;, &quot;|&quot;, &quot;b&quot;, &quot;b&quot;, &quot;|&quot;, &quot;|&quot;, &quot;c&quot;, &quot;c&quot;, &quot;|&quot;, &quot;|&quot;, &quot;d&quot;, &quot;d&quot;, &quot;|&quot;, &quot;|&quot;, &quot;e&quot;, &quot;e&quot;, &quot;|&quot;, &quot;|&quot;},
+<span class="lineNum">     350 </span>            :             {&quot;aa|&quot;, &quot;|&quot;, &quot;bb|&quot;, &quot;|&quot;, &quot;cc|&quot;, &quot;|&quot;, &quot;dd|&quot;, &quot;|&quot;, &quot;ee|&quot;, &quot;|&quot;}
+<span class="lineNum">     351 </span>            :            );
+<span class="lineNum">     352 </span>            :   
+<span class="lineNum">     353 </span>            :   opt.bufsize = 2;
+<span class="lineNum">     354 </span>            :   opt.minbuf = 2;
+<span class="lineNum">     355 </span>            :   buf.set_options(opt);
+<span class="lineNum">     356 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     357 </span>            :             {&quot;aa&quot;, &quot;||&quot;, &quot;bb&quot;, &quot;||&quot;, &quot;cc&quot;, &quot;||&quot;, &quot;dd&quot;, &quot;||&quot;, &quot;ee&quot;, &quot;||&quot;},
+<span class="lineNum">     358 </span>            :             {&quot;aa|&quot;, &quot;|&quot;, &quot;bb|&quot;, &quot;|&quot;, &quot;cc|&quot;, &quot;|&quot;, &quot;dd|&quot;, &quot;|&quot;, &quot;ee|&quot;, &quot;|&quot;}
+<span class="lineNum">     359 </span>            :            );
+<span class="lineNum">     360 </span>            : }
+<span class="lineNum">     361 </span>            : 
+<span class="lineNum">     362 </span>            : 
+<span class="lineNum">     363 </span>            : UNIT(basic_sep2, &quot;&quot;)
+<span class="lineNum">     364 </span>            : {
+<span class="lineNum">     365 </span>            :   using namespace fas::testing;
+<span class="lineNum">     366 </span>            :     read_buffer buf;
+<span class="lineNum">     367 </span>            :   options opt;
+<span class="lineNum">     368 </span>            :   buf.get_options(opt);
+<span class="lineNum">     369 </span>            :   opt.sep=&quot;##&quot;;
+<span class="lineNum">     370 </span>            :   opt.bufsize = 10;
+<span class="lineNum">     371 </span>            :   opt.minbuf = 10;
+<span class="lineNum">     372 </span>            :   buf.set_options(opt);
+<span class="lineNum">     373 </span>            :   
+<span class="lineNum">     374 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     375 </span>            :             {&quot;aa##&quot;, &quot;##&quot;, &quot;bb##&quot;, &quot;##cc##&quot;, &quot;##dd&quot;, &quot;####ee####&quot;}, 
+<span class="lineNum">     376 </span>            :             {&quot;aa##&quot;, &quot;##&quot;, &quot;bb##&quot;, &quot;##&quot;, &quot;cc##&quot;, &quot;##&quot;, &quot;dd##&quot;, &quot;##&quot;, &quot;ee##&quot;, &quot;##&quot;}
+<span class="lineNum">     377 </span>            :            );
+<span class="lineNum">     378 </span>            :   opt.bufsize = 1;
+<span class="lineNum">     379 </span>            :   opt.minbuf = 1;
+<span class="lineNum">     380 </span>            :   buf.set_options(opt);
+<span class="lineNum">     381 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     382 </span>            :             {&quot;a&quot;, &quot;a&quot;, &quot;#&quot;,&quot;#&quot;, &quot;#&quot;,&quot;#&quot;, &quot;b&quot;, &quot;b&quot;, &quot;#&quot;,&quot;#&quot;, &quot;#&quot;,&quot;#&quot;, &quot;c&quot;, &quot;c&quot;, &quot;#&quot;,&quot;#&quot;, &quot;#&quot;,&quot;#&quot;, &quot;d&quot;, &quot;d&quot;, &quot;#&quot;,&quot;#&quot;, &quot;#&quot;,&quot;#&quot;, &quot;e&quot;, &quot;e&quot;, &quot;#&quot;,&quot;#&quot;, &quot;#&quot;,&quot;#&quot;},
+<span class="lineNum">     383 </span>            :             {&quot;aa##&quot;, &quot;##&quot;, &quot;bb##&quot;, &quot;##&quot;, &quot;cc##&quot;, &quot;##&quot;, &quot;dd##&quot;, &quot;##&quot;, &quot;ee##&quot;, &quot;##&quot;}
+<span class="lineNum">     384 </span>            :            );
+<span class="lineNum">     385 </span>            :            
+<span class="lineNum">     386 </span>            :   opt.bufsize = 4;
+<span class="lineNum">     387 </span>            :   opt.minbuf = 4;
+<span class="lineNum">     388 </span>            :   buf.set_options(opt);
+<span class="lineNum">     389 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     390 </span>            :             {&quot;aa&quot;, &quot;####&quot;, &quot;bb&quot;, &quot;####&quot;, &quot;cc&quot;, &quot;####&quot;, &quot;dd&quot;, &quot;####&quot;, &quot;ee&quot;, &quot;####&quot;},
+<span class="lineNum">     391 </span>            :             {&quot;aa##&quot;, &quot;##&quot;, &quot;bb##&quot;, &quot;##&quot;, &quot;cc##&quot;, &quot;##&quot;, &quot;dd##&quot;, &quot;##&quot;, &quot;ee##&quot;, &quot;##&quot;}
+<span class="lineNum">     392 </span>            :            );
+<span class="lineNum">     393 </span>            : }
+<span class="lineNum">     394 </span>            : 
+<span class="lineNum">     395 </span>            : UNIT(basic_sep3, &quot;&quot;)
+<span class="lineNum">     396 </span>            : {
+<span class="lineNum">     397 </span>            :   using namespace fas::testing;
+<span class="lineNum">     398 </span>            :   read_buffer buf;
+<span class="lineNum">     399 </span>            :   options opt;
+<span class="lineNum">     400 </span>            :   buf.get_options(opt);
+<span class="lineNum">     401 </span>            :   opt.sep=&quot;@@@&quot;;
+<span class="lineNum">     402 </span>            :   opt.bufsize = 20;
+<span class="lineNum">     403 </span>            :   opt.minbuf = 20;
+<span class="lineNum">     404 </span>            :   buf.set_options(opt);
+<span class="lineNum">     405 </span>            :   
+<span class="lineNum">     406 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     407 </span>            :             {&quot;aa@@@&quot;, &quot;@@@&quot;, &quot;bb@@@&quot;, &quot;@@@cc@@@&quot;, &quot;@@@dd&quot;, &quot;@@@@@@ee@@@@@@&quot;}, 
+<span class="lineNum">     408 </span>            :             {&quot;aa@@@&quot;, &quot;@@@&quot;, &quot;bb@@@&quot;, &quot;@@@&quot;, &quot;cc@@@&quot;, &quot;@@@&quot;, &quot;dd@@@&quot;, &quot;@@@&quot;, &quot;ee@@@&quot;, &quot;@@@&quot;}
+<span class="lineNum">     409 </span>            :            );
+<span class="lineNum">     410 </span>            :   
+<span class="lineNum">     411 </span>            :   
+<span class="lineNum">     412 </span>            :   
+<span class="lineNum">     413 </span>            :   opt.bufsize = 1;
+<span class="lineNum">     414 </span>            :   opt.minbuf = 1;
+<span class="lineNum">     415 </span>            :   buf.set_options(opt);
+<span class="lineNum">     416 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     417 </span>            :             {&quot;a&quot;, &quot;a&quot;, &quot;@&quot;,&quot;@&quot;,&quot;@&quot;, &quot;@&quot;,&quot;@&quot;,&quot;@&quot;, &quot;b&quot;, &quot;b&quot;, &quot;@&quot;, &quot;@&quot;,&quot;@&quot;, &quot;@&quot;, &quot;@&quot;,&quot;@&quot;, &quot;c&quot;, &quot;c&quot;, &quot;@&quot;, &quot;@&quot;,&quot;@&quot;, &quot;@&quot;, &quot;@&quot;,&quot;@&quot;, &quot;d&quot;, &quot;d&quot;, &quot;@&quot;, &quot;@&quot;,&quot;@&quot;, &quot;@&quot;, &quot;@&quot;,&quot;@&quot;, &quot;e&quot;, &quot;e&quot;, &quot;@&quot;,&quot;@&quot;,&quot;@&quot;, &quot;@&quot;,&quot;@&quot;,&quot;@&quot;},
+<span class="lineNum">     418 </span>            :             {&quot;aa@@@&quot;, &quot;@@@&quot;, &quot;bb@@@&quot;, &quot;@@@&quot;, &quot;cc@@@&quot;, &quot;@@@&quot;, &quot;dd@@@&quot;, &quot;@@@&quot;, &quot;ee@@@&quot;, &quot;@@@&quot;}
+<span class="lineNum">     419 </span>            :            );
+<span class="lineNum">     420 </span>            :            
+<span class="lineNum">     421 </span>            :   opt.bufsize = 6;
+<span class="lineNum">     422 </span>            :   opt.minbuf = 6;
+<span class="lineNum">     423 </span>            :   buf.set_options(opt);
+<span class="lineNum">     424 </span>            :   test_buff(t, buf, 
+<span class="lineNum">     425 </span>            :             {&quot;aa&quot;, &quot;@@@@@@&quot;, &quot;bb&quot;, &quot;@@@@@@&quot;, &quot;cc&quot;, &quot;@@@@@@&quot;, &quot;dd&quot;, &quot;@@@@@@&quot;, &quot;ee&quot;, &quot;@@@@@@&quot;},
+<span class="lineNum">     426 </span>            :             {&quot;aa@@@&quot;, &quot;@@@&quot;, &quot;bb@@@&quot;, &quot;@@@&quot;, &quot;cc@@@&quot;, &quot;@@@&quot;, &quot;dd@@@&quot;, &quot;@@@&quot;, &quot;ee@@@&quot;, &quot;@@@&quot;}
+<span class="lineNum">     427 </span>            :            );
+<span class="lineNum">     428 </span>            : }
+<span class="lineNum">     429 </span>            : 
+<span class="lineNum">     430 </span>            : UNIT(empty_test, &quot;Ошибка без сепаратора (работает через раз)&quot;)
+<span class="lineNum">     431 </span>            : {
+<span class="lineNum">     432 </span>            :   using namespace fas::testing;
+<span class="lineNum">     433 </span>            :   read_buffer buf;
+<span class="lineNum">     434 </span>            :   options opt;
+<span class="lineNum">     435 </span>            :   buf.get_options(opt);
+<span class="lineNum">     436 </span>            :   opt.sep=&quot;&quot;;
+<span class="lineNum">     437 </span>            :   buf.set_options(opt);
+<span class="lineNum">     438 </span>            :   std::string req1 = &quot;{запрос номер одын}&quot;;
+<span class="lineNum">     439 </span>            :   std::string req2 = &quot;{запрос номер два}&quot;;
+<span class="lineNum">     440 </span>            :   auto p = buf.next();
+<span class="lineNum">     441 </span>            :   std::copy(req1.begin(), req1.end(), p.first);
+<span class="lineNum">     442 </span>            :   p.second = req1.size();
+<span class="lineNum">     443 </span>            :   buf.confirm(p);
+<span class="lineNum">     444 </span>            :   auto res = buf.detach();
+<span class="lineNum">     445 </span>            :   t &lt;&lt; equal&lt;expect, std::string&gt;( req1, std::string(res-&gt;begin(), res-&gt;end()) ) &lt;&lt; FAS_FL;
+<span class="lineNum">     446 </span>            :   res = buf.detach();
+<span class="lineNum">     447 </span>            :   t &lt;&lt; equal&lt;expect&gt;( res, nullptr ) &lt;&lt; FAS_FL;
+<span class="lineNum">     448 </span>            :   p = buf.next();
+<span class="lineNum">     449 </span>            :   std::copy(req2.begin(), req2.end(), p.first);
+<span class="lineNum">     450 </span>            :   p.second = req2.size();
+<span class="lineNum">     451 </span>            :   buf.confirm(p);
+<span class="lineNum">     452 </span>            :   res = buf.detach();
+<span class="lineNum">     453 </span>            :   t &lt;&lt; equal&lt;expect, std::string&gt;( req2, std::string(res-&gt;begin(), res-&gt;end()) ) &lt;&lt; FAS_FL;
+<a name="454"><span class="lineNum">     454 </span>            : }</a>
+<span class="lineNum">     455 </span>            : 
+<span class="lineNum">     456 </span><span class="lineCov">          3 : UNIT(bug_test, &quot;Ошибка склеивания с мусором&quot;)</span>
+<span class="lineNum">     457 </span>            : {
+<span class="lineNum">     458 </span>            :   using namespace fas::testing;
+<span class="lineNum">     459 </span><span class="lineCov">          1 :   t &lt;&lt; nothing;</span>
+<span class="lineNum">     460 </span><span class="lineCov">          1 :   read_buffer buf;</span>
+<span class="lineNum">     461 </span><span class="lineCov">          2 :   options opt;</span>
+<span class="lineNum">     462 </span><span class="lineCov">          1 :   buf.get_options(opt);</span>
+<span class="lineNum">     463 </span><span class="lineCov">          1 :   opt.sep=&quot;\r\n&quot;;</span>
+<span class="lineNum">     464 </span><span class="lineCov">          1 :   opt.trimsep = true;</span>
+<span class="lineNum">     465 </span><span class="lineCov">          1 :   opt.minbuf = 0;</span>
+<span class="lineNum">     466 </span><span class="lineCov">          1 :   buf.set_options(opt);</span>
+<span class="lineNum">     467 </span>            : 
+<span class="lineNum">     468 </span><span class="lineCov">          1 :   auto p = buf.next();</span>
+<span class="lineNum">     469 </span><span class="lineCov">      10001 :   for (int i = 0; i!=10000; ++i)</span>
+<a name="470"><span class="lineNum">     470 </span>            :   {</a>
+<span class="lineNum">     471 </span><span class="lineCov">      10000 :     std::string req;</span>
+<span class="lineNum">     472 </span><span class="lineCov">    5121153 :     std::generate_n( std::back_inserter(req), 1 + std::rand()%1024, [](){ return static_cast&lt;char&gt;('0' + std::rand()%32); });</span>
+<span class="lineNum">     473 </span><span class="lineCov">      10000 :     req+=&quot;\r\n&quot;;</span>
+<span class="lineNum">     474 </span><span class="lineCov">      10000 :     t &lt;&lt; message(&quot;size=&quot;) &lt;&lt; p.second &lt;&lt; &quot; req.size=&quot; &lt;&lt; req.size();</span>
+<span class="lineNum">     475 </span><span class="lineCov">      10000 :     t &lt;&lt; message(&quot;STRING [&quot;) &lt;&lt; req &lt;&lt; &quot;] i=&quot; &lt;&lt; i  ;</span>
+<span class="lineNum">     476 </span><span class="lineCov">      10000 :     std::copy(req.begin(), req.end(), p.first);</span>
+<span class="lineNum">     477 </span><span class="lineCov">      10000 :     p.second = req.size();</span>
+<span class="lineNum">     478 </span><span class="lineCov">      10000 :     buf.confirm(p);</span>
+<span class="lineNum">     479 </span><span class="lineCov">      10000 :     p = buf.next();</span>
+<span class="lineNum">     480 </span><span class="lineCov">      20000 :     auto res = buf.detach();</span>
+<span class="lineNum">     481 </span><span class="lineCov">      10000 :     t &lt;&lt; not_equal&lt;assert&gt;(res, nullptr) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     482 </span><span class="lineCov">      10000 :     t &lt;&lt; stop;</span>
+<span class="lineNum">     483 </span><span class="lineCov">      10000 :     req.resize(req.size() - 2);</span>
+<span class="lineNum">     484 </span><span class="lineCov">      10000 :     t &lt;&lt; equal&lt;expect, std::string&gt;( req, std::string(res-&gt;begin(), res-&gt;end()) ) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     485 </span>            :   }
+<span class="lineNum">     486 </span>            :   
+<span class="lineNum">     487 </span><span class="lineCov">          1 :   opt.sep=&quot;\r\n&quot;;</span>
+<span class="lineNum">     488 </span><span class="lineCov">          1 :   opt.trimsep = true;</span>
+<span class="lineNum">     489 </span><span class="lineCov">          1 :   buf.set_options(opt);</span>
+<span class="lineNum">     490 </span>            : 
+<span class="lineNum">     491 </span>            : 
+<span class="lineNum">     492 </span><span class="lineCov">          2 :   std::string req2 = &quot;{'jsonrpc':'2.0'\r\n&quot;;</span>
+<span class="lineNum">     493 </span><span class="lineCov">          2 :   std::string req1 = &quot;{'jsonrpc':'2.0','method':'insert','params':{'table':'new_contact','fields':{'platform':['web-site'],'partner':['mambaru'],'link':['none'],'age_from':62,'age_to':62,'gender_from':['F'],'gender_to':['M'],'country_from':['Russian Federation'],'country_to':['Russian Federation']},'values':[1635296312,1645340482]}}\r\n&quot;;</span>
+<span class="lineNum">     494 </span>            :   
+<span class="lineNum">     495 </span>            :   //p = buf.next();
+<span class="lineNum">     496 </span>            :   //t &lt;&lt; message(&quot;size=&quot;) &lt;&lt; p.second &lt;&lt; &quot; req1.size=&quot; &lt;&lt; req1.size();
+<span class="lineNum">     497 </span>            :   //t &lt;&lt; message(&quot;-&quot;);
+<span class="lineNum">     498 </span><span class="lineCov">          1 :   std::copy(req1.begin(), req1.end(), p.first);</span>
+<span class="lineNum">     499 </span><span class="lineCov">          1 :   p.second = req1.size();</span>
+<span class="lineNum">     500 </span><span class="lineCov">          1 :   buf.confirm(p);</span>
+<span class="lineNum">     501 </span>            : 
+<span class="lineNum">     502 </span><span class="lineCov">          1 :   p = buf.next();</span>
+<span class="lineNum">     503 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;size=&quot;) &lt;&lt; p.second &lt;&lt; &quot; req2.size=&quot; &lt;&lt; req1.size();</span>
+<span class="lineNum">     504 </span><span class="lineCov">          1 :   std::copy(req2.begin(), req2.end(), p.first);</span>
+<span class="lineNum">     505 </span><span class="lineCov">          1 :   p.second = req2.size();</span>
+<span class="lineNum">     506 </span><span class="lineCov">          1 :   buf.confirm(p);</span>
+<span class="lineNum">     507 </span>            : 
+<span class="lineNum">     508 </span><span class="lineCov">          2 :   auto res = buf.detach();</span>
+<span class="lineNum">     509 </span><span class="lineCov">          1 :   t &lt;&lt; not_equal&lt;assert&gt;(res, nullptr) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     510 </span><span class="lineCov">          1 :   t &lt;&lt; stop;</span>
+<span class="lineNum">     511 </span><span class="lineCov">          1 :   req1.resize(req1.size() - 2);</span>
+<span class="lineNum">     512 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect, std::string&gt;( req1, std::string(res-&gt;begin(), res-&gt;end()) ) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     513 </span>            : 
+<span class="lineNum">     514 </span><span class="lineCov">          1 :   res = buf.detach();</span>
+<span class="lineNum">     515 </span><span class="lineCov">          1 :   t &lt;&lt; not_equal&lt;assert&gt;(res, nullptr) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     516 </span><span class="lineCov">          1 :   t &lt;&lt; stop;</span>
+<span class="lineNum">     517 </span><span class="lineCov">          1 :   req2.resize(req2.size() - 2);</span>
+<span class="lineNum">     518 </span><span class="lineCov">          1 :   t &lt;&lt; equal&lt;expect, std::string&gt;( req2, std::string(res-&gt;begin(), res-&gt;end()) ) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     519 </span>            : 
+<span class="lineNum">     520 </span><span class="lineCov">          1 :   res = buf.detach();</span>
+<span class="lineNum">     521 </span><span class="lineCov">          2 :   t &lt;&lt; equal&lt;expect&gt;( res, nullptr ) &lt;&lt; FAS_FL;</span>
+<span class="lineNum">     522 </span><span class="lineCov">          1 : }</span>
+<a name="523"><span class="lineNum">     523 </span>            : </a>
+<span class="lineNum">     524 </span>            : 
+<span class="lineNum">     525 </span><span class="lineCov">          1 : BEGIN_SUITE(read_buffers, &quot;read_buffer suite&quot;)</span>
+<span class="lineNum">     526 </span>            :   /*ADD_UNIT(basic_test)
+<span class="lineNum">     527 </span>            :   ADD_UNIT(basic_sep0)
+<span class="lineNum">     528 </span>            :   ADD_UNIT(basic_sep1)
+<span class="lineNum">     529 </span>            :   ADD_UNIT(basic_sep2)
+<span class="lineNum">     530 </span>            :   ADD_UNIT(basic_sep3)
+<span class="lineNum">     531 </span>            :   ADD_UNIT(empty_test)
+<a name="532"><span class="lineNum">     532 </span>            :   */</a>
+<span class="lineNum">     533 </span>            :   ADD_UNIT(bug_test)
+<a name="534"><span class="lineNum">     534 </span><span class="lineCov">          4 : END_SUITE(read_buffers)</span></a>
+<span class="lineNum">     535 </span>            : 
+<a name="536"><span class="lineNum">     536 </span><span class="lineCov">          1 : BEGIN_TEST</span></a>
+<span class="lineNum">     537 </span><span class="lineCov">          1 :   RUN_SUITE(read_buffers)</span>
+<span class="lineNum">     538 </span><span class="lineCov">          4 : END_TEST</span>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

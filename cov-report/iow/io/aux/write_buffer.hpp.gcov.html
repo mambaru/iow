@@ -1,0 +1,248 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - iow-coverage.info - iow/io/aux/write_buffer.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../index.html">top level</a> - <a href="index.html">iow/io/aux</a> - write_buffer.hpp<span style="font-size: 80%;"> (source / <a href="write_buffer.hpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">iow-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">29</td>
+            <td class="headerCovTableEntry">36</td>
+            <td class="headerCovTableEntryMed">80.6 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-16</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">5</td>
+            <td class="headerCovTableEntry">5</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #pragma once</a>
+<span class="lineNum">       2 </span>            : 
+<span class="lineNum">       3 </span>            : #include &lt;iow/io/aux/write_buffer_options.hpp&gt;
+<span class="lineNum">       4 </span>            : #include &lt;iow/io/types.hpp&gt;
+<span class="lineNum">       5 </span>            : #include &lt;iow/memory.hpp&gt;
+<span class="lineNum">       6 </span>            : #include &lt;vector&gt;
+<span class="lineNum">       7 </span>            : #include &lt;memory&gt;
+<span class="lineNum">       8 </span>            : #include &lt;string&gt;
+<span class="lineNum">       9 </span>            : 
+<span class="lineNum">      10 </span>            : 
+<span class="lineNum">      11 </span>            : namespace iow{ namespace io{
+<a name="12"><span class="lineNum">      12 </span>            : </a>
+<span class="lineNum">      13 </span>            : 
+<span class="lineNum">      14 </span><span class="lineCov">          6 : class write_buffer</span>
+<span class="lineNum">      15 </span>            : {
+<span class="lineNum">      16 </span>            : public:
+<span class="lineNum">      17 </span>            :   typedef write_buffer_options options_type;
+<span class="lineNum">      18 </span>            :   typedef std::shared_ptr&lt;options_type&gt; options_ptr;
+<span class="lineNum">      19 </span>            :   typedef typename data_type::value_type value_type;
+<span class="lineNum">      20 </span>            :   typedef const value_type* value_ptr;
+<span class="lineNum">      21 </span>            :   typedef std::unique_ptr&lt;value_type[]&gt; sep_ptr;
+<span class="lineNum">      22 </span>            :   typedef std::pair&lt;value_ptr, size_t&gt; data_pair;
+<span class="lineNum">      23 </span>            :   typedef std::deque&lt;data_ptr&gt; data_list;
+<span class="lineNum">      24 </span>            :   
+<span class="lineNum">      25 </span>            :   typedef std::function&lt;data_ptr(size_t, size_t)&gt; create_fun;
+<span class="lineNum">      26 </span>            :   typedef std::function&lt;void(data_ptr)&gt; free_fun;
+<span class="lineNum">      27 </span>            : 
+<span class="lineNum">      28 </span>            :   
+<span class="lineNum">      29 </span>            : public:
+<span class="lineNum">      30 </span>            :   
+<span class="lineNum">      31 </span>            :   write_buffer() noexcept;
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span>            :   void clear();
+<span class="lineNum">      34 </span>            : 
+<span class="lineNum">      35 </span>            :   
+<span class="lineNum">      36 </span>            :   template&lt;typename O&gt;
+<span class="lineNum">      37 </span>            :   void set_options(const O&amp; opt) noexcept;
+<span class="lineNum">      38 </span>            : 
+<span class="lineNum">      39 </span>            :   template&lt;typename O&gt;
+<span class="lineNum">      40 </span>            :   void get_options(O&amp; opt) const noexcept;
+<span class="lineNum">      41 </span>            : 
+<span class="lineNum">      42 </span>            :   size_t size() const noexcept;
+<span class="lineNum">      43 </span>            : 
+<span class="lineNum">      44 </span>            :   size_t count() const noexcept;
+<span class="lineNum">      45 </span>            :   
+<span class="lineNum">      46 </span>            :   size_t offset() const noexcept;
+<span class="lineNum">      47 </span>            : 
+<span class="lineNum">      48 </span>            :   size_t capacity() const noexcept;
+<span class="lineNum">      49 </span>            : 
+<span class="lineNum">      50 </span>            :   bool overflow() const noexcept;
+<span class="lineNum">      51 </span>            :   
+<span class="lineNum">      52 </span>            :   bool ready() const;
+<span class="lineNum">      53 </span>            : 
+<span class="lineNum">      54 </span>            :   bool waiting() const;
+<span class="lineNum">      55 </span>            : 
+<span class="lineNum">      56 </span>            :   void attach(data_ptr d);
+<span class="lineNum">      57 </span>            : 
+<span class="lineNum">      58 </span>            :   data_pair next();
+<span class="lineNum">      59 </span>            : 
+<span class="lineNum">      60 </span>            :   bool confirm(data_pair p);
+<span class="lineNum">      61 </span>            : 
+<span class="lineNum">      62 </span>            :   void rollback();
+<span class="lineNum">      63 </span>            :   
+<span class="lineNum">      64 </span>            :   
+<span class="lineNum">      65 </span>            : 
+<span class="lineNum">      66 </span>            : private:
+<span class="lineNum">      67 </span>            :   
+<span class="lineNum">      68 </span>            :   void addsep_( data_type&amp; d, bool reserve );
+<span class="lineNum">      69 </span>            : 
+<span class="lineNum">      70 </span>            :   data_ptr create_(size_t bufsize, size_t maxbuf) const;
+<span class="lineNum">      71 </span>            : 
+<span class="lineNum">      72 </span>            :   data_ptr create_(size_t bufsize) const;
+<span class="lineNum">      73 </span>            : 
+<span class="lineNum">      74 </span>            :   data_ptr create_() const;
+<span class="lineNum">      75 </span>            : 
+<span class="lineNum">      76 </span>            :   void free_(data_ptr d) const;
+<span class="lineNum">      77 </span>            : 
+<span class="lineNum">      78 </span>            :   value_ptr cur_ptr_() const;
+<span class="lineNum">      79 </span>            : 
+<span class="lineNum">      80 </span>            :   size_t cur_size_() const;
+<span class="lineNum">      81 </span>            : 
+<span class="lineNum">      82 </span>            : private:
+<span class="lineNum">      83 </span>            :   
+<span class="lineNum">      84 </span>            :   // options
+<span class="lineNum">      85 </span>            :   sep_ptr _sep = nullptr;
+<span class="lineNum">      86 </span>            :   size_t _sep_size = 0;
+<span class="lineNum">      87 </span>            :   size_t _bufsize = 0;
+<span class="lineNum">      88 </span>            :   size_t _maxbuf = 0;
+<span class="lineNum">      89 </span>            :   size_t _minbuf = 0;
+<span class="lineNum">      90 </span>            :   size_t _maxsize = 0;
+<span class="lineNum">      91 </span>            :   bool _first_as_is = false;
+<span class="lineNum">      92 </span>            :   create_fun _create = nullptr;
+<span class="lineNum">      93 </span>            :   free_fun _free = nullptr;
+<span class="lineNum">      94 </span>            : 
+<span class="lineNum">      95 </span>            :   // -------------------
+<span class="lineNum">      96 </span>            :   size_t _size = 0;
+<span class="lineNum">      97 </span>            :   size_t _offset = 0;
+<span class="lineNum">      98 </span>            :   size_t _wait = 0; // в байтах
+<span class="lineNum">      99 </span>            : 
+<span class="lineNum">     100 </span>            :   data_list _list;
+<span class="lineNum">     101 </span>            : };
+<a name="102"><span class="lineNum">     102 </span>            : </a>
+<span class="lineNum">     103 </span>            :   template&lt;typename O&gt;
+<span class="lineNum">     104 </span><span class="lineCov">         46 :   void write_buffer::set_options(const O&amp; opt) noexcept</span>
+<span class="lineNum">     105 </span>            :   {
+<span class="lineNum">     106 </span><span class="lineCov">         46 :     if ( opt.sep.empty() )</span>
+<span class="lineNum">     107 </span>            :     {
+<span class="lineNum">     108 </span><span class="lineCov">         46 :       _sep = nullptr;</span>
+<span class="lineNum">     109 </span><span class="lineCov">         46 :       _sep_size=0;</span>
+<span class="lineNum">     110 </span>            :     }
+<span class="lineNum">     111 </span>            :     else
+<span class="lineNum">     112 </span>            :     {
+<span class="lineNum">     113 </span><span class="lineNoCov">          0 :       _sep_size = opt.sep.size();</span>
+<span class="lineNum">     114 </span><span class="lineNoCov">          0 :       _sep=sep_ptr(new value_type[_sep_size]);</span>
+<span class="lineNum">     115 </span><span class="lineNoCov">          0 :       std::copy(opt.sep.begin(), opt.sep.end(), _sep.get() );</span>
+<span class="lineNum">     116 </span>            :     }
+<span class="lineNum">     117 </span>            : 
+<span class="lineNum">     118 </span><span class="lineCov">         46 :     _bufsize = opt.bufsize;</span>
+<span class="lineNum">     119 </span><span class="lineCov">         46 :     _maxbuf = opt.maxbuf;</span>
+<span class="lineNum">     120 </span><span class="lineCov">         46 :     _minbuf = opt.minbuf;</span>
+<span class="lineNum">     121 </span><span class="lineCov">         46 :     _maxsize= opt.maxsize;</span>
+<span class="lineNum">     122 </span><span class="lineCov">         46 :     _first_as_is = opt.first_as_is;</span>
+<span class="lineNum">     123 </span>            : 
+<span class="lineNum">     124 </span><span class="lineCov">         46 :     _create = opt.create;</span>
+<span class="lineNum">     125 </span><span class="lineCov">         46 :     _free = opt.free;</span>
+<span class="lineNum">     126 </span>            : 
+<span class="lineNum">     127 </span><span class="lineCov">         46 :     if ( _bufsize == 0 )</span>
+<span class="lineNum">     128 </span>            :     {
+<span class="lineNum">     129 </span><span class="lineNoCov">          0 :       _bufsize = 4096;</span>
+<span class="lineNum">     130 </span>            :     }
+<span class="lineNum">     131 </span>            :     
+<span class="lineNum">     132 </span><span class="lineCov">         46 :     if ( _minbuf==0 )</span>
+<span class="lineNum">     133 </span>            :     {
+<span class="lineNum">     134 </span><span class="lineCov">         46 :       _minbuf=128;</span>
+<span class="lineNum">     135 </span>            :     }
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span><span class="lineCov">         46 :     if ( _minbuf &gt; _bufsize )</span>
+<span class="lineNum">     138 </span>            :     {
+<span class="lineNum">     139 </span><span class="lineNoCov">          0 :       _minbuf = _bufsize;</span>
+<span class="lineNum">     140 </span>            :     }
+<span class="lineNum">     141 </span>            : 
+<span class="lineNum">     142 </span><span class="lineCov">         46 :     if ( _maxbuf &lt; _bufsize )</span>
+<span class="lineNum">     143 </span>            :     {
+<span class="lineNum">     144 </span><span class="lineNoCov">          0 :       _maxbuf = _bufsize;</span>
+<span class="lineNum">     145 </span>            :     }
+<span class="lineNum">     146 </span>            : 
+<span class="lineNum">     147 </span>            :     //_list.reserve(2);
+<span class="lineNum">     148 </span><span class="lineCov">         46 :   }</span>
+<a name="149"><span class="lineNum">     149 </span>            : </a>
+<span class="lineNum">     150 </span>            :   template&lt;typename O&gt;
+<span class="lineNum">     151 </span><span class="lineCov">         35 :   void write_buffer::get_options(O&amp; opt) const noexcept</span>
+<span class="lineNum">     152 </span>            :   {
+<span class="lineNum">     153 </span><span class="lineCov">         35 :     if ( _sep_size!=0 )</span>
+<span class="lineNum">     154 </span>            :     {
+<span class="lineNum">     155 </span><span class="lineNoCov">          0 :       opt.sep.assign(_sep.get(), _sep.get() + _sep_size);</span>
+<span class="lineNum">     156 </span>            :     }
+<span class="lineNum">     157 </span>            :     else
+<span class="lineNum">     158 </span>            :     {
+<span class="lineNum">     159 </span><span class="lineCov">         35 :       opt.sep.clear();</span>
+<span class="lineNum">     160 </span>            :     }
+<span class="lineNum">     161 </span>            :     
+<span class="lineNum">     162 </span><span class="lineCov">         35 :     opt.bufsize = _bufsize;</span>
+<span class="lineNum">     163 </span>            :     // opt.maxsize = _maxsize;
+<span class="lineNum">     164 </span><span class="lineCov">         35 :     opt.maxbuf  = _maxbuf;</span>
+<span class="lineNum">     165 </span><span class="lineCov">         35 :     opt.minbuf  = _minbuf;</span>
+<span class="lineNum">     166 </span><span class="lineCov">         35 :     opt.first_as_is = _first_as_is;</span>
+<span class="lineNum">     167 </span><span class="lineCov">         35 :     opt.create  = _create;</span>
+<span class="lineNum">     168 </span><span class="lineCov">         35 :     opt.free    = _free;</span>
+<span class="lineNum">     169 </span><span class="lineCov">         35 :     opt.maxsize=_maxsize;</span>
+<span class="lineNum">     170 </span><span class="lineCov">         35 :   }</span>
+<span class="lineNum">     171 </span>            : 
+<span class="lineNum">     172 </span>            : }}
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

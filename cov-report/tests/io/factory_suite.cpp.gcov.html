@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - iow-coverage.info - tests/io/factory_suite.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">tests/io</a> - factory_suite.cpp<span style="font-size: 80%;"> (source / <a href="factory_suite.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">iow-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">54</td>
+            <td class="headerCovTableEntry">54</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-16</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">16</td>
+            <td class="headerCovTableEntry">16</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #include &lt;iostream&gt;</a>
+<span class="lineNum">       2 </span>            : #include &lt;fas/testing.hpp&gt;
+<span class="lineNum">       3 </span>            : #include &lt;vector&gt;
+<span class="lineNum">       4 </span>            : #include &lt;memory&gt;
+<span class="lineNum">       5 </span>            : #include &lt;list&gt;
+<span class="lineNum">       6 </span>            : #include &lt;mutex&gt;
+<span class="lineNum">       7 </span>            : #include &lt;condition_variable&gt;
+<span class="lineNum">       8 </span>            : #include &lt;thread&gt;
+<a name="9"><span class="lineNum">       9 </span>            : #include &lt;chrono&gt;</a>
+<span class="lineNum">      10 </span>            : 
+<span class="lineNum">      11 </span><span class="lineCov">          2 : class barrier</span>
+<span class="lineNum">      12 </span>            : {
+<span class="lineNum">      13 </span>            : private:
+<span class="lineNum">      14 </span>            :     std::mutex _mutex;
+<span class="lineNum">      15 </span>            :     std::condition_variable _cv;
+<a name="16"><span class="lineNum">      16 </span>            :     std::size_t _count;</a>
+<a name="17"><span class="lineNum">      17 </span>            : public:</a>
+<span class="lineNum">      18 </span><span class="lineCov">          2 :     explicit barrier(std::size_t count) : _count{count} { }</span>
+<span class="lineNum">      19 </span><span class="lineCov">          6 :     void wait()</span>
+<span class="lineNum">      20 </span>            :     {
+<span class="lineNum">      21 </span><span class="lineCov">          6 :         std::unique_lock&lt;std::mutex&gt; lock{_mutex};</span>
+<span class="lineNum">      22 </span><span class="lineCov">          6 :         if (--_count == 0) {</span>
+<a name="23"><span class="lineNum">      23 </span><span class="lineCov">          2 :             _cv.notify_all();</span></a>
+<span class="lineNum">      24 </span>            :         } else {
+<span class="lineNum">      25 </span><span class="lineCov">         12 :             _cv.wait(lock, [this] { return _count == 0; });</span>
+<span class="lineNum">      26 </span><span class="lineCov">          6 :         }</span>
+<span class="lineNum">      27 </span><span class="lineCov">          6 :     }</span>
+<a name="28"><span class="lineNum">      28 </span>            : };</a>
+<span class="lineNum">      29 </span>            : 
+<span class="lineNum">      30 </span><span class="lineCov">          1 : barrier bar1(3);</span>
+<span class="lineNum">      31 </span><span class="lineCov">          1 : barrier bar2(3);</span>
+<span class="lineNum">      32 </span>            : static const size_t COUNT = 1000000;
+<span class="lineNum">      33 </span>            : static const size_t SIZE = 512;
+<span class="lineNum">      34 </span>            : std::mutex mutex;
+<span class="lineNum">      35 </span>            : typedef std::vector&lt;char&gt; data_type;
+<a name="36"><span class="lineNum">      36 </span>            : </a>
+<span class="lineNum">      37 </span>            : void thread1();
+<span class="lineNum">      38 </span><span class="lineCov">          2 : void thread1()</span>
+<span class="lineNum">      39 </span>            : {
+<span class="lineNum">      40 </span><span class="lineCov">          2 :   bar1.wait();</span>
+<span class="lineNum">      41 </span><span class="lineCov">        152 :   int tem = 0;</span>
+<span class="lineNum">      42 </span><span class="lineCov">    1963820 :   for (size_t i=0; i &lt; COUNT; ++i)</span>
+<span class="lineNum">      43 </span>            :   {
+<span class="lineNum">      44 </span><span class="lineCov">    1963818 :     std::lock_guard&lt;std::mutex&gt; lk(mutex);</span>
+<span class="lineNum">      45 </span><span class="lineCov">    2000000 :     ++tem;</span>
+<span class="lineNum">      46 </span><span class="lineCov">    2000000 :   }</span>
+<span class="lineNum">      47 </span><span class="lineCov">          2 :   std::cout &lt;&lt; std::endl &lt;&lt;  tem &lt;&lt; std::endl;</span>
+<span class="lineNum">      48 </span><span class="lineCov">          2 : }</span>
+<a name="49"><span class="lineNum">      49 </span>            : </a>
+<span class="lineNum">      50 </span>            : void thread2();
+<span class="lineNum">      51 </span><span class="lineCov">          1 : void thread2()</span>
+<span class="lineNum">      52 </span>            : {
+<span class="lineNum">      53 </span><span class="lineCov">          1 :   bar2.wait();</span>
+<span class="lineNum">      54 </span><span class="lineCov">        680 :   int tem = 0;</span>
+<span class="lineNum">      55 </span><span class="lineCov">    1920547 :   for (size_t i=0; i &lt; COUNT; ++i)</span>
+<span class="lineNum">      56 </span>            :   {
+<span class="lineNum">      57 </span><span class="lineCov">    1920545 :     ++tem;</span>
+<span class="lineNum">      58 </span><span class="lineCov">    1920545 :     auto d = std::unique_ptr&lt;data_type&gt;( new data_type(SIZE) );</span>
+<span class="lineNum">      59 </span><span class="lineCov">    1886107 :     d.reset();</span>
+<span class="lineNum">      60 </span><span class="lineCov">    1986268 :   }</span>
+<span class="lineNum">      61 </span><span class="lineCov">          2 :   std::cout &lt;&lt; std::endl &lt;&lt;  tem &lt;&lt; std::endl;</span>
+<span class="lineNum">      62 </span><span class="lineCov">          2 : }</span>
+<a name="63"><span class="lineNum">      63 </span>            : </a>
+<span class="lineNum">      64 </span>            : 
+<span class="lineNum">      65 </span><span class="lineCov">          3 : UNIT(factory, &quot;&quot;)</span>
+<span class="lineNum">      66 </span>            : {
+<span class="lineNum">      67 </span>            :   using namespace fas::testing;
+<span class="lineNum">      68 </span>            : 
+<span class="lineNum">      69 </span><span class="lineCov">          1 :   std::thread t3(thread2);</span>
+<span class="lineNum">      70 </span><span class="lineCov">          2 :   std::thread t4(thread2);</span>
+<span class="lineNum">      71 </span><span class="lineCov">          1 :   auto start2 = std::chrono::high_resolution_clock::now();</span>
+<span class="lineNum">      72 </span><span class="lineCov">          1 :   bar2.wait();</span>
+<span class="lineNum">      73 </span><span class="lineCov">          1 :   t3.join();</span>
+<span class="lineNum">      74 </span><span class="lineCov">          1 :   t4.join();</span>
+<span class="lineNum">      75 </span><span class="lineCov">          1 :   auto finish2 = std::chrono::high_resolution_clock::now();</span>
+<span class="lineNum">      76 </span><span class="lineCov">          1 :   auto ms2 = std::chrono::duration_cast&lt;std::chrono::microseconds&gt;( finish2 - start2 ).count();</span>
+<span class="lineNum">      77 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;threads2: &quot;) &lt;&lt;  ms2 &lt;&lt; &quot;ms&quot;;</span>
+<span class="lineNum">      78 </span><span class="lineCov">          1 :   t &lt;&lt; nothing;</span>
+<span class="lineNum">      79 </span>            : 
+<span class="lineNum">      80 </span>            :   
+<span class="lineNum">      81 </span><span class="lineCov">          2 :   std::thread t1(thread1);</span>
+<span class="lineNum">      82 </span><span class="lineCov">          2 :   std::thread t2(thread1);</span>
+<span class="lineNum">      83 </span><span class="lineCov">          1 :   auto start = std::chrono::high_resolution_clock::now();</span>
+<span class="lineNum">      84 </span><span class="lineCov">          1 :   bar1.wait();</span>
+<span class="lineNum">      85 </span><span class="lineCov">          1 :   t1.join();</span>
+<span class="lineNum">      86 </span><span class="lineCov">          1 :   t2.join();</span>
+<span class="lineNum">      87 </span><span class="lineCov">          1 :   auto finish = std::chrono::high_resolution_clock::now();</span>
+<span class="lineNum">      88 </span><span class="lineCov">          1 :   auto ms1 = std::chrono::duration_cast&lt;std::chrono::microseconds&gt;( finish - start ).count();</span>
+<span class="lineNum">      89 </span><span class="lineCov">          1 :   t &lt;&lt; message(&quot;threads1: &quot;) &lt;&lt;  ms1 &lt;&lt; &quot;ms&quot;;</span>
+<span class="lineNum">      90 </span><span class="lineCov">          2 :   t &lt;&lt; nothing;</span>
+<span class="lineNum">      91 </span>            : 
+<span class="lineNum">      92 </span>            : 
+<a name="93"><span class="lineNum">      93 </span><span class="lineCov">          1 : }</span></a>
+<span class="lineNum">      94 </span>            : 
+<a name="95"><span class="lineNum">      95 </span><span class="lineCov">          1 : BEGIN_SUITE(factory,&quot;&quot;)</span></a>
+<span class="lineNum">      96 </span>            :   ADD_UNIT(factory)
+<span class="lineNum">      97 </span><span class="lineCov">          7 : END_SUITE(factory)</span>
+<span class="lineNum">      98 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
