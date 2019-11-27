@@ -4,27 +4,31 @@ project(iow)
 
 include(cmake/ci.cmake)
 
-rootlibs(faslib wjson wlog wflow)
+wci_getlib(NAME faslib)
+wci_getlib(NAME wjson)
+wci_getlib(NAME wlog)
+wci_getlib(NAME wflow)
 
-include_directories(.)
 add_library(
   iow
   iow/io/aux/read_buffer.cpp
   iow/io/aux/write_buffer.cpp
 )
+wci_targets(iow)
+target_include_directories(iow PUBLIC ${iow_SOURCE_DIR})
+
+include(FindThreads)
+find_package(Boost REQUIRED system )
+target_link_libraries(iow PUBLIC faslib wjson wlog wflow ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
 if ( BUILD_TESTING )
   enable_testing()
-  include_directories(.)
-  include(FindThreads)
-  find_package(Boost REQUIRED system )
-  target_link_libraries(iow wlog wflow ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
   add_subdirectory(tests)
 endif()
 
 set(CPACK_PACKAGE_NAME "iow")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "8")
+set(CPACK_PACKAGE_VERSION_MINOR "9")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/Readme.md")

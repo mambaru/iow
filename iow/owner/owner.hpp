@@ -20,7 +20,7 @@ class owner
 {
 public:
   typedef size_t io_id_t;
-  
+
   typedef std::shared_ptr<int> alive_type;
   typedef std::weak_ptr<int>   weak_type;
 
@@ -28,8 +28,9 @@ public:
   typedef std::function<void()> no_call_fun_t;
   typedef rwlock<std::mutex> mutex_type;
 
-  owner() 
-  : _alive( std::make_shared<int>(1) ) 
+  owner()
+    : _alive( std::make_shared<int>(1) )
+    , _tracking_flag(false)
   {
   }
 
@@ -39,12 +40,12 @@ public:
   owner(owner&& ) = default;
   owner& operator = (owner&& ) = default;
 
-  alive_type alive() const 
+  alive_type alive() const
   {
     read_lock<mutex_type> lk(_mutex);
-    return _alive; 
+    return _alive;
   }
-  
+
   void reset()
   {
     std::lock_guard<mutex_type> lk(_mutex);
@@ -53,16 +54,16 @@ public:
 
 
   template<typename Handler, typename AltHandler>
-  owner_handler< 
-    typename std::remove_reference<Handler>::type, 
+  owner_handler<
+    typename std::remove_reference<Handler>::type,
     typename std::remove_reference<AltHandler>::type
   >
   wrap(Handler&& h, AltHandler&& nh) const
   {
     read_lock<mutex_type> lk(_mutex);
-    return 
+    return
       owner_handler<
-        typename std::remove_reference<Handler>::type, 
+        typename std::remove_reference<Handler>::type,
         typename std::remove_reference<AltHandler>::type
       >(
           std::forward<Handler>(h),
@@ -71,8 +72,8 @@ public:
        )
     ;
   }
-  
-  void release(io_id_t io_id) 
+
+  void release_tracking(io_id_t io_id)
   {
     if ( _tracking_flag )
     {
@@ -80,12 +81,12 @@ public:
       _tracking_map.erase(io_id);
     }
   }
-  
+
   void enable_tracking(bool value)
   {
     if ( _tracking_flag == value )
       return;
-  
+
     _tracking_flag = value;
     if (!value)
     {
@@ -94,7 +95,7 @@ public:
     }
   }
 
-  
+
   std::weak_ptr<int> tracking(io_id_t io_id)
   {
     std::weak_ptr<int> wc;
@@ -111,18 +112,18 @@ public:
     }
     return wc;
   }
-  
+
   template<typename Handler, typename AltHandler>
-  owner_handler< 
-    typename std::remove_reference<Handler>::type, 
+  owner_handler<
+    typename std::remove_reference<Handler>::type,
     typename std::remove_reference<AltHandler>::type
   >
-  tracking(io_id_t io_id, Handler&& h, AltHandler&& nh) 
+  tracking(io_id_t io_id, Handler&& h, AltHandler&& nh)
   {
     std::weak_ptr<int> wc = this->tracking(io_id);
-    return 
+    return
       owner_handler<
-        typename std::remove_reference<Handler>::type, 
+        typename std::remove_reference<Handler>::type,
         typename std::remove_reference<AltHandler>::type
       >(
           std::forward<Handler>(h),
@@ -130,16 +131,16 @@ public:
           wc
        );
   }
-  
+
   template<typename Handler>
-  callback_handler< 
+  callback_handler<
     typename std::remove_reference<Handler>::type
   >
   callback(Handler&& h) const
   {
     read_lock<mutex_type> lk(_mutex);
     auto ready = std::make_shared< std::atomic_flag >();
-    return 
+    return
       callback_handler<
         typename std::remove_reference<Handler>::type
       >(
@@ -160,13 +161,13 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     _no_call = nc;
   }
- 
+
   size_t tracking_size() const
   {
     read_lock<mutex_type> lk(_mutex);
     return _tracking_map.size();
   }
-  
+
 private:
   mutable alive_type _alive;
   double_call_fun_t _double_call;

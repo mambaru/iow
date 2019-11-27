@@ -73,7 +73,7 @@ public:
     client_ptr cli = nullptr;
     {
       std::lock_guard<mutex_type> lk(_mutex);
-      if ( _clients.empty() ) return std::move(d);
+      if ( _clients.empty() ) return d;
       if ( _current >= _clients.size() ) _current = 0;
       cli = _clients[ _current++ ];
     }

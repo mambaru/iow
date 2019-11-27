@@ -29,7 +29,7 @@ struct ad_next
       IOW_LOG_ERROR("Read buffer. Out of memory.");
       t.get_aspect().template get< ::iow::io::_stop_>()(t);
     }
-    return std::move(p);
+    return p;
   }
 };
 
