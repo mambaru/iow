@@ -115,7 +115,7 @@ public:
     else
     {
       IOW_LOG_ERROR("Client not conected. Not send: [" << d << "]")
-      return std::move(d);
+      return d;
     }
     return nullptr;
   }

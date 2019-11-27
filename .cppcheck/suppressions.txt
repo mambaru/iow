@@ -1,0 +1,2 @@
+useStlAlgorithm:./tests/aux/read_buffer_bench_big.cpp:30
+unusedFunction:./tests/aux/write_buffer_test.cpp:330
