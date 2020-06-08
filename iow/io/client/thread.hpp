@@ -7,11 +7,6 @@
 
 namespace iow{ namespace io{ namespace client{
 
-  /*
-template< typename Client = multi_client<> >
-using thread = ::iow::io::descriptor::thread< Client >;
-*/
-
 
 template<typename Client  >
 class thread
@@ -40,7 +35,7 @@ public:
     IOW_LOG_ERROR( "iow::io::client::thread::send drop [" << d << "]" )
     return nullptr;
   }
-  
+
   // для мулти-коннект клиента
   void send( data_ptr d, io_id_t id, output_handler_t handler)
   {
@@ -54,6 +49,5 @@ public:
     }
   }
 };
-
 
 }}}

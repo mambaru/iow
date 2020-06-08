@@ -19,8 +19,8 @@ struct ad_next
 
     if ( buf.overflow() )
     {
+      IOW_LOG_ERROR("Read buffer overflow. The descriptor will be closed. size=" << buf.size() );
       buf.clear();
-      IOW_LOG_ERROR("Read buffer overflow. The descriptor will be closed.");
       t.get_aspect().template get< ::iow::io::_stop_>()(t);
     }
     else if ( p.first == nullptr )

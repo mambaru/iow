@@ -158,6 +158,8 @@ private:
     if (!this->_started)
       return;
     
+    super::close_(*this);
+    
     if ( _workflow!= nullptr )
     {
       std::weak_ptr<self> wthis = this->shared_from_this();
@@ -205,9 +207,9 @@ private:
       }
     }, nullptr);
 
-    opt.args.error_handler = [wthis, opt2](::iow::system::error_code ec)
+    opt.args.error_handler = [wthis, opt2](iow::system::error_code ec)
     {
-      IOW_LOG_MESSAGE("iow::io::client error handler" )
+      IOW_LOG_MESSAGE("iow::io::client error handler: " << ec.message() )
       
       if ( opt2.args.error_handler!=nullptr ) 
         opt2.args.error_handler(ec);

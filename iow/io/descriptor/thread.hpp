@@ -8,7 +8,7 @@
 #include <list>
 #include <thread>
 #include <cstdlib>
-
+#include <iostream>
 
 namespace iow{ namespace io{ namespace descriptor{
 
@@ -16,7 +16,7 @@ namespace iow{ namespace io{ namespace descriptor{
 template<typename Holder>
 class thread
   : public std::enable_shared_from_this< thread<Holder> >
-  
+
 {
 public:
   typedef Holder holder_type;
@@ -30,6 +30,10 @@ public:
   explicit thread(io_service_type& io)
     : _started(false)
     , _io_service(io)
+  {
+  }
+
+  ~thread()
   {
   }
 
@@ -49,7 +53,7 @@ public:
 
     if ( opt.threads != 0 )
       _io_service2 = std::make_shared<io_service_type>();
-      
+
     _holder = std::make_shared<holder_type>( (_io_service2!=nullptr ? (*_io_service2) : _io_service) );
     _holder->start(opt1);
     if ( io_service_ptr io = this->_io_service2 )
@@ -59,7 +63,7 @@ public:
         io_service_type::work wrk( *io );
         iow::system::error_code ec;
         io->run(ec);
-        if (ec) { IOW_LOG_ERROR("io::descriptor::thread io_service.run error" << ec.message()) };
+        if (ec) { IOW_LOG_ERROR("io::descriptor::thread::thread io_service.run error" << ec.message()) };
       });
     }
   }
@@ -71,7 +75,7 @@ public:
     if ( _holder == nullptr ) return;
     bool f1 = (_io_service2 == nullptr);
     bool f2 = (opt.threads == 0);
-    
+
     if ( f1 != f2)
     {
       this->stop_();
@@ -79,14 +83,14 @@ public:
     }
     _holder->reconfigure( std::forward<Opt>(opt) );
   }
-  
+
   template<typename Handler>
   void shutdown(Handler handler)
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    
-    if ( _holder == nullptr ) return;
-    
+    if ( _holder == nullptr )
+      return;
+
     auto pthis = this->shared_from_this();
     _holder->shutdown([handler,pthis]()
     {
@@ -101,13 +105,13 @@ public:
     if ( _holder == nullptr ) return;
     this->stop_();
   }
-  
-  holder_ptr holder() const 
+
+  holder_ptr holder() const
   {
     std::lock_guard<mutex_type> lk(_mutex);
     return _holder;
   }
-  
+
   void stop_()
   {
     _holder->stop();
@@ -116,7 +120,17 @@ public:
     {
       _io_service2->stop();
       _io_service2 = nullptr;
-      _thread.join();
+      if ( _thread.joinable() )
+      {
+        try
+        {
+          _thread.join();
+        }
+        catch(const std::exception& e)
+        {
+          IOW_LOG_FATAL("io::descriptor::thread::stop_" <<  e.what() )
+        }
+      }
     }
   }
 
