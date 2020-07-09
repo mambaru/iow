@@ -37,5 +37,4 @@ jobs:
           git config --global user.name "Vladimir Migashko"
           git add .
           git commit -am "[subm] build submodule autocommit" || true
-          git push https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git mamba-ready:mamba-ready
           git push -f https://${{ secrets.ACCESS_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git mamba-ready:mamba-ready
