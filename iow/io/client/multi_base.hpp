@@ -15,12 +15,12 @@ public:
   typedef typename client_type::data_ptr data_ptr;
   typedef std::shared_ptr<client_type> client_ptr;
   typedef std::vector<client_ptr> client_list;
-  typedef typename client_type::io_service_type io_service_type;
+  typedef typename client_type::io_context_type io_context_type;
   typedef std::recursive_mutex mutex_type;
 
-  explicit multi_base(io_service_type& io)
+  explicit multi_base(io_context_type& io)
     : _current(0)
-    , _io_service(io)
+    , _io_context(io)
   {}
 
   template<typename Opt>
@@ -34,7 +34,7 @@ public:
     _clients.reserve( size_t(count) );
     for (int i = 0; i < count; ++i)
     {
-      _clients.push_back( std::make_shared<client_type>(_io_service) );
+      _clients.push_back( std::make_shared<client_type>(_io_context) );
       _clients.back()->start( opt );
     }
   }
@@ -51,7 +51,7 @@ public:
 
     while ( int( _clients.size() ) < count )
     {
-      _clients.push_back( std::make_shared<client_type>(_io_service) );
+      _clients.push_back( std::make_shared<client_type>(_io_context) );
       _clients.back()->start( opt );
     }
   }
@@ -84,7 +84,7 @@ public:
 
 private:
   size_t _current;
-  io_service_type& _io_service;
+  io_context_type& _io_context;
   client_list _clients;
   mutable mutex_type _mutex;
 };

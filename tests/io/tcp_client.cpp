@@ -8,23 +8,23 @@
 #include <mutex>
 #include <memory>
 
-iow::asio::io_service g_io_service; 
+boost::asio::io_context g_io_context;
 std::atomic<int> connect_count;
 void server();
 void server()
 {
   typedef ::iow::ip::tcp::server::server<> tcp_server;
   typedef ::iow::ip::tcp::server::options<> options;
-  
-  auto acceptor = std::make_shared<tcp_server>( g_io_service  );
+
+  auto acceptor = std::make_shared<tcp_server>( g_io_context  );
   options opt;
   opt.addr = "0.0.0.0";
   opt.port = "12345";
-  
+
   std::cout << "server start..." << std::endl;
   acceptor->start(opt);
   std::cout << "server run..." << std::endl;
-  g_io_service.run();
+  g_io_context.run();
   std::cout << "server done" << std::endl;
 }
 
@@ -35,31 +35,31 @@ int main()
 
   typedef ::iow::ip::tcp::client::client<> client_type;
   typedef ::iow::ip::tcp::client::options options_type;
-  
-  auto tcp_client = std::make_shared<client_type>(g_io_service);
-  
-  
+
+  auto tcp_client = std::make_shared<client_type>(g_io_context);
+
+
   options_type opt;
   opt.connect_count = connect_count;
   opt.args.connect_handler = []()
   {
     std::cout << "connect ready" << std::endl;
     --connect_count;
-    if ( connect_count==0 ) 
+    if ( connect_count==0 )
     {
-      g_io_service.post([]()
+      boost::asio::post(g_io_context, []()
       {
-        std::cout << "stop io ..." << std::endl; 
+        std::cout << "stop io ..." << std::endl;
         sleep(1);
-        g_io_service.stop();
-        std::cout << "stop io ... ready" << std::endl; 
-      }); 
+        g_io_context.stop();
+        std::cout << "stop io ... ready" << std::endl;
+      });
     }
   };
   opt.addr = "0.0.0.0";
   opt.port = "12345";
   opt.reconnect_timeout_ms = 1000;
-  auto workflow = std::make_shared< wflow::workflow>(g_io_service);
+  auto workflow = std::make_shared< wflow::workflow>(g_io_context);
   opt.args.workflow = workflow;
   opt.connection.input_handler=[](iow::io::data_ptr, iow::io::io_id_t, ::iow::io::output_handler_t)
   {
@@ -76,16 +76,16 @@ int main()
   tcp_client->send( iow::io::make("Hello World!") );
   std::thread t(server);
   sleep(4);
-  
+
   std::cout << "client main run..." << std::endl;
-  g_io_service.run();
-  if ( connect_count != 0 ) 
+  g_io_context.run();
+  if ( connect_count != 0 )
   {
     std::cout << "TEST FAIL" << std::endl;
     std::cout.flush();
     abort();
   }
-  else 
+  else
   {
     std::cout << "OK" << std::endl;
   }

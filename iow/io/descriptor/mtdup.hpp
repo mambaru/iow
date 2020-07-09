@@ -25,20 +25,20 @@ public:
   typedef std::list<holder_ptr> holder_list;
   typedef std::list<std::thread> thread_list;
   typedef std::recursive_mutex mutex_type;
-  typedef ::iow::asio::io_service io_service_type;
-  typedef std::shared_ptr<io_service_type> io_service_ptr;
-  typedef std::list<io_service_ptr> service_list;
+  typedef boost::asio::io_context io_context_type;
+  typedef std::shared_ptr<io_context_type> io_context_ptr;
+  typedef std::list<io_context_ptr> service_list;
 
   explicit mtdup(descriptor_type&& desc)
     : _origin( std::make_shared<holder_type>( std::forward<descriptor_type>(desc)))
   {
   }
 
-  holder_ptr origin() const 
-  { 
+  holder_ptr origin() const
+  {
     return _origin;
   }
-  
+
   template<typename Handler>
   auto wrap(Handler&& h) const
     -> typename holder_type::template result_of<_wrap_, Handler>::type
@@ -52,7 +52,7 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
 
-    
+
     if ( opt.threads == 0 )
     {
       _origin->start(opt);
@@ -61,7 +61,7 @@ public:
 
     for (int i = 0; i < opt.threads; ++i)
     {
-      auto io = std::make_shared<io_service_type>();
+      auto io = std::make_shared<io_context_type>();
       auto desc = _origin->template dup< descriptor_type >( *io );
       auto h = std::make_shared<holder_type>( std::move( desc ) );
       _dup_list.push_back(h);
@@ -75,18 +75,17 @@ public:
       _threads.push_back( std::thread([io, tup, tdown, tstat]()
       {
         auto thread_id = std::this_thread::get_id();
-        
+
         if (tup) tup(thread_id);
-        iow::system::error_code ec;
         if ( tstat == nullptr )
-          io->run(ec);
+          io->run();
         else
         {
           for (;;)
           {
             auto start_ts = std::chrono::steady_clock::now();
-            size_t handlers = io->run_one(ec);
-            if ( ec || handlers == 0 )
+            size_t handlers = io->run_one();
+            if ( handlers == 0 )
               break;
 
             auto finish_ts = std::chrono::steady_clock::now();
@@ -95,19 +94,12 @@ public:
               tstat( thread_id, handlers, span );
           }
         }
-        
-        if (!ec)
-        {
-          IOW_LOG_MESSAGE("mtdup thread stopped")
-        }
-        else
-        {
-          IOW_LOG_FATAL("mtdup thread io_service::run error: " << ec.message())
-        }
+
+        IOW_LOG_MESSAGE("mtdup thread stopped")
         if (tdown) tdown(thread_id);
       }));
     }
-    
+
   }
 
   template<typename Opt>
@@ -124,17 +116,17 @@ public:
     _origin->close();
     for (auto h : _dup_list)
     {
-      // сначала закрываем, чтоб реконнект на другой ассептор не прошел 
+      // сначала закрываем, чтоб реконнект на другой ассептор не прошел
       h->close();
     }
 
-    
+
     _origin->stop();
     for (auto h : _dup_list)
     {
       h->stop();
     }
-    
+
 
     for (auto s : _services)
     {

@@ -12,17 +12,17 @@ class server
   : private server_base<Acceptor>
 {
   typedef server_base<Acceptor> super;
-  
-public: 
-  typedef typename super::io_service_type io_service_type;
+
+public:
+  typedef typename super::io_context_type io_context_type;
   typedef Acceptor acceptor_type;
   typedef std::shared_ptr<acceptor_type> acceptor_ptr;
   typedef typename acceptor_type::descriptor_type descriptor_type;
-  
-  explicit server(io_service_type& io)
-    : super( std::move( descriptor_type(io) ) )
+
+  explicit server(io_context_type& io)
+    : super( std::move( descriptor_type(io, nullptr) ) )
   {}
-  
+
   template<typename Opt>
   void start(Opt opt)
   {
@@ -35,5 +35,5 @@ public:
     super::stop();
   }
 };
-  
+
 }}}

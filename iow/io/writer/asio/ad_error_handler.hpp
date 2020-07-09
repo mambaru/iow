@@ -11,16 +11,16 @@ namespace iow{ namespace io{ namespace writer{ namespace asio{
 struct ad_error_handler
 {
   template<typename T, typename P>
-  void operator()(T& t, P p, const ::iow::system::error_code& ec) const
+  void operator()(T& t, P p, const boost::system::error_code& ec) const
   {
     t.get_aspect().template get< ::iow::io::writer::_rollback_ >()(t, std::move(p));
-    if ( ec.value() == iow::system::errc::operation_would_block )
+    if ( ec.value() == boost::system::errc::operation_would_block )
     {
       IOW_LOG_WARNING("iow::io::writer::asio::ad_error_handler (operation_would_block " 
                       << ec.value() << ") " << ec.message());
       t.get_aspect().template get<_more_>()(t);
     }
-    else if ( ec.value() != iow::system::errc::operation_canceled )
+    else if ( ec.value() != boost::system::errc::operation_canceled )
     {
       IOW_LOG_ERROR("iow::io::writer::asio::ad_error_handler ("
                       << ec.value() << ") " << ec.message());

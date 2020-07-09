@@ -36,8 +36,8 @@ using client = ::iow::io::client::client< connection_base<A> >;
 {
   typedef client_base<> super;
 public:
-  typedef super::io_service_type io_service_type; 
-  explicit client(io_service_type& io)
+  typedef super::io_context_type io_context_type; 
+  explicit client(io_context_type& io)
     : super( io )
   {}
 };*/

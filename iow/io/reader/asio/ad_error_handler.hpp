@@ -14,18 +14,18 @@ namespace iow{ namespace io{ namespace reader{ namespace asio{
 struct ad_error_handler
 {
   template<typename T, typename P>
-  void operator()(T& t, P p, const ::iow::system::error_code& ec) const
+  void operator()(T& t, P p, const boost::system::error_code& ec) const
   {
     t.get_aspect().template get< ::iow::io::reader::_rollback_>()(t, std::move(p));
-    if ( ec.value() == iow::system::errc::operation_would_block )
+    if ( ec.value() == boost::system::errc::operation_would_block )
     {
-      IOW_LOG_WARNING("iow::io::reader::asio::ad_error_handler (operation_would_block " 
+      IOW_LOG_WARNING("iow::io::reader::asio::ad_error_handler (operation_would_block "
                       << ec.value() << ") " << ec.message());
       t.get_aspect().template get<_more_>()(t);
     }
-    else if ( ec.value() != iow::system::errc::operation_canceled )
+    else if ( ec.value() != boost::system::errc::operation_canceled )
     {
-      if ( ec.value() != iow::asio::error::eof )
+      if ( ec.value() != boost::asio::error::eof )
       {
         IOW_LOG_ERROR("iow::io::reader::asio::ad_error_handler ("
                       << ec.value() << ") " << ec.message());
@@ -36,7 +36,7 @@ struct ad_error_handler
       {
         t.get_aspect().template get< ::iow::io::_shutdown_>()(t, nullptr);
       }
-      // Если исполльзовать в акцепторе, то fatal_handler использовать 
+      // Если исполльзовать в акцепторе, то fatal_handler использовать
     }
     else
     {

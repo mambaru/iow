@@ -13,7 +13,7 @@
 namespace iow{ namespace io{ namespace client{
 
 template<typename Connection >
-class client 
+class client
   : public Connection
   , public std::enable_shared_from_this< client<Connection> >
 {
@@ -22,31 +22,31 @@ public:
   typedef client<Connection> self;
   typedef typename super::data_ptr data_ptr;
   typedef typename super::descriptor_type descriptor_type;
-  typedef ::iow::asio::io_service io_service_type;
+  typedef boost::asio::io_context io_context_type;
   typedef typename super::mutex_type mutex_type;
   typedef typename super::output_handler_type output_handler_t;
   typedef std::vector< data_ptr > wait_data_t;
-  
+
   ~client()
   {
   }
-  
-  explicit client( io_service_type& io)
-    : super(std::move(descriptor_type(io)) )
+
+  explicit client( io_context_type& io)
+    : super(std::move(descriptor_type(io, nullptr)) )
     , _started(false)
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
   {
   }
-  
-  client( io_service_type& , descriptor_type&& desc)
+
+  client( io_context_type& , descriptor_type&& desc)
     : super(std::move(desc) )
     , _started(false)
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)
   {
   }
-  
+
   template<typename Opt>
   void start(Opt opt)
   {
@@ -80,7 +80,7 @@ public:
   void stop()
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
-    if ( !_started ) 
+    if ( !_started )
       return;
     _started = false;
     _ready_for_write = false;
@@ -104,9 +104,9 @@ public:
   data_ptr send(data_ptr d)
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
-    
+
     if ( d==nullptr )
-      return nullptr;    
+      return nullptr;
 
     if ( _ready_for_write && _output_handler!=nullptr )
     {
@@ -119,7 +119,7 @@ public:
     }
     return nullptr;
   }
-  
+
   void send( data_ptr d, io_id_t , output_handler_t handler)
   {
     auto dd = this->send( std::move(d) ) ;
@@ -130,7 +130,7 @@ public:
   }
 
 private:
-  
+
   template<typename Opt>
   void client_start_(Opt opt)
   {
@@ -138,33 +138,33 @@ private:
     super::start_(*this, opt.connection);
   }
 
-  
+
   void client_stop_()
   {
     super::stop_(*this);
     _ready_for_write = false;
     _output_handler = nullptr;
   }
-  
+
   void startup_handler_(io_id_t, output_handler_t handler)
   {
     _ready_for_write = true;
     _output_handler = handler;
   }
-  
+
   template<typename Opt>
   void delayed_reconnect_(Opt opt)
   {
     if (!this->_started)
       return;
-    
+
     super::close_(*this);
-    
+
     if ( _workflow!= nullptr )
     {
       std::weak_ptr<self> wthis = this->shared_from_this();
-      // Здесь owner wrap не нужен, т.к. объект сбрасывается после постановки задания в очередь 
-      _workflow->safe_post( 
+      // Здесь owner wrap не нужен, т.к. объект сбрасывается после постановки задания в очередь
+      _workflow->safe_post(
         std::chrono::milliseconds( this->_reconnect_timeout_ms ),
         [opt, wthis]() mutable
         {
@@ -181,15 +181,15 @@ private:
               IOW_LOG_ERROR("Client Reconnect ERROR. Owner is destroyed.");
             }
           }
-        } 
+        }
       ); // safe_post
-    } 
+    }
     else
     {
       IOW_LOG_FATAL("Reconnect not supported. Required initialize 'workflow'.")
     }
   }
-  
+
   template<typename Opt>
   void upgrate_options_(Opt& opt)
   {
@@ -197,7 +197,7 @@ private:
     std::weak_ptr<self> wthis = this->shared_from_this();
     opt.args.connect_handler = this->wrap_(*this, [wthis, opt2]()
     {
-      if ( opt2.args.connect_handler!=nullptr ) 
+      if ( opt2.args.connect_handler!=nullptr )
         opt2.args.connect_handler();
 
       if ( auto pthis = wthis.lock() )
@@ -207,11 +207,11 @@ private:
       }
     }, nullptr);
 
-    opt.args.error_handler = [wthis, opt2](iow::system::error_code ec)
+    opt.args.error_handler = [wthis, opt2](boost::system::error_code ec)
     {
       IOW_LOG_MESSAGE("iow::io::client error handler: " << ec.message() )
-      
-      if ( opt2.args.error_handler!=nullptr ) 
+
+      if ( opt2.args.error_handler!=nullptr )
         opt2.args.error_handler(ec);
       if ( auto pthis = wthis.lock() )
       {
@@ -220,13 +220,13 @@ private:
         pthis->delayed_reconnect_(opt2);
       }
     };
-    
-    opt.connection.shutdown_handler = [wthis, opt2]( io_id_t io_id) 
+
+    opt.connection.shutdown_handler = [wthis, opt2]( io_id_t io_id)
     {
       IOW_LOG_MESSAGE("iow::io::client connection shutdown handler" )
-      if ( opt2.connection.shutdown_handler!=nullptr ) 
+      if ( opt2.connection.shutdown_handler!=nullptr )
         opt2.connection.shutdown_handler(io_id);
-      
+
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<mutex_type> lk( pthis->mutex() );
@@ -256,7 +256,7 @@ private:
       {
         only_for_log(d);
         IOW_LOG_ERROR("Client input_handler not set [" << d << "]" )
-      }; 
+      };
     }
  }
 private:

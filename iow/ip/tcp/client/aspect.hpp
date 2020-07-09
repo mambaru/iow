@@ -12,18 +12,18 @@ namespace iow{ namespace ip{ namespace tcp{ namespace client{
 struct ad_sync_resolver
 {
   template<typename T, typename Opt>
-  ::iow::asio::ip::tcp::endpoint operator()(T& t, const Opt& opt) const
+  boost::asio::ip::tcp::endpoint operator()(T& t, const Opt& opt) const
   {
-    ::iow::system::error_code ec;
-    ::iow::asio::ip::tcp::resolver resolver( t.descriptor().get_io_service() );
-    
-    auto reitr = resolver.resolve({opt.addr, opt.port}/*, ec*/);
-    /*if ( ec )
+    boost::system::error_code ec;
+    boost::asio::ip::tcp::resolver resolver( t.descriptor().get_executor() );
+
+    auto reitr = resolver.resolve(opt.addr, opt.port, ec);
+    if ( ec )
     {
       IOW_LOG_ERROR("Client Reslove: " << ec.message())
-      return ::iow::asio::ip::tcp::endpoint();
-    }*/
-    ::iow::asio::ip::tcp::endpoint endpoint = *reitr;
+      return boost::asio::ip::tcp::endpoint();
+    }
+    boost::asio::ip::tcp::endpoint endpoint = *(reitr.begin());
     IOW_LOG_MESSAGE("Client Reslove: " << opt.addr << ":" << opt.port << " " << ec.message())
     return endpoint;
   }
@@ -35,5 +35,5 @@ struct aspect : fas::aspect<
   fas::advice< ::iow::io::client::_sync_resolver_, ad_sync_resolver>,
   ::iow::ip::tcp::connection::aspect
 >{};
-  
+
 }}}}

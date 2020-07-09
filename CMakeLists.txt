@@ -20,6 +20,7 @@ target_include_directories(iow PUBLIC ${iow_SOURCE_DIR})
 include(FindThreads)
 find_package(Boost REQUIRED system )
 target_link_libraries(iow PUBLIC faslib wjson wlog wflow ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+target_compile_definitions(iow PRIVATE -DBOOST_ASIO_NO_DEPRECATED)
 
 if ( BUILD_TESTING )
   enable_testing()

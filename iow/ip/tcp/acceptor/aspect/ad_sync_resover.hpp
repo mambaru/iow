@@ -8,13 +8,11 @@ namespace iow{ namespace ip{ namespace tcp{ namespace acceptor{
 struct ad_sync_resolver
 {
   template<typename T, typename Opt>
-  ::iow::asio::ip::tcp::endpoint operator()(T& t, const Opt& opt) const
+  boost::asio::ip::tcp::endpoint operator()(T& t, const Opt& opt) const
   {
-    ::iow::asio::ip::tcp::resolver resolver( t.descriptor().get_io_service() );
-    ::iow::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
-      opt.addr, 
-      opt.port
-    });
+    boost::asio::ip::tcp::resolver resolver( t.descriptor().get_executor() );
+    boost::asio::ip::tcp::resolver::results_type results = resolver.resolve(opt.addr, opt.port);
+    boost::asio::ip::tcp::endpoint endpoint = *(results.begin());
     return endpoint;
   }
 };

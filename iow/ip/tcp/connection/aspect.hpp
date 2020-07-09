@@ -16,7 +16,7 @@
 namespace iow{ namespace ip{ namespace tcp{ namespace connection{
 
 struct aspect : fas::aspect<
-    fas::type< ::iow::io::descriptor::_descriptor_type_, ::iow::asio::ip::tcp::socket >,
+    fas::type< ::iow::io::descriptor::_descriptor_type_, boost::asio::ip::tcp::socket >,
     fas::type< ::iow::io::_options_type_, options >,
     ::iow::io::socket::stream::aspect,
     ::iow::io::reader::asio::aspect,

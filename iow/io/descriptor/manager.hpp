@@ -15,23 +15,22 @@ public:
   typedef DescriptorHolder holder_type;
   typedef std::shared_ptr<holder_type> holder_ptr;
   typedef typename holder_type::descriptor_type descriptor_type;
-  //typedef typename holder_type::options_type options_type;
   typedef typename holder_type::io_id_type io_id_type;
-  typedef ::iow::asio::io_service io_service;
+  typedef boost::asio::io_context io_context;
 
   template<typename Opt>
   explicit manager(Opt&& opt)
     : _initilizer([opt](holder_ptr h){ h->initialize(opt);})
   {
-    
+
   }
-  
+
   void attach(io_id_type id, const holder_ptr& h)
   {
     _holders[id] = h;
   }
 
-  holder_ptr create(io_service& io)
+  holder_ptr create(const boost::asio::executor& io)
   {
     auto h =  std::make_shared<holder_type>( descriptor_type(io) );
     this->_initilizer(h);
@@ -57,7 +56,7 @@ public:
       IOW_LOG_ERROR("iow::io::descriptor::manager::erase: id=" << id << " not found")
     }
   }
-  
+
   size_t size() const
   {
     return _holders.size();

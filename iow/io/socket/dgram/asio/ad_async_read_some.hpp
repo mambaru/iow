@@ -22,7 +22,7 @@ struct ad_async_read_some
     };
     
     t.descriptor().async_receive_from( 
-      ::iow::asio::buffer( p.first, p.second ),
+      boost::asio::buffer( p.first, p.second ),
       *pep, 
       std::bind(handler, _1, _2, set_ep)
     );
