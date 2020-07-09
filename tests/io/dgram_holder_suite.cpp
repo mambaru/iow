@@ -12,8 +12,8 @@
 
 namespace {
 typedef std::vector<char> data_type;
-typedef iow::asio::posix::stream_descriptor descriptor1_type;
-typedef iow::asio::ip::udp::socket descriptor2_type;
+typedef boost::asio::posix::stream_descriptor descriptor1_type;
+typedef boost::asio::ip::udp::socket descriptor2_type;
 typedef iow::io::socket::dgram::options options_type;
 
 struct aspect_stream : fas::aspect<
@@ -33,13 +33,13 @@ typedef ::iow::io::descriptor::holder<aspect_stream> stream_holder;
 UNIT(dgram_holder_unit, "")
 {
   using namespace fas::testing;
-  iow::asio::io_service service;
+  boost::asio::io_context service;
   boost::asio::ip::udp::endpoint ep(boost::asio::ip::udp::v4(), 32000);
-  boost::asio::ip::udp::socket sock_server(service);
+  boost::asio::ip::udp::socket sock_server(service, nullptr);
   sock_server.open(boost::asio::ip::udp::v4());
   sock_server.bind( ep );
-  
-  boost::asio::ip::udp::socket sock_client(service, boost::asio::ip::udp::v4());
+
+  boost::asio::ip::udp::socket sock_client(service, boost::asio::ip::udp::v4(), nullptr);
   auto server = std::make_shared<stream_holder>( std::move(sock_server) );
   options_type opt;
   opt.reader.sep="";

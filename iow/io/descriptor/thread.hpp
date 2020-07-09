@@ -24,12 +24,12 @@ public:
   typedef std::thread thread_type;
   typedef std::recursive_mutex mutex_type;
   typedef std::shared_ptr<thread_type> thread_ptr;
-  typedef ::iow::asio::io_service io_service_type;
-  typedef std::shared_ptr<io_service_type> io_service_ptr;
+  typedef boost::asio::io_context io_context_type;
+  typedef std::shared_ptr<io_context_type> io_context_ptr;
 
-  explicit thread(io_service_type& io)
+  explicit thread(io_context_type& io)
     : _started(false)
-    , _io_service(io)
+    , _io_context(io)
   {
   }
 
@@ -52,18 +52,17 @@ public:
     if ( _holder != nullptr ) return;
 
     if ( opt.threads != 0 )
-      _io_service2 = std::make_shared<io_service_type>();
+      _io_context2 = std::make_shared<io_context_type>();
 
-    _holder = std::make_shared<holder_type>( (_io_service2!=nullptr ? (*_io_service2) : _io_service) );
+    _holder = std::make_shared<holder_type>( (_io_context2!=nullptr ? (*_io_context2) : _io_context) );
     _holder->start(opt1);
-    if ( io_service_ptr io = this->_io_service2 )
+    if ( io_context_ptr io = this->_io_context2 )
     {
       _thread = std::thread([io]()
       {
-        io_service_type::work wrk( *io );
-        iow::system::error_code ec;
-        io->run(ec);
-        if (ec) { IOW_LOG_ERROR("io::descriptor::thread::thread io_service.run error" << ec.message()) };
+        typedef boost::asio::executor_work_guard<io_context_type::executor_type> work_type;
+        work_type wrk( io->get_executor() );
+        io->run();
       });
     }
   }
@@ -73,7 +72,7 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
     if ( _holder == nullptr ) return;
-    bool f1 = (_io_service2 == nullptr);
+    bool f1 = (_io_context2 == nullptr);
     bool f2 = (opt.threads == 0);
 
     if ( f1 != f2)
@@ -116,10 +115,10 @@ public:
   {
     _holder->stop();
     _holder = nullptr;
-    if ( _io_service2 != nullptr )
+    if ( _io_context2 != nullptr )
     {
-      _io_service2->stop();
-      _io_service2 = nullptr;
+      _io_context2->stop();
+      _io_context2 = nullptr;
       if ( _thread.joinable() )
       {
         try
@@ -141,8 +140,8 @@ public:
 
 private:
   bool _started;
-  io_service_type& _io_service;
-  io_service_ptr _io_service2;
+  io_context_type& _io_context;
+  io_context_ptr _io_context2;
   mutable mutex_type _mutex;
   holder_ptr _holder;
   thread_type _thread;

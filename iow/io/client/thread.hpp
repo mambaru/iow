@@ -16,10 +16,10 @@ class thread
   typedef ::iow::io::descriptor::thread< Client > super;
 public:
   typedef Client client_type;
-  typedef typename client_type::io_service_type io_service_type;
+  typedef typename client_type::io_context_type io_context_type;
   typedef typename client_type::data_ptr data_ptr;
 
-  explicit thread(io_service_type& io)
+  explicit thread(io_context_type& io)
     : super(io)
   {
   }

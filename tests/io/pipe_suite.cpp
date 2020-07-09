@@ -23,15 +23,15 @@ struct ad_read_some
   {
     if ( t.input.empty() )
       return;
-    
+
     auto dd = std::make_shared<typename T::input_t>( std::move(d) );
-    t.service.post([&t, dd](){
+    boost::asio::post(t.service, [&t, dd](){
       auto tmp = std::move(t.input.front());
       t.input.pop_front();
       std::copy(tmp->begin(), tmp->end(), (*dd)->begin());
       (*dd)->resize(tmp->size());
       t.get_aspect().template get< ::iow::io::reader::_complete_>()(t, std::move(*dd));
-    });
+    }, nullptr);
   }
 };
 
@@ -42,11 +42,11 @@ struct ad_write_some
   {
     if ( p.first == nullptr )
       return;
-    
-    t.service.post([&t, p](){
+
+    boost::asio::post(t.service, [&t, p](){
       t.result += std::string(p.first, p.first + p.second);
       t.get_aspect().template get< ::iow::io::writer::_complete_>()(t, std::move(p) /*.first, p.second*/ );
-    });
+    }, nullptr);
   }
 };
 
@@ -64,7 +64,7 @@ struct ad_input_factory
 struct ad_entry
 {
   template<typename T>
-  void operator()(T& , typename T::output_t d) 
+  void operator()(T& , typename T::output_t d)
   {
     this->data = std::move(d);
   }
@@ -114,7 +114,7 @@ struct ad_next
 
 
 class writer1
-  : public ::iow::io::io_base< fas::aspect< 
+  : public ::iow::io::io_base< fas::aspect<
       fas::alias< ::iow::io::reader::_confirm_, ::iow::io::writer::_output_>,
       fas::advice< ::iow::io::reader::_next_, ad_input_factory>,
       fas::advice< ::iow::io::writer::_attach_, ad_entry>,
@@ -136,21 +136,21 @@ public:
   typedef data_ptr input_t;
   typedef data_ptr output_t;
 
-  explicit writer1(::iow::asio::io_service& io)
-    : service(io) 
+  explicit writer1(boost::asio::io_context& io)
+    : service(io)
   {}
-  
-  void start() 
+
+  void start()
   {
-    this->start_(*this, fas::empty_type() ); 
+    this->start_(*this, fas::empty_type() );
   }
-  
+
   void add(std::string val)
   {
     input.push_back( std::make_unique<data_type>(val.begin(), val.end()) );
   }
-  
-  ::iow::asio::io_service& service;
+
+  boost::asio::io_context& service;
   std::list<data_ptr> input;
   std::string result;
 };
@@ -158,18 +158,18 @@ public:
 UNIT(pipe_unit, "")
 {
   using namespace fas::testing;
-  
-  
-  ::iow::asio::io_service io;
+
+
+  boost::asio::io_context io;
   writer1 f(io);
-  
+
   f.add("Hello ");
   f.add("world");
   f.add("!");
   f.start();
   io.run();
   t << equal<expect, std::string>(f.result, "Hello world!") << f.result << FAS_TESTING_FILE_LINE;
-  
+
 }
 
 BEGIN_SUITE(pipe,"")

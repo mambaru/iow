@@ -19,7 +19,7 @@ public:
   explicit worker_base(descriptor_type&& desc)
     : super( std::forward<descriptor_type>(desc))
   {}
-  
+
   template<typename O>
   void listen(O opt)
   {
@@ -46,8 +46,8 @@ class server: public server_base<>
 {
   typedef server_base<> super;
 public:
-  typedef super::io_service_type io_service_type; 
-  explicit server(io_service_type& io)
+  typedef super::io_context_type io_context_type;
+  explicit server(io_context_type& io)
     : super( io )
   {}
 };

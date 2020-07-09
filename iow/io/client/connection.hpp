@@ -18,7 +18,7 @@ struct ad_connect
     auto popt = std::make_shared<Opt>(opt);
     std::weak_ptr<T> wthis = t.shared_from_this();
     
-    auto handler = t.wrap([wthis, popt](const ::iow::system::error_code& ec)
+    auto handler = t.wrap([wthis, popt](const boost::system::error_code& ec)
     {
       if ( auto p = wthis.lock() )
       {
@@ -50,7 +50,7 @@ struct ad_connect
     }
     else
     {
-      ::iow::system::error_code ec;
+      boost::system::error_code ec;
       t.descriptor().connect( endpoint, ec);
       handler(ec);
     }

@@ -30,15 +30,15 @@ struct ad_some
   {
     if ( t.input.empty() )
       return;
-    
+
     auto dd = std::make_shared<typename T::input_t>( std::move(d) );
-    t.service.post([&t, dd](){
+    boost::asio::post(t.service, [&t, dd](){
       auto tmp = std::move(t.input.front());
       t.input.pop_front();
       std::copy(tmp->begin(), tmp->end(), (*dd)->begin());
       (*dd)->resize(tmp->size());
       t.get_aspect().template get< ::iow::io::reader::_complete_>()(t, std::move(*dd));
-    });
+    }, nullptr);
   }
 };
 
@@ -55,7 +55,7 @@ struct ad_factory
 
 
 class flow1
-  : public ::iow::io::io_base< fas::aspect< 
+  : public ::iow::io::io_base< fas::aspect<
       //::iow::io::flow::aspect< _handler_ /*, data_ptr*/ >::advice_list,
       fas::advice<_handler_, ad_handler>,
       fas::advice< ::iow::io::reader::_next_, ad_factory>,
@@ -68,25 +68,25 @@ class flow1
       fas::type< ::iow::io::_options_type_, fas::empty_type >
     > >
 {
-  
+
 public:
   typedef data_ptr input_t;
 
-  explicit flow1(::iow::asio::io_service& io)
-    : service(io) 
+  explicit flow1(boost::asio::io_context& io)
+    : service(io)
   {}
-  
-  void start() 
+
+  void start()
   {
-    this->start_(*this, fas::empty_type() ); 
+    this->start_(*this, fas::empty_type() );
   }
-  
+
   void add(std::string val)
   {
     input.push_back( std::make_unique<data_type>(val.begin(), val.end()) );
   }
-  
-  ::iow::asio::io_service& service;
+
+  boost::asio::io_context& service;
   std::list<data_ptr> input;
   std::string result;
 };
@@ -94,7 +94,7 @@ public:
 UNIT(flow, "")
 {
   using namespace fas::testing;
-  ::iow::asio::io_service io;
+  boost::asio::io_context io;
   flow1 f(io);
   f.add("Hello ");
   f.add("world");

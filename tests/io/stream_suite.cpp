@@ -26,21 +26,15 @@ struct ad_read_some
   {
     if ( t.input.empty() )
       return;
-    
-    //auto dd = std::make_shared<typename T::input_t>( std::move(d) );
-    
-    t.service.post([&t, d](){
+
+    boost::asio::post(t.service, [&t, d](){
       auto dd = d;
       auto tmp = std::move(t.input.front());
       t.input.pop_front();
-      /*std::copy(tmp->begin(), tmp->end(), (*dd)->begin());
-      (*dd)->resize(tmp->size());
-    */
       std::copy(tmp->begin(), tmp->end(), dd.first);
       dd.second = tmp->size();
-      
       t.get_aspect().template get< ::iow::io::reader::_complete_>()(t, std::move(dd));
-    });
+    }, nullptr);
   }
 };
 
@@ -51,29 +45,25 @@ struct ad_write_some
   {
     if ( p.first == nullptr )
       return;
-    
-    t.service.post([&t, p](){
+
+    boost::asio::post(t.service, [&t, p](){
       t.result += std::string(p.first, p.first + p.second);
-      t.get_aspect().template get< ::iow::io::writer::_complete_>()(t, std::move(p) /*.first, p.second*/ );
-    });
+      t.get_aspect().template get< ::iow::io::writer::_complete_>()(t, std::move(p));
+    }, nullptr);
   }
 };
 
 struct stream_options
 {
-  //typedef ::iow::io::data_pool< data_type > buffer_pool_type;
-  //typedef std::shared_ptr<buffer_pool_type> buffer_pool_ptr;
   typedef ::iow::io::write_buffer_options write_buffer_options;
   typedef ::iow::io::read_buffer_options read_buffer_options;
-  //typedef ::iow::io::data_pool_options data_pool_options;
+
   write_buffer_options writer;
   read_buffer_options reader;
-  //data_pool_options data_pool;
 };
 
-
 class stream
-  : public ::iow::io::io_base< fas::aspect< 
+  : public ::iow::io::io_base< fas::aspect<
       fas::advice< ::iow::io::reader::_some_, ad_read_some>,
       fas::advice< ::iow::io::writer::_some_, ad_write_some>,
       ::iow::io::basic::aspect<std::recursive_mutex>::advice_list,
@@ -88,24 +78,24 @@ public:
   typedef data_ptr input_t;
   typedef data_ptr output_t;
 
-  explicit stream(::iow::asio::io_service& io)
-    : service(io) 
+  explicit stream(boost::asio::io_context& io)
+    : service(io)
   {}
-  
-  void start() 
+
+  void start()
   {
     stream_options opt;
     opt.reader.sep.clear();
     opt.writer.sep.clear();
-    this->start_(*this, opt ); 
+    this->start_(*this, opt );
   }
-  
+
   void add(std::string val)
   {
     input.push_back( std::make_unique<data_type>(val.begin(), val.end()) );
   }
-  
-  ::iow::asio::io_service& service;
+
+  boost::asio::io_context& service;
   std::list<data_ptr> input;
   std::string result;
 };
@@ -113,17 +103,17 @@ public:
 UNIT(stream_unit, "")
 {
   using namespace fas::testing;
-  
-  ::iow::asio::io_service io;
+
+  boost::asio::io_context io;
   stream f(io);
-  
+
   f.add("Hello ");
   f.add("world");
   f.add("!");
   f.start();
   io.run();
   t << equal<expect, std::string>(f.result, "Hello world!") << f.result << FAS_TESTING_FILE_LINE;
-  
+
 }
 
 BEGIN_SUITE(stream,"")

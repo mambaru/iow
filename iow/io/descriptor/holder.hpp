@@ -28,7 +28,7 @@ public:
 
   holder_base(const holder_base& ) = delete;
   void operator=(const holder_base& ) = delete;
-  
+
   explicit holder_base(descriptor_type&& desc)
     : super()
     , _descriptor(std::move(desc))
@@ -68,17 +68,17 @@ public:
   template<typename Descriptor>
   Descriptor dup()
   {
-    return std::move( this->dup<Descriptor>(this->get_io_service()) );
+    return std::move( this->dup<Descriptor>(this->get_io_context()) );
   }
 
 protected:
-  
+
   template<typename T>
   void close_(T& t)
   {
     t.get_aspect().template get<_close_>()(t);
   }
-  
+
   template<typename T, typename Opt>
   void reconfigure_(T& t, Opt&& opt)
   {
@@ -101,7 +101,7 @@ protected:
     typedef Descriptor dup_descriptor_type;
     typedef typename dup_descriptor_type::native_handle_type dup_native_type;
     dup_native_type d = ::dup( this->descriptor().native_handle() );
-    dup_descriptor_type dup_descriptor(io, protocol, d);
+    dup_descriptor_type dup_descriptor(io, protocol, d, nullptr);
     return dup_descriptor;
   }
 
@@ -110,9 +110,9 @@ protected:
   void start_(T& /*t*/)
   {
     if ( _start_with_opt!= nullptr)
-      _start_with_opt();  
+      _start_with_opt();
   }
-  
+
 private:
   descriptor_type _descriptor;
   std::function<void()> _start_with_opt;
@@ -128,7 +128,7 @@ class holder
 public:
   typedef typename super::mutex_type mutex_type;
   typedef typename super::descriptor_type descriptor_type;
-  
+
   explicit holder(descriptor_type&& desc)
     : super(std::move(desc) )
   {}
@@ -171,7 +171,7 @@ public:
     std::lock_guard< mutex_type > lk( super::mutex() );
     this->close_(*this);
   }
-  
+
   void stop()
   {
     std::lock_guard< mutex_type > lk( super::mutex() );
@@ -185,7 +185,7 @@ public:
     super::shutdown_(*this, std::forward<Handler>(handler));
   }
 
-  
+
 };
 
 }}}

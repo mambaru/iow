@@ -12,19 +12,16 @@
 #include <vector>
 
 namespace iow{ namespace ip{ namespace udp{ namespace server{
-  
+
 struct _open_;
 struct _sync_resolver_;
 struct ad_sync_resolver
 {
   template<typename T, typename Opt>
-  ::iow::asio::ip::udp::endpoint operator()(T& t, const Opt& opt) const
+  boost::asio::ip::udp::endpoint operator()(T& t, const Opt& opt) const
   {
-    ::iow::asio::ip::udp::resolver resolver( t.descriptor().get_io_service() );
-    ::iow::asio::ip::udp::endpoint endpoint = *resolver.resolve({
-      opt.addr, 
-      opt.port
-    });
+    boost::asio::ip::udp::resolver resolver( t.descriptor().get_executor() );
+    boost::asio::ip::udp::endpoint endpoint = *(resolver.resolve(opt.addr, opt.port).begin());
     return endpoint;
   }
 };
@@ -47,7 +44,7 @@ struct ad_open
 struct aspect : fas::aspect<
     fas::advice<_open_, ad_open>,
     fas::advice<_sync_resolver_, ad_sync_resolver>,
-    fas::type< ::iow::io::descriptor::_descriptor_type_, ::iow::asio::ip::udp::socket >,
+    fas::type< ::iow::io::descriptor::_descriptor_type_, boost::asio::ip::udp::socket >,
     fas::value< ::iow::io::socket::dgram::_current_endpoint_, std::shared_ptr< boost::asio::ip::udp::endpoint > >,
     fas::type< ::iow::io::_options_type_, options >,
     ::iow::io::socket::dgram::aspect,
@@ -56,5 +53,5 @@ struct aspect : fas::aspect<
     ::iow::io::rw::aspect,
     ::iow::io::basic::aspect< std::recursive_mutex >::advice_list
 >{};
-  
+
 }}}}

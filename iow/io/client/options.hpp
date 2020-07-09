@@ -19,7 +19,7 @@ struct options
   struct {
     std::shared_ptr< wflow::workflow > workflow;
     std::function<void()> connect_handler;
-    std::function<void( ::iow::system::error_code )> error_handler;
+    std::function<void( boost::system::error_code )> error_handler;
   } args;
   
 };

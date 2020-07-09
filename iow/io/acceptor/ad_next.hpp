@@ -14,13 +14,13 @@ struct ad_next
     typedef typename context_type::connection_ptr connection_ptr;
     typedef typename connection_type::descriptor_type descriptor_type;
   };
-  
+
   template<typename T>
   auto operator()(T& t)  const
     -> typename get_type<T>::connection_ptr
   {
-    return t.get_aspect().template get<_context_>().manager->create( t.descriptor().get_io_service() );
+    return t.get_aspect().template get<_context_>().manager->create( t.descriptor().get_executor() );
   }
 };
-  
+
 }}}

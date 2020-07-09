@@ -8,9 +8,10 @@ int main()
   opt.threads = 3;
   opt.addr = "0.0.0.0";
   opt.port = "12345";
-  boost::asio::io_service ios;
-  boost::asio::io_service::work wrk(ios);
-  
+  boost::asio::io_context ios;
+  typedef boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_type;
+  work_type wrk(ios.get_executor());
+
   server_type srv(ios);
   srv.start(opt);
   ios.run();
