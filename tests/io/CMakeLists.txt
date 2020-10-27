@@ -8,8 +8,8 @@ set( SUITE_LIST
   dgram_holder_suite.cpp
 )
 
-add_executable( io_test $ENV{FAS_TESTING_CPP} io_test.cpp ${SUITE_LIST} )
-target_link_libraries(io_test PUBLIC iow )
+add_executable( io_test io_test.cpp ${SUITE_LIST} )
+target_link_libraries(io_test PUBLIC iow fas::testing)
 wci_test( TARGET io_test COMMAND io_test )
 
 if ( NOT CODE_COVERAGE )
@@ -22,5 +22,7 @@ if ( NOT CODE_COVERAGE )
 
   add_executable( udp_test udp_test.cpp)
   target_link_libraries( udp_test PUBLIC iow)
+
+  wci_utils(tcp_acceptor tcp_client udp_test)
 
 endif()

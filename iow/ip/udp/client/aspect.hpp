@@ -42,20 +42,6 @@ struct ad_open
   {
     const auto endpoint = t.get_aspect().template get<_sync_resolver_>()(t, opt);
     t.descriptor().open(endpoint.protocol());
-    //t.descriptor().bind(endpoint);
-    /*boost::system::error_code ec;
-    t.descriptor().connect(endpoint, ec);
-    if ( !ec )
-    {
-      if ( opt.args.connect_handler!=nullptr )
-        opt.args.connect_handler();
-    }
-    else
-    {
-      IOW_LOG_ERROR("UDP connect error:" << ec.message() );
-      if ( opt.args.error_handler!=nullptr )
-        opt.args.error_handler(ec);
-    }*/
     t.get_aspect().template get< ::iow::io::socket::dgram::_current_endpoint_>()
       = std::make_shared<boost::asio::ip::udp::endpoint>(endpoint);
     if ( opt.args.connect_handler!=nullptr )

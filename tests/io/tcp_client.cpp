@@ -53,7 +53,7 @@ int main()
         sleep(1);
         g_io_context.stop();
         std::cout << "stop io ... ready" << std::endl;
-      });
+      }, nullptr);
     }
   };
   opt.addr = "0.0.0.0";
