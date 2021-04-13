@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iow/owner/owner.hpp>
+#include <wflow/owner.hpp>
 #include <iow/io/types.hpp>
 #include <fas/aop.hpp>
 #include <functional>
@@ -12,7 +12,7 @@ struct context
 {
   typedef ::iow::io::io_id_t io_id_type;
   typedef bool status_type;
-  typedef owner owner_type;
+  typedef wflow::owner owner_type;
   typedef MutexType mutex_type;
   typedef std::function<void(io_id_type)> shutdown_complete;
   
