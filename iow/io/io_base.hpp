@@ -4,8 +4,6 @@
 #include <fas/aop.hpp>
 #include <mutex>
 
-// Удалить
-#include <iow/owner/owner_handler.hpp>
 
 
 namespace iow{ namespace io{

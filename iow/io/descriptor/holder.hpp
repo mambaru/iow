@@ -1,6 +1,7 @@
 #pragma once
 #include <iow/io/io_base.hpp>
 #include <iow/io/descriptor/tags.hpp>
+#include <memory>
 #include <unistd.h>
 #include <functional>
 

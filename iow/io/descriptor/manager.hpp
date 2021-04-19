@@ -16,6 +16,7 @@ public:
   typedef std::shared_ptr<holder_type> holder_ptr;
   typedef typename holder_type::descriptor_type descriptor_type;
   typedef typename holder_type::io_id_type io_id_type;
+  typedef typename descriptor_type::executor_type executor_type; 
   typedef boost::asio::io_context io_context;
 
   template<typename Opt>
@@ -30,7 +31,7 @@ public:
     _holders[id] = h;
   }
 
-  holder_ptr create(const boost::asio::executor& io)
+  holder_ptr create(const executor_type& io)
   {
     auto h =  std::make_shared<holder_type>( descriptor_type(io) );
     this->_initilizer(h);
