@@ -12,7 +12,9 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: Install packages
-        run: bash setup.sh
+        run: |
+          export GITHUB_REPOSITORY=${GITHUB_REPOSITORY}
+          bash setup.sh
         working-directory: ./.github/workflows
 
       - name: Coverage report and push to master branches
