@@ -20,7 +20,7 @@ public:
   typedef typename acceptor_type::descriptor_type descriptor_type;
 
   explicit server(io_context_type& io)
-    : super( std::move( descriptor_type(io, nullptr) ) )
+    : super( std::move( descriptor_type(io/*, nullptr*/) ) )
   {}
 
   template<typename Opt>

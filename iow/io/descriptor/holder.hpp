@@ -102,7 +102,7 @@ protected:
     typedef Descriptor dup_descriptor_type;
     typedef typename dup_descriptor_type::native_handle_type dup_native_type;
     dup_native_type d = ::dup( this->descriptor().native_handle() );
-    dup_descriptor_type dup_descriptor(io, protocol, d, nullptr);
+    dup_descriptor_type dup_descriptor(io, protocol, d/*, nullptr*/);
     return dup_descriptor;
   }
 

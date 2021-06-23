@@ -32,7 +32,7 @@ public:
   }
 
   explicit client( io_context_type& io)
-    : super(std::move(descriptor_type(io, nullptr)) )
+    : super(std::move(descriptor_type(io/*, nullptr*/)) )
     , _started(false)
     , _ready_for_write(false)
     , _reconnect_timeout_ms(0)

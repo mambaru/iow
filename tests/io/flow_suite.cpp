@@ -38,7 +38,7 @@ struct ad_some
       std::copy(tmp->begin(), tmp->end(), (*dd)->begin());
       (*dd)->resize(tmp->size());
       t.get_aspect().template get< ::iow::io::reader::_complete_>()(t, std::move(*dd));
-    }, nullptr);
+    }/*, nullptr*/);
   }
 };
 

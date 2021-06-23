@@ -34,7 +34,7 @@ struct ad_read_some
       std::copy(tmp->begin(), tmp->end(), dd.first);
       dd.second = tmp->size();
       t.get_aspect().template get< ::iow::io::reader::_complete_>()(t, std::move(dd));
-    }, nullptr);
+    }/*, nullptr*/);
   }
 };
 
@@ -49,7 +49,7 @@ struct ad_write_some
     boost::asio::post(t.service, [&t, p](){
       t.result += std::string(p.first, p.first + p.second);
       t.get_aspect().template get< ::iow::io::writer::_complete_>()(t, std::move(p));
-    }, nullptr);
+    }/*, nullptr*/);
   }
 };
 

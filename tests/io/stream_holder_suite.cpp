@@ -50,8 +50,8 @@ UNIT(stream_holder_unit, "")
   int res2 = ::pipe(f2);
   t << message("pipe1: ") << res1 << " " << f1[0] << " " << f1[1] << std::endl;
   t << message("pipe2: ") << res2 << " " << f2[0] << " " << f2[1] << std::endl;
-  descriptor_type d1(service, f1[0], nullptr);
-  descriptor_type d2(service, f2[1], nullptr);
+  descriptor_type d1(service, f1[0]/*, nullptr*/);
+  descriptor_type d2(service, f2[1]/*, nullptr*/);
 
   auto h1 = std::make_shared<stream_holder_t>(std::move(d1));
   auto h2 = std::make_shared<stream_holder_t>(std::move(d2));
