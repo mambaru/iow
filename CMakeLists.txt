@@ -4,10 +4,10 @@ project(iow)
 
 include(cmake/ci.cmake)
 
-wci_getlib(NAME faslib)
-wci_getlib(NAME wjson)
-wci_getlib(NAME wlog)
-wci_getlib(NAME wflow)
+wci_submodule(NAME faslib)
+wci_submodule(NAME wjson)
+wci_submodule(NAME wlog)
+wci_submodule(NAME wflow)
 
 add_library(
   iow
@@ -28,7 +28,7 @@ endif()
 set(CPACK_PACKAGE_NAME "iow")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "9")
-set(CPACK_PACKAGE_VERSION_PATCH "3")
+set(CPACK_PACKAGE_VERSION_PATCH "4")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/Readme.md")
 set(CPACK_PACKAGE_CONTACT "migashko@gmail.com")
