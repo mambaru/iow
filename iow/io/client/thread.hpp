@@ -29,10 +29,22 @@ public:
   {
     if ( auto h = super::holder() )
     {
-      return std::move( h->send(std::move(d)) );
+      return h->send(std::move(d));
     }
 
     IOW_LOG_ERROR( "iow::io::client::thread::send drop [" << d << "]" )
+    return nullptr;
+  }
+
+  template<typename Opt>
+  data_ptr send(data_ptr d, const Opt& opt)
+  {
+    if ( auto h = super::holder() )
+    {
+      return h->send(std::move(d), opt);
+    }
+
+    IOW_LOG_ERROR( "iow::io::client::thread::send(opt) drop [" << d << "]" )
     return nullptr;
   }
 

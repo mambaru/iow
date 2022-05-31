@@ -16,12 +16,15 @@ struct ad_write_handler
     if ( !ec )
     {
       p.second = bytes_transferred;
-      IOW_LOG_TRACE("WRITED[" << std::string(p.first, p.first + p.second) << "] id=" << t.get_id_(t) )
+      IOW_LOG_TRACE("WRITED[" << std::string(p.first, p.first + p.second) << "] id=" << t.get_id_(t) << " size=" << bytes_transferred )
       t.get_aspect().template get< ::iow::io::writer::_complete_>()(t, std::move(p));
     }
     else
     {
       p.second = 0;
+      IOW_LOG_TRACE("WRITED ERROR[" << std::string(p.first, p.first + p.second) << "] id=" << t.get_id_(t) << " size=" << bytes_transferred 
+		      << ", ERROR: " << ec.message() )
+
       t.get_aspect().template get< _error_handler_>()(t, std::move(p), std::move(ec));
     }
   }

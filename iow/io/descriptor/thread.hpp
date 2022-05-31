@@ -110,6 +110,13 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     return _holder;
   }
+  
+  bool ready_for_write() const 
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    if ( _holder == nullptr ) return false;
+    return _holder->ready_for_write();
+  }
 
   void stop_()
   {

@@ -24,7 +24,7 @@ struct ad_sync_resolver
       return boost::asio::ip::tcp::endpoint();
     }
     boost::asio::ip::tcp::endpoint endpoint = *(reitr.begin());
-    IOW_LOG_MESSAGE("Client Reslove: " << opt.addr << ":" << opt.port << " " << ec.message())
+    IOW_LOG_DEBUG("Client Reslove: " << opt.addr << ":" << opt.port << " " << ec.message())
     return endpoint;
   }
 };

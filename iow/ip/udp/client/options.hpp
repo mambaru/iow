@@ -16,7 +16,7 @@ struct basic_options:
 };
 
 struct options:
-  public ::iow::io::client::options< basic_options >
+  public ::iow::io::client::client_options< basic_options >
 {
   
 };

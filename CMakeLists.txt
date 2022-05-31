@@ -17,7 +17,7 @@ add_library(
 wci_targets(iow)
 target_include_directories(iow PUBLIC ${iow_SOURCE_DIR})
 
-target_link_libraries(iow PUBLIC faslib wjson wlog wflow )
+target_link_libraries(iow PUBLIC faslib wjson wlog wflow)
 target_compile_definitions(iow PRIVATE -DBOOST_ASIO_NO_DEPRECATED)
 
 if ( BUILD_TESTING )

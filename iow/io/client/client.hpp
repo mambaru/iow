@@ -4,7 +4,6 @@
 
 #include <iow/logger.hpp>
 #include <iow/io/client/connection.hpp>
-#include <wflow/workflow.hpp>
 
 #include <memory>
 #include <cassert>
@@ -32,18 +31,14 @@ public:
   }
 
   explicit client( io_context_type& io)
-    : super(std::move(descriptor_type(io/*, nullptr*/)) )
-    , _started(false)
-    , _ready_for_write(false)
-    , _reconnect_timeout_ms(0)
+    :  super(std::move(descriptor_type(io)) )
+    , _io(io)
   {
   }
 
-  client( io_context_type& , descriptor_type&& desc)
+  client( io_context_type& io, descriptor_type&& desc)
     : super(std::move(desc) )
-    , _started(false)
-    , _ready_for_write(false)
-    , _reconnect_timeout_ms(0)
+    , _io(io)
   {
   }
 
@@ -51,22 +46,27 @@ public:
   void start(Opt opt)
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
-    IOW_LOG_MESSAGE("Client connect start " << opt.addr << ":" << opt.port << "" )
     if ( _started ) return;
-    if ( opt.args.workflow != nullptr )
+    if ( opt.args.delayed_handler != nullptr )
     {
-        _workflow = opt.args.workflow;
+        _delayed_handler = opt.args.delayed_handler;
     }
     else
     {
-      IOW_LOG_WARNING("iow::io::client workflow not set")
+      IOW_LOG_WARNING("iow::io::client delayed_handler not set")
     }
     _started = true;
-    _ready_for_write = false;
+    _connected = false;
+    _ready_for_write = opt.connect_by_request;
+    _connect_by_request = opt.connect_by_request;
     _reconnect_timeout_ms = opt.reconnect_timeout_ms;
+    _sequence_duplex_mode = opt.sequence_duplex_mode;
 
-    this->upgrate_options_(opt);
-    super::connect_( *this, opt );
+    if ( !_connect_by_request )
+    {
+      this->upgrate_options_(opt);
+      super::connect_( *this, opt );
+    }
   }
 
   template<typename Opt>
@@ -83,6 +83,7 @@ public:
     if ( !_started )
       return;
     _started = false;
+    _connected = false;
     _ready_for_write = false;
     super::stop_(*this);
   }
@@ -91,6 +92,8 @@ public:
   void shutdown(Handler&& handler)
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
+    _ready_for_write = false;
+    _connected = false;
     super::shutdown_( *this, std::forward<Handler>(handler) );
   }
 
@@ -98,27 +101,43 @@ public:
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
     _ready_for_write = false;
+    _connected = false;
     super::close_(*this);
+  }
+  
+  bool ready_for_write() const
+  {
+    std::lock_guard<mutex_type> lk( super::mutex() );
+    return _ready_for_write;
   }
 
   data_ptr send(data_ptr d)
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
 
-    if ( d==nullptr )
-      return nullptr;
-
-    if ( _ready_for_write && _output_handler!=nullptr )
-    {
-      _output_handler( std::move(d) );
-    }
-    else
-    {
-      IOW_LOG_ERROR("Client not conected. Not send: [" << d << "]")
+    if ( !_connected )
       return d;
-    }
-    return nullptr;
+
+    return this->send_( std::move(d) );
   }
+  
+  template<typename Opt>
+  data_ptr send(data_ptr d, Opt opt )
+  {
+    std::lock_guard<mutex_type> lk( super::mutex() );
+
+    if ( !_connected && _connect_by_request )
+    {
+      this->upgrate_options_(opt);
+      super::connect_( *this, opt );
+    }
+
+    if ( !_connected )
+      return d;
+
+    return this->send_(std::move(d));
+  }
+
 
   void send( data_ptr d, io_id_t , output_handler_t handler)
   {
@@ -130,6 +149,21 @@ public:
   }
 
 private:
+  
+  data_ptr send_(data_ptr d)
+  {
+    if ( d==nullptr )
+      return nullptr;
+
+    if ( _ready_for_write && _output_handler!=nullptr )
+    {
+      if ( _sequence_duplex_mode )
+        _ready_for_write = false;
+      _output_handler( std::move(d) );
+    }
+    return d;
+  }
+
 
   template<typename Opt>
   void client_start_(Opt opt)
@@ -142,12 +176,14 @@ private:
   void client_stop_()
   {
     super::stop_(*this);
+    _connected = false;
     _ready_for_write = false;
     _output_handler = nullptr;
   }
 
   void startup_handler_(io_id_t, output_handler_t handler)
   {
+    _connected = true;
     _ready_for_write = true;
     _output_handler = handler;
   }
@@ -160,33 +196,36 @@ private:
 
     super::close_(*this);
 
-    if ( _workflow!= nullptr )
+    if ( opt.connect_by_request )
+      return;
+
+    std::weak_ptr<self> wthis = this->shared_from_this();
+    auto reconnect_handler = [opt, wthis]() mutable
     {
-      std::weak_ptr<self> wthis = this->shared_from_this();
-      // Здесь owner wrap не нужен, т.к. объект сбрасывается после постановки задания в очередь
-      _workflow->safe_post(
-        std::chrono::milliseconds( this->_reconnect_timeout_ms ),
-        [opt, wthis]() mutable
+      if (auto pthis = wthis.lock() )
+      {
+        std::lock_guard<mutex_type> lk( pthis->mutex() );
+        if ( pthis->_started )
         {
-          if (auto pthis = wthis.lock() )
-          {
-            std::lock_guard<mutex_type> lk( pthis->mutex() );
-            if ( pthis->_started )
-            {
-              pthis->upgrate_options_(opt);
-              pthis->connect_( *pthis, opt );
-            }
-            else
-            {
-              IOW_LOG_ERROR("Client Reconnect ERROR. Owner is destroyed.");
-            }
-          }
+          pthis->upgrate_options_(opt);
+          pthis->connect_( *pthis, opt );
         }
-      ); // safe_post
+      }
+      else
+      {
+        IOW_LOG_ERROR("Client Reconnect ERROR. Owner is destroyed.");
+      }
+    };
+    
+    if ( _delayed_handler!= nullptr )
+    {
+      _delayed_handler( std::chrono::milliseconds( this->_reconnect_timeout_ms ), reconnect_handler); // safe_post
     }
     else
     {
-      IOW_LOG_FATAL("Reconnect not supported. Required initialize 'workflow'.")
+      if ( this->_reconnect_timeout_ms != 0 )
+      { IOW_LOG_WARNING("Delayed reconnect is not available. Required initialize 'delayed_handler'.") }
+      boost::asio::post(_io, reconnect_handler);
     }
   }
 
@@ -216,21 +255,29 @@ private:
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<mutex_type> lk( pthis->mutex() );
-        pthis->_ready_for_write = false;
+        pthis->_connected = false;
+        pthis->_ready_for_write = opt2.connect_by_request;
         pthis->delayed_reconnect_(opt2);
       }
+      
+      if ( opt2.connection.input_handler!=nullptr)
+        opt2.connection.input_handler(nullptr, 0, nullptr);
     };
 
     opt.connection.shutdown_handler = [wthis, opt2]( io_id_t io_id)
     {
-      IOW_LOG_MESSAGE("iow::io::client connection shutdown handler" )
+      IOW_LOG_DEBUG("iow::io::client connection shutdown handler" )
+
       if ( opt2.connection.shutdown_handler!=nullptr )
         opt2.connection.shutdown_handler(io_id);
 
       if ( auto pthis = wthis.lock() )
       {
         std::lock_guard<mutex_type> lk( pthis->mutex() );
-        pthis->_ready_for_write = false;
+        // connect_by_request: после закрытия оставляем _ready_for_write=true, 
+        // чтобы иницировать подключение при следующем запросе 
+        pthis->_ready_for_write = opt2.connect_by_request;
+        pthis->_connected = false;
         pthis->delayed_reconnect_(opt2);
       }
     };
@@ -249,22 +296,44 @@ private:
       }
     }, nullptr);
 
-    if ( opt2.connection.input_handler == nullptr )
+    if ( opt.connection.input_handler == nullptr )
     {
-      opt2.connection.input_handler
-        = []( data_ptr d, io_id_t /*o_id*/, output_handler_t /*output*/)
+      opt.connection.input_handler
+        = []( data_ptr d, io_id_t , output_handler_t )
       {
         only_for_log(d);
         IOW_LOG_ERROR("Client input_handler not set [" << d << "]" )
       };
     }
+    else if ( _sequence_duplex_mode )
+    {
+      auto input_handler = opt.connection.input_handler;
+      opt.connection.input_handler
+        = [input_handler, wthis]( data_ptr d, io_id_t id, output_handler_t output)
+      {
+        if ( auto pthis = wthis.lock() )
+        {
+          std::lock_guard<mutex_type> lk( pthis->mutex() );
+          if (pthis->_connected) 
+            pthis->_ready_for_write = true;
+        }
+        input_handler( std::move(d), id, output);
+      };
+    }
+    
+    
  }
 private:
-  bool _started;
-  bool _ready_for_write;
-  time_t _reconnect_timeout_ms;
+  io_context_type& _io;
+  bool _started = false;
+  bool _connected = false;
+  bool _ready_for_write = false;
+  bool _sequence_duplex_mode = false;
+  bool _connect_by_request = false;
+  time_t _reconnect_timeout_ms = 0;
   output_handler_t _output_handler;
-  std::shared_ptr< wflow::workflow > _workflow;
+  typedef std::function<void(std::chrono::milliseconds, std::function<void()>) > delayed_handler_f;
+  delayed_handler_f _delayed_handler;
 };
 
 }}}

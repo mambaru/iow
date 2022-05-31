@@ -9,14 +9,14 @@ namespace iow{ namespace ip{ namespace tcp{ namespace client{
 
 struct options_json
 {
-  typedef ::iow::io::client::options_json<
+  typedef ::iow::io::client::multi_client_options_json<
     ::iow::ip::tcp::connection::options_json
   > base_json;
   
   typedef ::wjson::object<
     options,
-    ::wjson::member_list<
-      ::wjson::base< base_json >
+    wjson::member_list<
+      wjson::base< base_json >
     >,
     ::wjson::strict_mode
   > type;

@@ -6,11 +6,9 @@
 namespace iow{ namespace io{ namespace client{
 
 template<typename Client>
-class multi_thread: public multi_base<Client>
+class multi_thread: public multi_base<Client, true>
 {
-  using super = multi_base<Client>;
-  //typedef multi_base<Client> super;
-
+  using super = multi_base<Client, true>;
 public:
   typedef typename super::io_context_type io_context_type;
   

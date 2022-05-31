@@ -60,11 +60,14 @@ int main()
   opt.port = "12345";
   opt.reconnect_timeout_ms = 1000;
   auto workflow = std::make_shared< wflow::workflow>(g_io_context);
-  opt.args.workflow = workflow;
+  opt.args.delayed_handler = [workflow](std::chrono::milliseconds ms, std::function<void()> h)
+  {
+    workflow->safe_post(ms, h);
+  };
   opt.connection.input_handler=[](iow::io::data_ptr, iow::io::io_id_t, ::iow::io::output_handler_t)
   {
   };
-  opt.connection.fatal_handler = [](int code, std::string msg )
+  opt.connection.fatal_handler = [](int code, const std::string& msg )
   {
     std::cout << "---> " << code  << ": " << msg << std::endl;
   };

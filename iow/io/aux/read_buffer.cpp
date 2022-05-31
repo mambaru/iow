@@ -153,12 +153,6 @@ namespace iow{ namespace io{
     return resbuf;
   }
 
-  /*constexpr read_buffer::diff_type read_buffer::npos()
-  {
-    return -1;
-    // return ~0ul;
-  }*/
-
   data_ptr read_buffer::create_(size_t bufsize, size_t maxbuf) const noexcept
   {
     if ( _create!=nullptr )
