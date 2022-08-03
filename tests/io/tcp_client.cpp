@@ -64,10 +64,10 @@ int main()
   {
     workflow->safe_post(ms, h);
   };
-  opt.connection.input_handler=[](iow::io::data_ptr, iow::io::io_id_t, ::iow::io::output_handler_t)
+  opt.connection.input_handler=[](iow::io::data_ptr, iow::io::io_id_t, ::iow::io::output_handler_t) noexcept
   {
   };
-  opt.connection.fatal_handler = [](int code, const std::string& msg )
+  opt.connection.fatal_handler = [](int code, const std::string& msg ) noexcept
   {
     std::cout << "---> " << code  << ": " << msg << std::endl;
   };
