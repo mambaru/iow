@@ -55,7 +55,7 @@ public:
   Descriptor dup(IOServiceType& io, const ProtocolType& protocol)
   {
     std::lock_guard< mutex_type > lk( super::mutex() );
-    return std::move(this->dup_<Descriptor>(io, protocol));
+    return this->dup_<Descriptor>(io, protocol);
   }
 
   template<typename Descriptor, typename IOServiceType>
@@ -63,7 +63,7 @@ public:
   {
     typedef Descriptor dup_descriptor_type;
     typedef typename dup_descriptor_type::protocol_type dup_protocol_type;
-    return std::move( this->dup<Descriptor>(io, dup_protocol_type::v4()) );
+    return this->dup<Descriptor>(io, dup_protocol_type::v4());
   }
 
   template<typename Descriptor>
