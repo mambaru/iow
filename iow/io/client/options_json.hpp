@@ -28,7 +28,7 @@ struct basic_options_json
       wjson::member< n_sequence_duplex_mode, option_type, bool, &option_type::sequence_duplex_mode>,
       wjson::member< n_show_connect_log, option_type, bool, &option_type::show_connect_log>,
       wjson::member< n_connect_by_request, option_type, bool, &option_type::connect_by_request>,
-      wjson::member< n_reconnect_timeout_ms, option_type, time_t, &option_type::reconnect_timeout_ms>
+      wjson::member< n_reconnect_timeout_ms, option_type, time_t, &option_type::reconnect_timeout_ms, wjson::time_interval_ms<time_t> >
     >,
     ::wjson::strict_mode
   > type;
