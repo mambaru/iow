@@ -88,8 +88,6 @@ UNIT(factory, "")
   auto ms1 = std::chrono::duration_cast<std::chrono::microseconds>( finish - start ).count();
   t << message("threads1: ") <<  ms1 << "ms";
   t << nothing;
-
-
 }
 
 BEGIN_SUITE(factory,"")

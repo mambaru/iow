@@ -5,6 +5,8 @@
 #include <iow/logger.hpp>
 #include <iow/io/client/connection.hpp>
 
+#include <wjson/wjson.hpp>
+
 #include <memory>
 #include <cassert>
 #include <iow/asio.hpp>
@@ -61,6 +63,20 @@ public:
     _connect_by_request = opt.connect_by_request;
     _reconnect_timeout_ms = opt.reconnect_timeout_ms;
     _sequence_duplex_mode = opt.sequence_duplex_mode;
+
+    _ping_timeout_ms = opt.ping_timeout_ms;
+    _ping_data = opt.ping_data;
+
+    if ( !_ping_data.empty() )
+    {
+      if ( wjson::parser::is_string( _ping_data.begin(), _ping_data.end() ) )
+      {
+        std::string str;
+        typedef wjson::string<>::serializer serializer;
+        serializer()( str, _ping_data.begin(), _ping_data.end(), nullptr);
+        _ping_data.swap( str );
+      }
+    }
 
     if ( !_connect_by_request )
     {
@@ -186,6 +202,34 @@ private:
     _connected = true;
     _ready_for_write = true;
     _output_handler = handler;
+
+    if ( _ping_timeout_ms!=0 && _delayed_handler!=nullptr )
+    {
+      _delayed_handler(
+        std::chrono::milliseconds(_ping_timeout_ms),
+        this->wrap_(*this, std::bind(&self::ping, this), nullptr)
+      );
+    }
+  }
+
+  void ping()
+  {
+    std::lock_guard<mutex_type> lk( super::mutex() );
+    self::ping_();
+  }
+
+  void ping_()
+  {
+    if ( _ping_timeout_ms==0 || _ready_for_write == false )
+      return;
+    this->send_( std::make_unique<data_type>( _ping_data.begin(), _ping_data.end()) );
+    if ( _delayed_handler!=nullptr )
+    {
+      _delayed_handler(
+        std::chrono::milliseconds(_ping_timeout_ms),
+        this->wrap_(*this, std::bind(&self::ping, this), nullptr)
+      );
+    }
   }
 
   template<typename Opt>
@@ -331,6 +375,8 @@ private:
   bool _sequence_duplex_mode = false;
   bool _connect_by_request = false;
   time_t _reconnect_timeout_ms = 0;
+  time_t _ping_timeout_ms = 0;
+  std::string _ping_data;
   output_handler_t _output_handler;
   typedef std::function<void(std::chrono::milliseconds, std::function<void()>) > delayed_handler_f;
   delayed_handler_f _delayed_handler;

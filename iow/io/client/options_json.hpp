@@ -18,6 +18,10 @@ struct basic_options_json
   JSON_NAME(sequence_duplex_mode)
   JSON_NAME(show_connect_log)
   JSON_NAME(connect_by_request)
+
+  JSON_NAME(ping_timeout_ms)
+  JSON_NAME(ping_data)
+
   
   typedef wjson::object<
     option_type,
@@ -28,7 +32,9 @@ struct basic_options_json
       wjson::member< n_sequence_duplex_mode, option_type, bool, &option_type::sequence_duplex_mode>,
       wjson::member< n_show_connect_log, option_type, bool, &option_type::show_connect_log>,
       wjson::member< n_connect_by_request, option_type, bool, &option_type::connect_by_request>,
-      wjson::member< n_reconnect_timeout_ms, option_type, time_t, &option_type::reconnect_timeout_ms, wjson::time_interval_ms<time_t> >
+      wjson::member< n_reconnect_timeout_ms, option_type, time_t, &option_type::reconnect_timeout_ms, wjson::time_interval_ms<time_t> >,
+      wjson::member< n_ping_timeout_ms, option_type, time_t, &option_type::ping_timeout_ms, wjson::time_interval_ms<time_t> >,
+      wjson::member< n_addr, option_type, std::string, &option_type::ping_data>,
     >,
     ::wjson::strict_mode
   > type;

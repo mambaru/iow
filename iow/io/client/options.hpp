@@ -11,6 +11,10 @@ struct basic_options
 {
   bool async_connect = false;
   time_t reconnect_timeout_ms = 1000;
+
+  time_t ping_timeout_ms = 0;
+  std::string ping_data;
+
   // до получения ответа, клиент становится недоступен
   bool sequence_duplex_mode = false;
   bool show_connect_log = true;
