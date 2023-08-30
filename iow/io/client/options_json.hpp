@@ -37,10 +37,10 @@ struct basic_options_json
       wjson::member< n_addr, option_type, std::string, &option_type::ping_data>
     >,
     ::wjson::strict_mode
-  > type;
-  typedef typename type::target target;
-  typedef typename type::serializer serializer;
-  typedef typename type::member_list member_list;
+  > meta;
+  typedef typename meta::target target;
+  typedef typename meta::serializer serializer;
+  typedef typename meta::member_list member_list;
 };
 
 template< typename ConnectionOptionsJson >
@@ -59,10 +59,10 @@ struct client_options_json
       wjson::base< basic_options_json >
     >,
     ::wjson::strict_mode
-  > type;
-  typedef typename type::target target;
-  typedef typename type::serializer serializer;
-  typedef typename type::member_list member_list;
+  > meta;
+  typedef typename meta::target target;
+  typedef typename meta::serializer serializer;
+  typedef typename meta::member_list member_list;
 };
 
 
@@ -82,10 +82,10 @@ struct multi_client_options_json
       wjson::member< n_connect_count, option_type, int, &option_type::connect_count>
     >,
     wjson::strict_mode
-  > type;
-  typedef typename type::target target;
-  typedef typename type::serializer serializer;
-  typedef typename type::member_list member_list;
+  > meta;
+  typedef typename meta::target target;
+  typedef typename meta::serializer serializer;
+  typedef typename meta::member_list member_list;
 };
 
 template< typename ConnectionOptionsJson >
@@ -104,10 +104,10 @@ struct multi_thread_options_json
       wjson::member< n_threads, option_type, int, &option_type::threads>
     >,
     wjson::strict_mode
-  > type;
-  typedef typename type::target target;
-  typedef typename type::serializer serializer;
-  typedef typename type::member_list member_list;
+  > meta;
+  typedef typename meta::target target;
+  typedef typename meta::serializer serializer;
+  typedef typename meta::member_list member_list;
 };
 
 
