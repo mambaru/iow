@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(iow)
+project(iow VERSION "0.9.8")
 
 include(cmake/ci.cmake)
 
@@ -15,7 +15,7 @@ add_library(
   iow/io/aux/write_buffer.cpp
 )
 wci_targets(iow)
-target_include_directories(iow PUBLIC ${iow_SOURCE_DIR})
+target_include_directories(iow PUBLIC $<BUILD_INTERFACE:${iow_SOURCE_DIR}>)
 
 target_link_libraries(iow PUBLIC faslib wjson wlog wflow)
 target_compile_definitions(iow PRIVATE -DBOOST_ASIO_NO_DEPRECATED)
@@ -25,14 +25,4 @@ if ( BUILD_TESTING )
   add_subdirectory(tests)
 endif()
 
-set(CPACK_PACKAGE_NAME "iow")
-set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "9")
-set(CPACK_PACKAGE_VERSION_PATCH "4")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/Readme.md")
-set(CPACK_PACKAGE_CONTACT "migashko@gmail.com")
-
-install(DIRECTORY iow DESTINATION include FILES_MATCHING PATTERN "*.hpp" )
-install(TARGETS iow LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-include(CPack)
+include(cmake/install.cmake)
