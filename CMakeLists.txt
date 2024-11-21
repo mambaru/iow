@@ -9,6 +9,9 @@ wci_submodule(NAME wjson)
 wci_submodule(NAME wlog)
 wci_submodule(NAME wflow)
 
+ogenc_warning(-Wno-pre-c++14-compat "" ON)
+
+
 add_library(
   iow
   iow/io/aux/read_buffer.cpp

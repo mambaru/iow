@@ -19,7 +19,8 @@ struct basic_options
   bool sequence_duplex_mode = false;
   bool show_connect_log = true;
   bool connect_by_request = false;
-  
+  bool chunk_stat = false;
+
   std::string addr;
   std::string port;
 

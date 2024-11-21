@@ -232,6 +232,9 @@ UNIT(fullbuf_test, "full-buffering mode")
     if ( cursize > maxbuf )
       cursize = 1;
   }
+  t << is_true<assert>( data_line.size()==0 )  << data_line.size() << FAS_TESTING_FILE_LINE;
+  t << is_true<assert>( data_line.count()==0 ) << FAS_TESTING_FILE_LINE;
+
 }
 
 UNIT(ignore_first_test, "buffering with ignore first flag mode")
@@ -337,6 +340,8 @@ END_SUITE(aux)
     getopt( 10,     20,    5,    false,      11,       33   ),
     getopt( 10,     20,    5,    false,      100,      100  ),
     getopt( 33,     34,    32,   false,      1000,     1000 ),
+    getopt( 1,      1,     1,    false,      1,        100  ),
+    getopt( 1,      1,     1,    false,      2,        100  ),
   };
 
   ::fas::testing::suite_counts sc;

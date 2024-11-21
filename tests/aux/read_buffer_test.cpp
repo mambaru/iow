@@ -70,6 +70,10 @@ UNIT(basic_test, "")
   
   auto str = std::string(d->begin(), d->end());
   t << equal_str<assert>( std::string("ab"), str  ) << FAS_TESTING_FILE_LINE;
+
+
+  t << equal<assert, size_t>(buf.size(), 0) << "buf.size()==" << buf.size() << FAS_TESTING_FILE_LINE;
+  t << equal<assert, size_t>(buf.count(), 0) << "buf.count()==" << buf.count() << FAS_TESTING_FILE_LINE;
 }
 
 template<typename T>
@@ -105,6 +109,8 @@ void test_buff1(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
   t << equal<expect>(input, result) << input << "!=" << result << FAS_TESTING_FILE_LINE;
   if ( !chk.empty() )
     t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
+  t << equal<assert, size_t>(buf.size(), 0) << "buf.size()==" << buf.size() << FAS_TESTING_FILE_LINE;
+  t << equal<assert, size_t>(buf.count(), 0) << "buf.count()==" << buf.count() << FAS_TESTING_FILE_LINE;
 }
 
 template<typename T>
@@ -154,6 +160,8 @@ void test_buff2(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
         }
     }
   }
+  t << equal<assert, size_t>(buf.size(), 0) << "buf.size()==" << buf.size() << FAS_TESTING_FILE_LINE;
+  t << equal<assert, size_t>(buf.count(), 0) << "buf.count()==" << buf.count() << FAS_TESTING_FILE_LINE;
 }
 
 
@@ -203,6 +211,10 @@ void test_buff3(T& t, read_buffer& buf, std::vector<std::string> reads, std::vec
   t << equal<expect>(input, result) << input << "!=" << result << FAS_TESTING_FILE_LINE;
   if ( !chk.empty() )
     t << equal<expect>(chk, vectres) << FAS_TESTING_FILE_LINE;
+
+  t << equal<assert, size_t>(buf.size(), 0) << "buf.size()==" << buf.size() << FAS_TESTING_FILE_LINE;
+  t << equal<assert, size_t>(buf.count(), 0) << "buf.count()==" << buf.count() << FAS_TESTING_FILE_LINE;
+
 }
 
 template<typename T>
@@ -523,13 +535,12 @@ UNIT(bug_test, "Ошибка склеивания с мусором")
 
 
 BEGIN_SUITE(read_buffers, "read_buffer suite")
-  /*ADD_UNIT(basic_test)
+  ADD_UNIT(basic_test)
   ADD_UNIT(basic_sep0)
   ADD_UNIT(basic_sep1)
   ADD_UNIT(basic_sep2)
   ADD_UNIT(basic_sep3)
   ADD_UNIT(empty_test)
-  */
   ADD_UNIT(bug_test)
 END_SUITE(read_buffers)
 

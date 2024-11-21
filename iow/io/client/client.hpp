@@ -59,6 +59,7 @@ public:
     }
     _started = true;
     _connected = false;
+    _chank_stat = opt.chunk_stat;
     _ready_for_write = opt.connect_by_request;
     _connect_by_request = opt.connect_by_request;
     _reconnect_timeout_ms = opt.reconnect_timeout_ms;
@@ -163,6 +164,13 @@ public:
       handler(nullptr);
     }
   }
+
+  ::iow::io::connection_stat get_stat() const
+  {
+    std::lock_guard<mutex_type> lk( super::mutex() );
+    return super::get_stat_(_chank_stat);
+  }
+
 
 private:
   
@@ -374,6 +382,7 @@ private:
   bool _ready_for_write = false;
   bool _sequence_duplex_mode = false;
   bool _connect_by_request = false;
+  bool _chank_stat = false;
   time_t _reconnect_timeout_ms = 0;
   time_t _ping_timeout_ms = 0;
   std::string _ping_data;

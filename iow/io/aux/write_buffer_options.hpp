@@ -20,7 +20,8 @@ struct write_buffer_options
   size_t minbuf  = 0;
   size_t maxsize = 0; 
   bool first_as_is = true; // Если maxbuff или minbuff != 0 и bufsize!=0
-  
+ // bool chunk_stats = false; ///  собирать ли информацию по чанкам
+
   create_fun create;
   free_fun free;
 };

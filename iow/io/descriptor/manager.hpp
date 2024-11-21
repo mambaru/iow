@@ -63,6 +63,13 @@ public:
     return _holders.size();
   }
 
+  template<typename Tg, typename F>
+  void stat(F&& fun) const
+  {
+    for (const auto &i: _holders)
+      fun( i.second->get_aspect().template get<Tg>() );
+  }
+
 private:
   std::function<void(holder_ptr)> _initilizer;
   typedef std::map< io_id_type, holder_ptr> holder_map;

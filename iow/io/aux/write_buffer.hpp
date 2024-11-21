@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iow/io/aux/write_buffer_options.hpp>
+#include <iow/io/aux/buffer_stat.hpp>
+
 #include <iow/io/types.hpp>
 #include <iow/memory.hpp>
 #include <vector>
@@ -20,8 +22,8 @@ public:
   typedef const value_type* value_ptr;
   typedef std::unique_ptr<value_type[]> sep_ptr;
   typedef std::pair<value_ptr, size_t> data_pair;
-  typedef std::deque<data_ptr> data_list;
-  
+  typedef std::vector<data_ptr> buffer_list;
+
   typedef std::function<data_ptr(size_t, size_t)> create_fun;
   typedef std::function<void(data_ptr)> free_fun;
 
@@ -61,7 +63,8 @@ public:
 
   void rollback();
   
-  
+  buffer_stat get_stat(bool chunk_stat) const;
+
 
 private:
   
@@ -97,7 +100,7 @@ private:
   size_t _offset = 0;
   size_t _wait = 0; // в байтах
 
-  data_list _list;
+  buffer_list _list;
 };
 
   template<typename O>

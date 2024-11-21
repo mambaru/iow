@@ -116,16 +116,21 @@ namespace iow{ namespace io{
     {
       free_( std::move(buf) );
       _buffers.erase( _buffers.begin() + static_cast<std::ptrdiff_t>( _readbuf ) );
+      if ( _buffers.empty() )
+        _buffers.shrink_to_fit();
     }
     _readpos = ~0ul;
     _readbuf = ~0ul;
     return true;
   }
 
-  data_ptr read_buffer::detach()
+  data_ptr read_buffer::detach() noexcept
   {
+    data_ptr resbuf;
+
     if ( _buffers.empty() )
-      return nullptr;
+      return resbuf;
+
     auto res = search_();
     if ( res.first == ~0ul )
     {
@@ -139,10 +144,10 @@ namespace iow{ namespace io{
         _parsebuf = _buffers.size()-1;
         _parsepos = _buffers.back()->size();
       }
-      return nullptr;
+      return resbuf;
     }
 
-    auto resbuf = this->make_result_(res);
+    resbuf = this->make_result_(res);
     this->prepare_(res);
     size_t bufsize = resbuf->size();
     _size -= bufsize;
@@ -152,6 +157,31 @@ namespace iow{ namespace io{
     }
     return resbuf;
   }
+
+  buffer_stat read_buffer::get_stat(bool chunk_stat) const
+  {
+    buffer_stat stat;
+    if ( chunk_stat)
+    {
+      stat.chunk_sizes.reserve(_buffers.size());
+      stat.chunk_capacities.reserve(_buffers.size());
+    }
+
+    stat.chunk_count = _buffers.size();
+    stat.chunk_count_capacity = _buffers.capacity();
+    for (const auto& b : _buffers )
+    {
+      stat.total_size += b->size();
+      stat.total_capacity += b->capacity();
+      if (chunk_stat)
+      {
+        stat.chunk_sizes.push_back(b->size());
+        stat.chunk_capacities.push_back(b->capacity());
+      }
+    }
+    return stat;
+  }
+
 
   data_ptr read_buffer::create_(size_t bufsize, size_t maxbuf) const noexcept
   {
@@ -476,20 +506,21 @@ namespace iow{ namespace io{
     return result;
   }
 
-  data_ptr read_buffer::make_result_if_first_(const search_pair& p)
+  data_ptr read_buffer::make_result_if_first_(const search_pair& p) noexcept
   {
-    if ( p.first!=0 )
-      return nullptr;
+    data_ptr result;
 
-    data_ptr result = nullptr;
+    if ( p.first!=0 )
+      return result;
 
     // Если можем полностью захватить буфер
-     size_t tmp = _buffers[0]->size();
+    size_t tmp = _buffers[0]->size();
     if ( tmp == p.second )
     {
+
       result = std::move(_buffers[0ul]);
       // Если ральные данные не с начала буфера
-      if (_offset!=0)
+      if (_offset!=0 && _offset <= result->size() )
       {
         result->erase(result->begin(), result->begin() + static_cast<std::ptrdiff_t>(_offset) );
       }
@@ -504,7 +535,9 @@ namespace iow{ namespace io{
         result->begin() 
       );
     }
+
     return result;
+
   }
 
 }}

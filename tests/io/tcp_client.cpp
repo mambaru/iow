@@ -8,6 +8,7 @@
 #include <mutex>
 #include <memory>
 
+namespace {
 boost::asio::io_context g_io_context;
 std::atomic<int> connect_count;
 void server();
@@ -27,7 +28,7 @@ void server()
   g_io_context.run();
   std::cout << "server done" << std::endl;
 }
-
+}
 
 int main()
 {
@@ -77,6 +78,7 @@ int main()
   std::cout << "client start..." << std::endl;
   tcp_client->start(opt);
   tcp_client->send( iow::io::make("Hello World!") );
+  tcp_client->get_stat();
   std::thread t(server);
   sleep(4);
 

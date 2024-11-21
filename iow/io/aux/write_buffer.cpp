@@ -129,9 +129,11 @@ namespace iow{ namespace io{
     {
       _offset = 0;
       free_( std::move(_list.front()) );
-      _list.pop_front();
+      //_list.pop_front();
+      _list.erase(_list.cbegin());
+      if ( _list.size() > 128 &&  _list.size()*2 < _list.capacity() )
+        _list.shrink_to_fit();
     }
-    
     return true;
   }
 
@@ -142,6 +144,29 @@ namespace iow{ namespace io{
     _wait = 0;
   }
   
+  buffer_stat write_buffer::get_stat(bool chunk_stat) const
+  {
+    buffer_stat stat;
+    if ( chunk_stat)
+    {
+      stat.chunk_sizes.reserve(_list.size());
+      stat.chunk_capacities.reserve(_list.size());
+    }
+
+    stat.chunk_count = _list.size();
+    stat.chunk_count_capacity = _list.capacity();
+    for (const auto& b : _list )
+    {
+      stat.total_size += b->size();
+      stat.total_capacity += b->capacity();
+      if (chunk_stat)
+      {
+        stat.chunk_sizes.push_back(b->size());
+        stat.chunk_capacities.push_back(b->capacity());
+      }
+    }
+    return stat;
+  }
 
   data_ptr write_buffer::create_(size_t bufsize, size_t maxbuf) const
   {

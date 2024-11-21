@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/io/aux/read_buffer_options.hpp>
+#include <iow/io/aux/buffer_stat.hpp>
 #include <iow/memory.hpp>
 #include <iow/io/types.hpp>
 #include <fas/typemanip/empty_type.hpp>
@@ -62,9 +63,11 @@ public:
 
   bool confirm(data_pair d);
 
-  data_ptr detach();
+  data_ptr detach() noexcept;
 
-  
+  buffer_stat get_stat(bool chunk_stat) const;
+
+
 private:
 
   //static constexpr diff_type npos();
@@ -110,7 +113,7 @@ private:
 
   data_ptr make_result_(const search_pair& p);
 
-  data_ptr make_result_if_first_(const search_pair& p);
+  data_ptr make_result_if_first_(const search_pair& p) noexcept;
 
 private:
 
@@ -141,6 +144,8 @@ private:
   size_t _parsepos = 0;
 
   buffer_list   _buffers;
+
+  //bool _chunk_stat = false;
 };
 
 
@@ -166,6 +171,7 @@ private:
     _create = opt.create;
     _free = opt.free;
     _maxsize = opt.maxsize;
+    //_chunk_stat = opt.chunk_stat;
 
     if ( _bufsize == 0 )
     {

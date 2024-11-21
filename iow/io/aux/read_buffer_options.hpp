@@ -19,6 +19,8 @@ struct read_buffer_options
   size_t minbuf=0;
   size_t maxsize=0;
   bool trimsep = true; // Отрезать сепаратор 
+ // bool chunk_stats = false; ///  собирать ли информацию по чанкам
+
   std::function< data_ptr(size_t, size_t) > create;
   std::function< void(data_ptr) > free;
 };

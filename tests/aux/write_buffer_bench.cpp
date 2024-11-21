@@ -8,6 +8,7 @@ typedef std::vector<char> data_type;
 typedef ::iow::io::write_buffer  write_buffer;
 typedef ::iow::io::data_ptr data_ptr;
 
+namespace {
 void attach(write_buffer& buf, size_t count);
 void proccess(write_buffer& buf);
 void run(size_t total, size_t count, size_t bufsize, size_t minbuf, size_t maxbuf);
@@ -67,7 +68,7 @@ void run(size_t total, size_t count, size_t bufsize, size_t minbuf, size_t maxbu
   
   std::cout << "run " << span << "mks " << rate << "persec" << std::endl;
 }
-
+} //namespace
 int main()
 {
   fd = open("/dev/null", O_APPEND);

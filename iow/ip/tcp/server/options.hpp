@@ -11,6 +11,7 @@ struct options:  AcceptorOptions
 {
   // TODO: в базовый сервер
   int threads = 0;
+  bool chunk_stat = false;
   
   typedef std::function<void(std::thread::id)> thread_handler;
   thread_handler thread_startup;

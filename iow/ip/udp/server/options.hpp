@@ -15,6 +15,7 @@ struct options:
   thread_handler thread_shutdown;
 
   int threads = 0;
+  bool chunk_stat = false;
   std::string addr;
   std::string port;
 

@@ -25,6 +25,7 @@ typedef ::iow::io::acceptor::acceptor<
 
 #include <iostream>
 #include <iow/ip/tcp/acceptor/acceptor.hpp>
+#include <iow/ip/tcp/server/server.hpp>
 
 int main()
 {
@@ -40,4 +41,8 @@ int main()
   acceptor->listen(opt);
   acceptor->start(opt);
   io_context.run();
+
+  ::iow::ip::tcp::server::server<> s(io_context);
+  s.get_stat();
+
 }

@@ -16,14 +16,15 @@ struct ad_sync_resolver
   {
     boost::system::error_code ec;
     boost::asio::ip::tcp::resolver resolver( t.descriptor().get_executor() );
+    boost::asio::ip::tcp::endpoint endpoint;
 
     auto reitr = resolver.resolve(opt.addr, opt.port, ec);
     if ( ec )
     {
       IOW_LOG_ERROR("Client Reslove: " << ec.message())
-      return boost::asio::ip::tcp::endpoint();
+      return endpoint;
     }
-    boost::asio::ip::tcp::endpoint endpoint = *(reitr.begin());
+    endpoint = *(reitr.begin());
     IOW_LOG_DEBUG("Client Reslove: " << opt.addr << ":" << opt.port << " " << ec.message())
     return endpoint;
   }

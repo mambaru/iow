@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <iow/logger.hpp>
+#include <iow/io/stat.hpp>
 
 namespace iow{ namespace io{ namespace client{
 
@@ -109,6 +110,18 @@ public:
 
     return d;
   }
+
+  ::iow::io::connection_stat get_stat() const
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    ::iow::io::connection_stat stat;
+    for (const auto &cli : _clients )
+    {
+      stat+=cli->stat();
+    }
+    return stat;
+  }
+
   
 private:
   data_ptr send_(data_ptr d)

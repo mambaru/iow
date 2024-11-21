@@ -15,11 +15,13 @@ template<
 struct options_json
 {
   JSON_NAME(threads)
-  
+  JSON_NAME(chunk_stat)
+
   typedef ::wjson::object<
     ServerOptions,
     ::wjson::member_list<
       ::wjson::member<n_threads, ServerOptions, int, &ServerOptions::threads>, //< перенести в общий серевер
+      ::wjson::member<n_chunk_stat, ServerOptions, bool, &ServerOptions::chunk_stat>, //< перенести в общий серевер
       ::wjson::base< AcceptorJson >
     >,
     ::wjson::strict_mode

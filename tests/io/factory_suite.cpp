@@ -8,6 +8,8 @@
 #include <thread>
 #include <chrono>
 
+namespace {
+
 class barrier
 {
 private:
@@ -61,6 +63,7 @@ void thread2()
   std::cout << std::endl <<  tem << std::endl;
 }
 
+}
 
 UNIT(factory, "")
 {

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <iow/io/socket/stream/socket.hpp>
+#include <iow/io/reader/data/tags.hpp>
+#include <iow/io/writer/data/tags.hpp>
+#include <iow/io/stat.hpp>
 #include <iow/asio.hpp>
 
 
@@ -82,6 +85,14 @@ public:
   {
     this->get_aspect().template get<_connect_>()(t, std::forward<Opt>(opt) );
   }
+
+  ::iow::io::connection_stat get_stat_(bool chunk_stat) const
+  {
+    ::iow::io::connection_stat stat;
+    stat.reader = this->get_aspect().template get< iow::io::reader::data::_read_buffer_>().get_stat(chunk_stat);
+    stat.writer = this->get_aspect().template get< iow::io::writer::data::_write_buffer_>().get_stat(chunk_stat);
+    return stat;
+  }
 };
 
 template<typename A = fas::aspect<> >
@@ -124,6 +135,13 @@ public:
     std::lock_guard<mutex_type> lk( super::mutex() );
     super::close_(*this);
   }
+
+  ::iow::io::connection_stat get_stat(bool chunk_stat) const
+  {
+    std::lock_guard<mutex_type> lk( super::mutex() );
+    super::get_stat_(chunk_stat);
+  }
+
 };
 
   
