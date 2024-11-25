@@ -117,7 +117,7 @@ public:
     ::iow::io::connection_stat stat;
     for (const auto &cli : _clients )
     {
-      stat+=cli->stat();
+      stat+=cli->get_stat();
     }
     return stat;
   }

@@ -12,6 +12,7 @@ struct options_json
   JSON_NAME(addr)
   JSON_NAME(port)
   JSON_NAME(threads)
+  JSON_NAME(chunk_stat)
   typedef ::wjson::object<
     options,
     wjson::member_list<
