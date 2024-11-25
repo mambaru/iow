@@ -139,7 +139,7 @@ public:
   ::iow::io::connection_stat get_stat(bool chunk_stat) const
   {
     std::lock_guard<mutex_type> lk( super::mutex() );
-    super::get_stat_(chunk_stat);
+    return super::get_stat_(chunk_stat);
   }
 
 };
