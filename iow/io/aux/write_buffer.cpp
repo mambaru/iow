@@ -19,6 +19,7 @@ namespace iow{ namespace io{
     _size = 0;
     _offset = 0;
     _list.clear();
+    _list.shrink_to_fit();
     _wait = 0;
   }
 
@@ -131,8 +132,17 @@ namespace iow{ namespace io{
       free_( std::move(_list.front()) );
       //_list.pop_front();
       _list.erase(_list.cbegin());
-      if ( _list.size() > 128 &&  _list.size()*2 < _list.capacity() )
+      /*if ( _list.size() > 128 &&  _list.size()*2 < _list.capacity() )
         _list.shrink_to_fit();
+        */
+
+      buffer_list tmp(_list.size());
+      std::move(_list.begin(), _list.end(), tmp.begin());
+      _list = buffer_list();
+      _list = buffer_list(tmp.size());
+      std::move(tmp.begin(), tmp.end(), _list.begin());
+
+      //buffer_list(_list.begin(), _list.end()).swap(_list);
     }
     return true;
   }

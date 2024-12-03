@@ -20,4 +20,7 @@ add_executable(read_buffer_bench_big read_buffer_bench_big.cpp)
 target_link_libraries(read_buffer_bench_big PUBLIC iow)
 wci_utils(read_buffer_bench_big)
 
+add_executable(write_buffer_leak write_buffer_leak.cpp)
+target_link_libraries(write_buffer_leak PUBLIC iow)
+wci_utils(write_buffer_leak)
 
