@@ -47,18 +47,20 @@ public:
     typedef ::iow::io::writer::data::_write_buffer_ _write_buffer_;
 
     ::iow::io::connection_stat stat;
-
-    stat.connection_count = super::origin()->get_aspect().template get<_context_>().manager->size();
-    super::origin()->get_aspect().template get<_context_>().manager->template stat<_read_buffer_>(
-      [&](const auto& read_buffer){
-        stat.reader += read_buffer.get_stat(_chunk_stat);
-      }
-    );
-    super::origin()->get_aspect().template get<_context_>().manager->template stat<_write_buffer_>(
-      [&](const auto& write_buffer){
-        stat.writer += write_buffer.get_stat(_chunk_stat);
-      }
-    );
+    if ( auto pmanager = super::origin()->get_aspect().template get<_context_>().manager )
+    {
+      stat.connection_count = pmanager->size();
+      pmanager->template stat<_read_buffer_>(
+        [&](const auto& read_buffer){
+          stat.reader += read_buffer.get_stat(_chunk_stat);
+        }
+      );
+      pmanager->template stat<_write_buffer_>(
+        [&](const auto& write_buffer){
+          stat.writer += write_buffer.get_stat(_chunk_stat);
+        }
+      );
+    }
     return stat;
   }
 private:
