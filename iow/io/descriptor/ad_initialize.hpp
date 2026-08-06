@@ -25,6 +25,7 @@ struct ad_initialize
     cntx.startup_handler   = opt.startup_handler;
     cntx.shutdown_handler  = opt.shutdown_handler;
     cntx.fatal_handler     = opt.fatal_handler;
+    cntx.error_handler     = opt.error_handler;
 
     if (  opt.input_handler != nullptr )
     {
@@ -36,7 +37,16 @@ struct ad_initialize
       cntx.fatal_handler = [](int code, std::string message)
       {
         only_for_log(code, message);
-        IOW_LOG_FATAL("iow::io::descriptor: Default fatal handler (" << code << ") " << message)
+        IOW_LOG_FATAL(message)
+      };
+    }
+
+    if (  cntx.error_handler == nullptr )
+    {
+      cntx.error_handler = [](int code, std::string message)
+      {
+        only_for_log(code, message);
+        IOW_LOG_ERROR(message)
       };
     }
 

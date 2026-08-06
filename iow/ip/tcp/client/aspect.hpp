@@ -3,9 +3,11 @@
 #include <iow/io/client/connection.hpp>
 #include <iow/ip/tcp/client/options.hpp>
 #include <iow/ip/tcp/connection/aspect.hpp>
+#include <iow/ip/endpoint.hpp>
 #include <iow/io/basic/tags.hpp>
 #include <fas/aop.hpp>
 #include <iow/system.hpp>
+#include <iow/logger.hpp>
 
 namespace iow{ namespace ip{ namespace tcp{ namespace client{
 
@@ -15,17 +17,16 @@ struct ad_sync_resolver
   boost::asio::ip::tcp::endpoint operator()(T& t, const Opt& opt) const
   {
     boost::system::error_code ec;
-    boost::asio::ip::tcp::resolver resolver( t.descriptor().get_executor() );
-    boost::asio::ip::tcp::endpoint endpoint;
-
-    auto reitr = resolver.resolve(opt.addr, opt.port, ec);
+    auto endpoint = ::iow::ip::resolve_endpoint<boost::asio::ip::tcp>(
+      t.descriptor().get_executor(), opt.addr, opt.port, ec);
     if ( ec )
     {
-      IOW_LOG_ERROR("Client Reslove: " << ec.message())
-      return endpoint;
+      IOW_LOG_ERROR("Client Resolve: " << ec.message())
     }
-    endpoint = *(reitr.begin());
-    IOW_LOG_DEBUG("Client Reslove: " << opt.addr << ":" << opt.port << " " << ec.message())
+    else
+    {
+      IOW_LOG_DEBUG("Client Resolve: " << opt.addr << ":" << opt.port)
+    }
     return endpoint;
   }
 };

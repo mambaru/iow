@@ -439,7 +439,7 @@ UNIT(basic_sep3, "")
            );
 }
 
-UNIT(empty_test, "Ошибка без сепаратора (работает через раз)")
+UNIT(empty_test, "Без сепаратора: последовательный confirm/detach")
 {
   using namespace fas::testing;
   read_buffer buf;
@@ -463,6 +463,49 @@ UNIT(empty_test, "Ошибка без сепаратора (работает ч�
   buf.confirm(p);
   res = buf.detach();
   t << equal<expect, std::string>( req2, std::string(res->begin(), res->end()) ) << FAS_FL;
+}
+
+UNIT(nosep_reuse_test, "Без сепаратора: next до detach не должен склеивать сообщения")
+{
+  using namespace fas::testing;
+  read_buffer buf;
+  options opt;
+  buf.get_options(opt);
+  opt.sep = "";
+  opt.bufsize = 64;
+  opt.minbuf = 1;
+  buf.set_options(opt);
+
+  auto p = buf.next();
+  std::string req1 = "hello";
+  std::copy(req1.begin(), req1.end(), p.first);
+  p.second = req1.size();
+  buf.confirm(p);
+
+  p = buf.next();
+  auto res = buf.detach();
+  t << not_equal<assert>(res, nullptr) << FAS_FL;
+  t << stop;
+  t << equal<expect, std::string>(req1, std::string(res->begin(), res->end())) << FAS_FL;
+
+  std::string req2 = "world";
+  std::copy(req2.begin(), req2.end(), p.first);
+  p.second = req2.size();
+  buf.confirm(p);
+  res = buf.detach();
+  t << not_equal<assert>(res, nullptr) << FAS_FL;
+  t << stop;
+  t << equal<expect, std::string>(req2, std::string(res->begin(), res->end())) << FAS_FL;
+
+  p = buf.next();
+  std::string req3 = "!!!";
+  std::copy(req3.begin(), req3.end(), p.first);
+  p.second = req3.size();
+  buf.confirm(p);
+  res = buf.detach();
+  t << not_equal<assert>(res, nullptr) << FAS_FL;
+  t << stop;
+  t << equal<expect, std::string>(req3, std::string(res->begin(), res->end())) << FAS_FL;
 }
 
 UNIT(bug_test, "Ошибка склеивания с мусором")
@@ -534,6 +577,127 @@ UNIT(bug_test, "Ошибка склеивания с мусором")
 }
 
 
+namespace iow{ namespace io{
+
+struct read_buffer_test_access
+{
+  static bool last_fails_on_readpos_zero(read_buffer& b)
+  {
+    auto n = b.next();
+    if ( n.first == nullptr || n.second < 2 )
+      return false;
+    n.first[0] = 'a';
+    n.first[1] = 'b';
+    n.second = 2;
+    if ( !b.confirm(n) )
+      return false;
+    b._readbuf = 0;
+    b._readpos = 0;
+    read_buffer::const_iterator itr;
+    return !b.last_(0, itr) && b._corrupt;
+  }
+
+  static bool last_fails_on_empty_buffer(read_buffer& b)
+  {
+    b._buffers.push_back(std::make_unique<data_type>());
+    b._readbuf = ~0ul;
+    b._readpos = ~0ul;
+    read_buffer::const_iterator itr;
+    return !b.last_(0, itr) && b._corrupt;
+  }
+
+  static bool prepare_fails_on_bad_readbuf(read_buffer& b)
+  {
+    b._buffers.clear();
+    b._buffers.push_back(nullptr);
+    b._readbuf = 0;
+    b._readpos = 0;
+    b._size = 0;
+    // prepare_ clears on failure; must not abort
+    return !b.prepare_(std::make_pair(size_t(0), size_t(0))) && b.count() == 0 && !b._corrupt;
+  }
+
+  static bool prepare_fails_when_readbuf_erased(read_buffer& b)
+  {
+    b._buffers.clear();
+    b._buffers.push_back(std::make_unique<data_type>(data_type{'x'}));
+    b._buffers.push_back(std::make_unique<data_type>(data_type{'y'}));
+    b._readbuf = 0;
+    b._readpos = 0;
+    b._size = 2;
+    // erase both buffers (p.first=1, complete) while _readbuf points into erased range
+    return !b.prepare_(std::make_pair(size_t(1), size_t(1))) && b.count() == 0 && !b._corrupt;
+  }
+
+  static bool detach_clears_after_corrupt(read_buffer& b)
+  {
+    auto n = b.next();
+    if ( n.first == nullptr || n.second < 2 )
+      return false;
+    n.first[0] = 'a';
+    n.first[1] = '\n';
+    n.second = 2;
+    if ( !b.confirm(n) )
+      return false;
+    b._corrupt = true;
+    auto d = b.detach();
+    return d == nullptr && b.count() == 0 && !b._corrupt;
+  }
+};
+
+}}
+
+UNIT(soft_fail_test, "read_buffer soft-fail on invariants")
+{
+  using namespace fas::testing;
+  using namespace iow::io;
+
+  {
+    read_buffer buf;
+    options opt;
+    buf.get_options(opt);
+    opt.bufsize = 8;
+    opt.sep = "\n";
+    buf.set_options(opt);
+    t << is_true<assert>( read_buffer_test_access::last_fails_on_readpos_zero(buf) ) << FAS_TESTING_FILE_LINE;
+    t << stop;
+    // recover via next()
+    auto n = buf.next();
+    t << is_true<assert>( n.first != nullptr ) << FAS_TESTING_FILE_LINE;
+  }
+
+  {
+    read_buffer buf;
+    t << is_true<assert>( read_buffer_test_access::last_fails_on_empty_buffer(buf) ) << FAS_TESTING_FILE_LINE;
+    t << stop;
+    buf.clear();
+    t << equal<assert, size_t>(buf.count(), 0) << FAS_TESTING_FILE_LINE;
+  }
+
+  {
+    read_buffer buf;
+    t << is_true<assert>( read_buffer_test_access::prepare_fails_on_bad_readbuf(buf) ) << FAS_TESTING_FILE_LINE;
+    t << stop;
+  }
+
+  {
+    read_buffer buf;
+    t << is_true<assert>( read_buffer_test_access::prepare_fails_when_readbuf_erased(buf) ) << FAS_TESTING_FILE_LINE;
+    t << stop;
+  }
+
+  {
+    read_buffer buf;
+    options opt;
+    buf.get_options(opt);
+    opt.bufsize = 8;
+    opt.sep = "\n";
+    buf.set_options(opt);
+    t << is_true<assert>( read_buffer_test_access::detach_clears_after_corrupt(buf) ) << FAS_TESTING_FILE_LINE;
+    t << stop;
+  }
+}
+
 BEGIN_SUITE(read_buffers, "read_buffer suite")
   ADD_UNIT(basic_test)
   ADD_UNIT(basic_sep0)
@@ -541,7 +705,9 @@ BEGIN_SUITE(read_buffers, "read_buffer suite")
   ADD_UNIT(basic_sep2)
   ADD_UNIT(basic_sep3)
   ADD_UNIT(empty_test)
+  ADD_UNIT(nosep_reuse_test)
   ADD_UNIT(bug_test)
+  ADD_UNIT(soft_fail_test)
 END_SUITE(read_buffers)
 
 BEGIN_TEST

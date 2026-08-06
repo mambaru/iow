@@ -1,12 +1,15 @@
 #pragma once
 
 #include <iow/ip/udp/server/options.hpp>
+#include <iow/ip/endpoint.hpp>
 #include <iow/io/reader/asio/aspect.hpp>
 #include <iow/io/writer/asio/aspect.hpp>
 #include <iow/io/rw/aspect.hpp>
 #include <iow/io/basic/aspect.hpp>
 #include <iow/io/descriptor/tags.hpp>
 #include <iow/io/socket/dgram/aspect.hpp>
+#include <iow/logger.hpp>
+#include <iow/system.hpp>
 #include <fas/aop.hpp>
 #include <mutex>
 #include <vector>
@@ -20,8 +23,15 @@ struct ad_sync_resolver
   template<typename T, typename Opt>
   boost::asio::ip::udp::endpoint operator()(T& t, const Opt& opt) const
   {
-    boost::asio::ip::udp::resolver resolver( t.descriptor().get_executor() );
-    boost::asio::ip::udp::endpoint endpoint = *(resolver.resolve(opt.addr, opt.port).begin());
+    boost::system::error_code ec;
+    auto endpoint = ::iow::ip::resolve_endpoint<boost::asio::ip::udp>(
+      t.descriptor().get_executor(), opt.addr, opt.port, ec);
+    if ( ec )
+    {
+      IOW_LOG_ERROR("UDP listen resolve failed for " << opt.addr << ":" << opt.port
+                    << ": " << ec.message())
+      throw boost::system::system_error(ec);
+    }
     return endpoint;
   }
 };

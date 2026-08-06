@@ -15,17 +15,6 @@ struct ad_input_handler
 
     if ( cntx.input_handler != nullptr )
     {
-      /*
-      auto input = cntx.input_handler;
-      auto output = t.get_aspect().template get<_make_output_>()(t);
-      auto io_id = t.get_id_(t);
-      auto& m = t.mutex();
-      m.unlock();
-      input( std::move(d), std::move(io_id), std::move(output));
-      m.lock();
-      */
-      
-      
       auto input = cntx.input_handler;
       //auto output = cntx.output_handler;
       auto output = t.get_aspect().template get<_make_output_>()(t);
@@ -35,6 +24,19 @@ struct ad_input_handler
       {
         input( std::move(d), std::move(io_id), std::move(output));
       }
+      catch(const std::bad_alloc& e)
+      {
+        if ( output )
+          output(nullptr);
+
+        std::lock_guard<typename T::mutex_type> lk(t.mutex());
+        if ( cntx.error_handler != nullptr )
+          try
+          {
+            cntx.error_handler(-1, std::string("iow::io::descriptor::ad_input_handler: OUT OF MEMMORY for input buffers std::bad_alloc: ") + std::string(e.what()));
+          }
+          catch(...) {}
+      }
       catch(const std::exception& e)
       {
         if ( output!=nullptr )
@@ -42,7 +44,7 @@ struct ad_input_handler
 
         std::lock_guard<typename T::mutex_type> lk(t.mutex());
         if ( cntx.fatal_handler != nullptr ) 
-          try 
+        try
         {
           cntx.fatal_handler(-1, std::string("iow::io::descriptor::ad_input_handler: std::exception: ") + std::string(e.what()));
         } 
@@ -50,7 +52,9 @@ struct ad_input_handler
       }
       catch(...)
       {
-        if ( output ) output(nullptr);
+        if ( output )
+          output(nullptr);
+
         std::lock_guard<typename T::mutex_type> lk(t.mutex());
         if ( cntx.fatal_handler != nullptr ) try {
           cntx.fatal_handler(-1, "iow::io::descriptor::ad_input_handler: Unhandled exception in input handler");

@@ -1,7 +1,8 @@
 #pragma once
 #include <iow/logger.hpp>
+#include <exception>
 
-namespace iow{ namespace io{ namespace descriptor{ 
+namespace iow{ namespace io{ namespace descriptor{
 
 struct ad_close
 {
@@ -15,9 +16,15 @@ struct ad_close
         t.descriptor().close();
       }
     }
+    catch(const std::exception& e)
+    {
+      IOW_LOG_ERROR("descriptor close failed: " << e.what()
+                    << " — continue shutdown");
+    }
     catch(...)
     {
-      abort();
+      IOW_LOG_ERROR("descriptor close failed: unknown exception"
+                    << " — continue shutdown");
     }
   }
 };

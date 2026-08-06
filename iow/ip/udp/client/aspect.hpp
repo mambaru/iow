@@ -1,12 +1,15 @@
 #pragma once
 
 #include <iow/ip/udp/client/options.hpp>
+#include <iow/ip/endpoint.hpp>
 #include <iow/io/reader/asio/aspect.hpp>
 #include <iow/io/writer/asio/aspect.hpp>
 #include <iow/io/rw/aspect.hpp>
 #include <iow/io/basic/aspect.hpp>
 #include <iow/io/descriptor/tags.hpp>
 #include <iow/io/socket/dgram/aspect.hpp>
+#include <iow/logger.hpp>
+#include <iow/system.hpp>
 #include <fas/aop.hpp>
 #include <mutex>
 #include <vector>
@@ -21,14 +24,14 @@ struct ad_sync_resolver
   boost::asio::ip::udp::endpoint operator()(T& t, const Opt& opt) const
   {
     boost::system::error_code ec;
-    boost::asio::ip::udp::resolver resolver( t.descriptor().get_executor() );
-    boost::asio::ip::udp::resolver::results_type results = resolver.resolve(opt.addr, opt.port, ec);
-    boost::asio::ip::udp::endpoint endpoint = *(results.begin());
+    auto endpoint = ::iow::ip::resolve_endpoint<boost::asio::ip::udp>(
+      t.descriptor().get_executor(), opt.addr, opt.port, ec);
 
-    if ( ec && opt.args.error_handler!=nullptr )
+    if ( ec )
     {
       IOW_LOG_ERROR("UDP resolve error:" << ec.message() );
-      opt.args.error_handler(ec);
+      if ( opt.args.error_handler!=nullptr )
+        opt.args.error_handler(ec);
     }
     return endpoint;
   }

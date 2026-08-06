@@ -16,12 +16,14 @@ struct context
   typedef std::function< void(io_id_type, output_handler_type) > startup_handler_type;
   typedef std::function< void(io_id_type) > shutdown_handler_type;
   typedef std::function< void(int, std::string)> fatal_handler_type;
+  typedef std::function< void(int, std::string)> error_handler_type;
 
   output_handler_type output_handler;
   input_handler_type input_handler;
   startup_handler_type  startup_handler;
   shutdown_handler_type shutdown_handler;
   fatal_handler_type    fatal_handler;
+  error_handler_type    error_handler;
 };
 
 }}}
