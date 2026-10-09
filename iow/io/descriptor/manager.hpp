@@ -26,6 +26,16 @@ public:
 
   }
 
+  // Обновить фабрику новых соединений и options у уже живых (без erase/stop).
+  template<typename Opt>
+  void reconfigure(Opt&& opt)
+  {
+    Opt local = std::forward<Opt>(opt);
+    _initilizer = [local](holder_ptr h){ h->initialize(local);};
+    for (auto& i : _holders)
+      i.second->reconfigure(local);
+  }
+
   void attach(io_id_type id, const holder_ptr& h)
   {
     _holders[id] = h;
@@ -33,7 +43,7 @@ public:
 
   holder_ptr create(const executor_type& io)
   {
-    auto h =  std::make_shared<holder_type>( descriptor_type(io) );
+    auto h = std::make_shared<holder_type>( descriptor_type(io) );
     this->_initilizer(h);
     return h;
   }

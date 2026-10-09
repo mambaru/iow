@@ -25,7 +25,23 @@ target_compile_definitions(iow PRIVATE -DBOOST_ASIO_NO_DEPRECATED)
 
 if ( BUILD_TESTING )
   enable_testing()
+  # Valgrind memcheck does not support AVX-512 from -march=native
+  set(IOW_VALGRIND_COMPILE_OPTIONS)
+  if ( NOT MSVC AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i[3-6]86)$" )
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag("-mno-avx512f" IOW_COMPILER_HAS_MNO_AVX512F)
+    if ( IOW_COMPILER_HAS_MNO_AVX512F )
+      list(APPEND IOW_VALGRIND_COMPILE_OPTIONS
+        $<$<CONFIG:Release>:-mno-avx512f>
+        $<$<CONFIG:RelWithDebInfo>:-mno-avx512f>)
+      target_compile_options(iow PRIVATE ${IOW_VALGRIND_COMPILE_OPTIONS})
+    endif()
+  endif()
   add_subdirectory(tests)
+endif()
+
+if ( WITH_SAMPLES )
+  add_subdirectory(examples)
 endif()
 
 include(cmake/install.cmake)

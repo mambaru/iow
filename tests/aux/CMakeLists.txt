@@ -8,6 +8,10 @@ add_executable(read_buffer_test read_buffer_test.cpp)
 target_link_libraries(read_buffer_test PUBLIC iow fas::testing)
 wci_test(TARGET read_buffer_test COMMAND read_buffer_test )
 
+add_executable(data_pool_test data_pool_test.cpp)
+target_link_libraries(data_pool_test PUBLIC iow fas::testing)
+wci_test(TARGET data_pool_test COMMAND data_pool_test )
+
 add_executable(write_buffer_bench write_buffer_bench.cpp)
 target_link_libraries(write_buffer_bench PUBLIC iow)
 wci_utils(write_buffer_bench)

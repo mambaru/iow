@@ -3,7 +3,6 @@
 #include <mutex>
 #include <list>
 #include <thread>
-#include <cstdlib>
 #include <chrono>
 
 #include <iow/io/basic/tags.hpp>
@@ -12,8 +11,6 @@
 #include <iow/system.hpp>
 
 namespace iow{ namespace io{ namespace descriptor{
-
-
 
 template<typename Holder>
 class mtdup
@@ -31,12 +28,41 @@ public:
 
   explicit mtdup(descriptor_type&& desc)
     : _origin( std::make_shared<holder_type>( std::forward<descriptor_type>(desc)))
+    , _thread_count(0)
   {
   }
 
   holder_ptr origin() const
   {
     return _origin;
+  }
+
+  int thread_count() const
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    return _thread_count;
+  }
+
+  // threads==0 → origin; threads>0 → только dup-acceptors (на origin manager нет).
+  template<typename Handler>
+  void for_each_holder(Handler&& handler) const
+  {
+    holder_list snapshot;
+    {
+      std::lock_guard<mutex_type> lk(_mutex);
+      if ( _thread_count == 0 )
+      {
+        if ( _origin != nullptr )
+          snapshot.push_back(_origin);
+      }
+      else
+      {
+        snapshot = _dup_list;
+      }
+    }
+
+    for (auto& h : snapshot)
+      handler(h);
   }
 
   template<typename Handler>
@@ -51,15 +77,88 @@ public:
   void start(Opt&& opt)
   {
     std::lock_guard<mutex_type> lk(_mutex);
+    this->start_(std::forward<Opt>(opt));
+  }
 
+  // threads ↑  — добавить acceptor-потоки, клиентов не трогать
+  // threads ↓  — жёстко остановить лишние (их соединения сбрасываются)
+  // threads == — только options на живых holders
+  // 0 ↔ N      — смена модели; нужен повторный listen() снаружи (server::reconfigure)
+  template<typename Opt>
+  void reconfigure(Opt&& opt)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    Opt local = std::forward<Opt>(opt);
 
-    if ( opt.threads == 0 )
+    const int next = local.threads;
+    const int cur = _thread_count;
+
+    if ( (cur == 0) != (next == 0) )
     {
-      _origin->start(opt);
+      IOW_LOG_WARNING("mtdup::reconfigure: mode switch threads "
+                      << cur << " -> " << next
+                      << " (hard restart; listen must be redone by caller)");
+      this->stop_();
+      this->start_(std::move(local));
       return;
     }
 
-    for (int i = 0; i < opt.threads; ++i)
+    if ( cur == 0 && next == 0 )
+    {
+      _origin->reconfigure(std::move(local));
+      return;
+    }
+
+    // cur > 0 && next > 0
+    for (auto& h : _dup_list)
+      h->reconfigure(local);
+
+    if ( next > cur )
+    {
+      IOW_LOG_MESSAGE("mtdup::reconfigure: increase threads " << cur << " -> " << next);
+      this->add_threads_(local, next - cur);
+    }
+    else if ( next < cur )
+    {
+      IOW_LOG_WARNING("mtdup::reconfigure: decrease threads " << cur << " -> " << next
+                      << " (dropping connections on stopped acceptors)");
+      this->stop_excess_(static_cast<size_t>(cur - next));
+    }
+
+    _thread_count = next;
+  }
+
+  void stop()
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    this->stop_();
+  }
+
+  mutex_type& mutex() const
+  {
+    return _mutex;
+  }
+
+private:
+
+  template<typename Opt>
+  void start_(Opt&& opt)
+  {
+    if ( opt.threads == 0 )
+    {
+      _origin->start(opt);
+      _thread_count = 0;
+      return;
+    }
+
+    this->add_threads_(opt, opt.threads);
+    _thread_count = opt.threads;
+  }
+
+  template<typename Opt>
+  void add_threads_(const Opt& opt, int count)
+  {
+    for (int i = 0; i < count; ++i)
     {
       auto io = std::make_shared<io_context_type>();
       auto desc = _origin->template dup< descriptor_type >( *io );
@@ -99,20 +198,31 @@ public:
         if (tdown) tdown(thread_id);
       }));
     }
-
   }
 
-  template<typename Opt>
-  void reconfigure(Opt&& )  const
+  void stop_excess_(size_t count)
   {
-    std::lock_guard<mutex_type> lk(_mutex);
-    std::abort();
+    for (size_t i = 0; i < count; ++i)
+    {
+      if ( _dup_list.empty() )
+        break;
+
+      auto h = _dup_list.back();
+      auto s = _services.back();
+      // сначала закрываем, чтоб реконнект на другой ассептор не прошел
+      h->close();
+      h->stop();
+      s->stop();
+      _threads.back().join();
+
+      _dup_list.pop_back();
+      _services.pop_back();
+      _threads.pop_back();
+    }
   }
 
-  void stop()
+  void stop_()
   {
-    std::lock_guard<mutex_type> lk(_mutex);
-
     _origin->close();
     for (auto h : _dup_list)
     {
@@ -142,20 +252,15 @@ public:
     _dup_list.clear();
     _threads.clear();
     _services.clear();
+    _thread_count = 0;
   }
-
-  mutex_type& mutex() const
-  {
-    return _mutex;
-  }
-
-private:
 
   mutable mutex_type _mutex;
   holder_ptr _origin;
   holder_list _dup_list;
   thread_list _threads;
   service_list _services;
+  int _thread_count;
 };
 
 }}}

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <iow/system.hpp>
+#include <iow/asio.hpp>
 #include <iow/io/writer/tags.hpp>
 #include <iow/logger.hpp>
 
@@ -22,8 +23,18 @@ struct ad_error_handler
     }
     else if ( ec.value() != boost::system::errc::operation_canceled )
     {
-      IOW_LOG_ERROR("iow::io::writer::asio::ad_error_handler ("
-                      << ec.value() << ") " << ec.message());
+      if ( ec == boost::asio::error::connection_reset
+        || ec == boost::asio::error::broken_pipe )
+      {
+        IOW_LOG_WARNING("iow::io::writer::asio::ad_error_handler ("
+                        << ec.value() << ") " << ec.message()
+                        << " — client closed the connection; expected, not a service failure");
+      }
+      else
+      {
+        IOW_LOG_ERROR("iow::io::writer::asio::ad_error_handler ("
+                        << ec.value() << ") " << ec.message());
+      }
       t.get_aspect().template gete< ::iow::io::_on_error_ >()(t, ec);
       t.get_aspect().template get< ::iow::io::_stop_>()(t);
     }

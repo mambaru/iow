@@ -21,7 +21,7 @@ struct context
   typedef std::shared_ptr<manager_type> manager_ptr;
   
   int backlog = 0;
-  int max_connections = 0;
+  int max_connections = 128*1024;
   std::string addr;
   std::string port;
 

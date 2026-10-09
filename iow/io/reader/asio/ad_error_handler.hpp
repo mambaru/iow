@@ -27,8 +27,18 @@ struct ad_error_handler
     {
       if ( ec.value() != boost::asio::error::eof )
       {
-        IOW_LOG_ERROR("iow::io::reader::asio::ad_error_handler ("
-                      << ec.value() << ") " << ec.message());
+        if ( ec == boost::asio::error::connection_reset
+          || ec == boost::asio::error::broken_pipe )
+        {
+          IOW_LOG_WARNING("iow::io::reader::asio::ad_error_handler ("
+                          << ec.value() << ") " << ec.message()
+                          << " — client closed the connection; expected, not a service failure");
+        }
+        else
+        {
+          IOW_LOG_ERROR("iow::io::reader::asio::ad_error_handler ("
+                        << ec.value() << ") " << ec.message());
+        }
         t.get_aspect().template gete< ::iow::io::_on_error_ >()(t, ec);
         t.get_aspect().template get< ::iow::io::_stop_>()(t);
       }

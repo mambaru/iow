@@ -17,7 +17,7 @@ struct read_buffer_options
   size_t bufsize=4096;
   size_t maxbuf=4096*2;
   size_t minbuf=0;
-  size_t maxsize=0;
+  size_t maxsize=64*1024*1024;
   bool trimsep = true; // Отрезать сепаратор 
  // bool chunk_stats = false; ///  собирать ли информацию по чанкам
 
