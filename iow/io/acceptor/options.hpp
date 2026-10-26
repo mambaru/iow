@@ -13,7 +13,7 @@ struct options
   typedef ConnectionsOptions connection_options_type;
   connection_options_type connection;
   
-  int max_connections = 0;
+  int max_connections = 128*1024;
   int backlog = 1024;
   std::string addr;
   std::string port;

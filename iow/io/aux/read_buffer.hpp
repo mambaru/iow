@@ -19,6 +19,8 @@ class read_buffer
   typedef typename data_type::const_iterator const_iterator;
   typedef std::pair<size_t, size_t> search_pair;
 
+  friend struct read_buffer_test_access;
+
 public:
   typedef typename data_type::value_type value_type;
   typedef read_buffer_options options_type;
@@ -98,7 +100,7 @@ private:
 
   const_iterator end_(size_t pos) const;
 
-  const_iterator last_(size_t pos) const;
+  bool last_(size_t pos, const_iterator& out) const;
 
   void dec_(size_t& pos, const_iterator& itr) const;
 
@@ -108,8 +110,10 @@ private:
 
   search_pair search_() const;
 
+  void mark_corrupt_(const char* what) const;
+
   // Удаляем отработанные буферы и настраиваем состояние
-  void prepare_(const search_pair& p);
+  bool prepare_(const search_pair& p);
 
   data_ptr make_result_(const search_pair& p);
 
@@ -144,6 +148,9 @@ private:
   size_t _parsepos = 0;
 
   buffer_list   _buffers;
+
+  // Soft-fail: invariant broken in const helpers (last_/search_); public API clears.
+  mutable bool _corrupt = false;
 
   //bool _chunk_stat = false;
 };

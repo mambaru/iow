@@ -20,6 +20,9 @@ struct ad_confirm
     }
     else
     {
+      IOW_LOG_WARNING("Accept rejected: max_connections exceeded ("
+                      << context.manager->size() << "/" << context.max_connections
+                      << "). Connection closed.");
       p->stop();
     };
   }

@@ -8,11 +8,12 @@ struct options
 private:
   typedef ContextType context_type;
 public:
-  typedef typename context_type::output_handler_type  output_handler_type;
-  typedef typename context_type::input_handler_type  input_handler_type;
+  typedef typename context_type::output_handler_type    output_handler_type;
+  typedef typename context_type::input_handler_type     input_handler_type;
   typedef typename context_type::startup_handler_type   startup_handler_type;
   typedef typename context_type::shutdown_handler_type  shutdown_handler_type;
   typedef typename context_type::fatal_handler_type     fatal_handler_type;
+  typedef typename context_type::error_handler_type     error_handler_type;
 
   bool nonblocking = true; 
   size_t receive_buffer_size = 0;
@@ -22,7 +23,7 @@ public:
   startup_handler_type  startup_handler;
   shutdown_handler_type shutdown_handler;
   fatal_handler_type    fatal_handler;
- 
+  error_handler_type    error_handler;
 };
   
 }}}

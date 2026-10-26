@@ -1,4 +1,5 @@
 #include <iow/io/aux/read_buffer.hpp>
+#include <iow/logger.hpp>
 #include <iow/memory.hpp>
 #include <iow/io/types.hpp>
 #include <queue>
@@ -23,6 +24,7 @@ namespace iow{ namespace io{
     _parsebuf = 0;
     _parsepos = 0;
     _buffers.clear();
+    _corrupt = false;
   }
 
   size_t read_buffer::count() const noexcept
@@ -57,6 +59,9 @@ namespace iow{ namespace io{
   read_buffer::data_pair read_buffer::next()
   {
     data_pair result(nullptr,0);
+
+    if ( _corrupt )
+      this->clear();
 
     if ( this->waiting() )
       return result;
@@ -93,6 +98,12 @@ namespace iow{ namespace io{
 
   bool read_buffer::confirm(data_pair d)
   {
+    if ( _corrupt )
+    {
+      this->clear();
+      return false;
+    }
+
     if ( !this->waiting() )
       return false;
 
@@ -128,10 +139,22 @@ namespace iow{ namespace io{
   {
     data_ptr resbuf;
 
+    if ( _corrupt )
+    {
+      this->clear();
+      return resbuf;
+    }
+
     if ( _buffers.empty() )
       return resbuf;
 
     auto res = search_();
+    if ( _corrupt )
+    {
+      this->clear();
+      return resbuf;
+    }
+
     if ( res.first == ~0ul )
     {
       if ( _readbuf != ~0ul )
@@ -148,7 +171,12 @@ namespace iow{ namespace io{
     }
 
     resbuf = this->make_result_(res);
-    this->prepare_(res);
+    if ( resbuf == nullptr )
+      return resbuf;
+
+    if ( !this->prepare_(res) )
+      return resbuf;
+
     size_t bufsize = resbuf->size();
     _size -= bufsize;
     if ( _trimsep && ( bufsize >= _sep_size ) )
@@ -265,23 +293,27 @@ namespace iow{ namespace io{
     return _buffers[pos]->end();
   }
 
-  read_buffer::const_iterator read_buffer::last_(size_t pos) const
+  bool read_buffer::last_(size_t pos, const_iterator& out) const
   {
     auto& buf = *(_buffers[pos]);
     if ( pos == _readbuf )
     {
       if (_readpos==0)
       {
-        abort();
+        mark_corrupt_("last_: _readpos==0");
+        return false;
       }
-      return buf.begin() + static_cast<std::ptrdiff_t>(_readpos) - 1;
+      out = buf.begin() + static_cast<std::ptrdiff_t>(_readpos) - 1;
+      return true;
     }
 
     if ( buf.empty() )
     {
-      abort();
+      mark_corrupt_("last_: empty buffer");
+      return false;
     }
-    return buf.begin() + static_cast<std::ptrdiff_t>( buf.size() ) - 1;
+    out = buf.begin() + static_cast<std::ptrdiff_t>( buf.size() ) - 1;
+    return true;
   }
 
   void read_buffer::dec_(size_t& pos, const_iterator& itr) const
@@ -300,9 +332,19 @@ namespace iow{ namespace io{
       else
       {
         --pos;
-        itr = last_(pos);
+        if ( !last_(pos, itr) )
+          pos = ~0ul;
       }
     }
+  }
+
+  void read_buffer::mark_corrupt_(const char* what) const
+  {
+    if ( _corrupt )
+      return;
+    _corrupt = true;
+    IOW_LOG_ERROR("read_buffer invariant failed: " << what
+                  << " — buffer will be cleared");
   }
 
   bool read_buffer::check_sep_( size_t pos, const_iterator itr) const
@@ -343,19 +385,19 @@ namespace iow{ namespace io{
 
   read_buffer::search_pair read_buffer::nosep_search_() const
   {
-    if ( _offset!=0 && _parsebuf==0ul && _offset==_parsepos ) 
-    {
-      return search_pair(-1, -1);
-    }
-
     if ( _readbuf==~0ul )
     {
       // Если последний буфер не выделен под чтение
-      return search_pair(_buffers.size() - 1, _buffers.back()->size());
+      size_t endpos = _buffers.back()->size();
+      if ( _buffers.size() == 1 && endpos <= _offset )
+        return search_pair(-1, -1);
+      return search_pair(_buffers.size() - 1, endpos);
     }
     else if (_readpos != 0)
     {
       // Если последний буфер выделен под чтение, но не сначала
+      if ( _readbuf == 0 && _readpos <= _offset )
+        return search_pair(-1, -1);
       return search_pair(_readbuf, _readpos);
     }
     else if ( _readbuf != 0 )
@@ -400,6 +442,9 @@ namespace iow{ namespace io{
         beg = begin_(i);
       }
 
+      if ( i == 0 && beg < begin_(0) )
+        beg = begin_(0);
+
       while ( beg!=end )
       {
         beg = std::find(beg, end, _sep[_sep_size-1]);
@@ -418,7 +463,7 @@ namespace iow{ namespace io{
   }
 
   // Удаляем отработанные буферы и настраиваем состояние
-  void read_buffer::prepare_(const read_buffer::search_pair& p) 
+  bool read_buffer::prepare_(const read_buffer::search_pair& p)
   {
     if ( p.first==0 )
     {
@@ -433,7 +478,11 @@ namespace iow{ namespace io{
         if (_readbuf != ~0ul)
         {
           if (_readbuf==0)
-            abort();
+          {
+            mark_corrupt_("prepare_: _readbuf==0 after front erase");
+            this->clear();
+            return false;
+          }
           --_readbuf;
         }
       }
@@ -455,7 +504,11 @@ namespace iow{ namespace io{
         if (_readbuf != ~0ul)
         {
           if ( static_cast<std::ptrdiff_t>(_readbuf) < off)
-            abort();
+          {
+            mark_corrupt_("prepare_: _readbuf < erased count");
+            this->clear();
+            return false;
+          }
           _readbuf-=static_cast<size_t>(off);
         }
       }
@@ -465,7 +518,8 @@ namespace iow{ namespace io{
     }
     if ( _buffers.size() > 128 &&  _buffers.size()*2 < _buffers.capacity() )
       _buffers.shrink_to_fit();
-    }
+    return true;
+  }
 
   data_ptr read_buffer::make_result_(const search_pair& p)
   {
@@ -484,6 +538,10 @@ namespace iow{ namespace io{
 
     // reserve с небольшим оверхедом, поэтому очищаем и используем inserter
     result = create_(reserve, reserve*2 < _maxbuf ? reserve*2 : reserve);
+
+    if ( result == nullptr )
+      return result;
+
     result->clear();
 
     // Копируем со всех буферов, что готовы
@@ -527,8 +585,15 @@ namespace iow{ namespace io{
     }
     else
     {
+      if ( p.second < _offset )
+        return result;
+
       size_t bufsize = p.second - _offset;
-      result = create_(p.second - _offset, bufsize*2 < _maxbuf ? bufsize*2 : bufsize);
+      result = create_(bufsize, bufsize*2 < _maxbuf ? bufsize*2 : bufsize);
+      if ( result == nullptr )
+        return result;
+
+      result->resize(bufsize);
       std::copy(
         _buffers[0]->begin() + static_cast<std::ptrdiff_t>(_offset),
         _buffers[0]->begin() + static_cast<std::ptrdiff_t>(p.second),

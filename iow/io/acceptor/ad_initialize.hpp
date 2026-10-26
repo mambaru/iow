@@ -10,8 +10,6 @@ struct ad_initialize
   template<typename T, typename O>
   void operator()(T& t, const O& opt) const
   {
-    //t.get_aspect().template get<_context_>().connection_options = opt.connection;
-    
     typedef typename T::aspect::template advice_cast< _context_ >::type context_type;
     typedef typename context_type::io_id_type io_id_type;
     context_type& context = t.get_aspect().template get<_context_>();
@@ -26,18 +24,22 @@ struct ad_initialize
         std::lock_guard<typename T::mutex_type> lk(pthis->mutex());
         pthis->get_aspect().template get<_context_>().manager->erase(id);
       }
-      
+
       if ( sh!=nullptr )
       {
         sh(id);
       }
     }, nullptr);
-    context.manager = std::make_shared<typename context_type::manager_type>( std::move(conn_opt) );
+
     context.addr = opt.addr;
     context.port = opt.port;
     context.backlog = opt.backlog;
     context.max_connections = opt.max_connections;
-    
+
+    if ( context.manager == nullptr )
+      context.manager = std::make_shared<typename context_type::manager_type>( std::move(conn_opt) );
+    else
+      context.manager->reconfigure( std::move(conn_opt) );
   }
 };
 

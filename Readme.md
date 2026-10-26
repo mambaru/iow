@@ -8,6 +8,7 @@
 
 Библиотека работы с сетью для пакета [wfc_io](https://github.com/mambaru/wfc_io) фреймворка [WFC](https://github.com/mambaru/wfcroot).
 
+* Введение и пример TCP-чата: [docs/iow.md](docs/iow.md).
 * Документация [doxygen](https://mambaru.github.io/iow/index.html).
 * Репозитарий на [github.com](https://github.com/mambaru/iow).
 * Отчет [coverage](https://mambaru.github.io/iow/cov-report/index.html)

@@ -92,7 +92,10 @@ namespace iow{ namespace io{
     {
       data_ptr& last = _list.back();
       size_t sumsize = last->size() + d->size() + _sep_size;
-      if ( last->size() < _minbuf && sumsize < _maxbuf )
+      // Не склеиваем в чанк, на который уже выдан next() — reserve инвалидирует указатель
+      bool merge = last->size() < _minbuf && sumsize < _maxbuf
+                && !( this->waiting() && _list.size() == 1 );
+      if ( merge )
       {
         last->reserve(sumsize);
         std::copy( d->begin(), d->end(), std::inserter(*last, last->end() ) );
@@ -119,7 +122,10 @@ namespace iow{ namespace io{
 
   bool write_buffer::confirm(data_pair p)
   {
-    if ( _wait == 0 || _size < p.second ) 
+    if ( _wait == 0 || p.second > _wait || _size < p.second )
+      return false;
+
+    if ( _list.empty() || _offset + p.second > _list.front()->size() )
       return false;
 
     _wait = 0;
@@ -149,8 +155,6 @@ namespace iow{ namespace io{
 
   void write_buffer::rollback()
   {
-    if ( _wait != 0 )
-      return;
     _wait = 0;
   }
   

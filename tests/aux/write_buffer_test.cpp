@@ -317,12 +317,94 @@ UNIT(partconfirm_test, "partconfirm_test")
   t << is_true<assert>( data_line.count()==0 ) << FAS_TESTING_FILE_LINE;
 }
 
+UNIT(attach_during_wait_test, "attach во время wait не должен merge в in-flight чанк")
+{
+  using namespace fas::testing;
+  ::iow::io::write_buffer buf;
+  ::iow::io::write_buffer_options opt;
+  buf.get_options(opt);
+  opt.sep = "";
+  opt.minbuf = 128;
+  opt.maxbuf = 256;
+  buf.set_options(opt);
+
+  std::string s1 = "hi";
+  buf.attach(std::make_unique<data_type>(s1.begin(), s1.end()));
+  auto p = buf.next();
+  t << equal<assert, size_t>(p.second, 2) << FAS_FL;
+  t << is_true<assert>(buf.waiting()) << FAS_FL;
+  t << stop;
+
+  const char* in_flight = p.first;
+  std::string s2(200, 'X');
+  buf.attach(std::make_unique<data_type>(s2.begin(), s2.end()));
+  t << equal<assert, size_t>(buf.count(), 2) << FAS_FL;
+  t << stop;
+  t << equal<expect, std::string>(std::string(in_flight, in_flight + 2), "hi") << FAS_FL;
+
+  t << is_true<assert>(buf.confirm(p)) << FAS_FL;
+  t << stop;
+  auto p2 = buf.next();
+  t << is_true<assert>(p2.first != nullptr) << FAS_FL;
+  t << stop;
+  t << equal<expect, size_t>(p2.second, 200) << FAS_FL;
+  t << equal<expect, std::string>(std::string(p2.first, p2.first + 3), "XXX") << FAS_FL;
+}
+
+UNIT(rollback_test, "rollback снимает wait и позволяет повторить next")
+{
+  using namespace fas::testing;
+  ::iow::io::write_buffer buf;
+  ::iow::io::write_buffer_options opt;
+  buf.get_options(opt);
+  opt.sep = "";
+  buf.set_options(opt);
+
+  std::string s = "abc";
+  buf.attach(std::make_unique<data_type>(s.begin(), s.end()));
+  auto p = buf.next();
+  t << is_true<assert>(p.first != nullptr) << FAS_FL;
+  t << equal<assert, size_t>(p.second, 3) << FAS_FL;
+  t << is_true<assert>(buf.waiting()) << FAS_FL;
+  t << stop;
+
+  buf.rollback();
+  t << is_false<assert>(buf.waiting()) << FAS_FL;
+  t << is_true<assert>(buf.ready()) << FAS_FL;
+  t << stop;
+
+  auto p2 = buf.next();
+  t << is_true<assert>(p2.first != nullptr) << FAS_FL;
+  t << stop;
+  t << equal<expect, std::string>(std::string(p2.first, p2.first + p2.second), "abc") << FAS_FL;
+}
+
+UNIT(confirm_oversize_test, "confirm больше offered next должен отклоняться")
+{
+  using namespace fas::testing;
+  ::iow::io::write_buffer buf;
+  ::iow::io::write_buffer_options opt;
+  buf.get_options(opt);
+  opt.sep = "";
+  buf.set_options(opt);
+
+  std::string s = "abcd";
+  buf.attach(std::make_unique<data_type>(s.begin(), s.end()));
+  auto p = buf.next();
+  p.second = p.second + 1;
+  t << is_false<assert>(buf.confirm(p)) << FAS_FL;
+  t << is_true<assert>(buf.waiting()) << FAS_FL;
+}
+
 BEGIN_SUITE(aux,"aux suite")
   ADD_UNIT(init_test)
   ADD_UNIT(nobuf_test)
   ADD_UNIT(fullbuf_test)
   ADD_UNIT(ignore_first_test)
   ADD_UNIT(partconfirm_test)
+  ADD_UNIT(attach_during_wait_test)
+  ADD_UNIT(rollback_test)
+  ADD_UNIT(confirm_oversize_test)
   ADD_VALUE(_test_options_, std::shared_ptr<data_line_test_options> )
   ADD_VALUE(_data_line_, ::iow::io::write_buffer )
   ADD_ADVICE(_generator_, generator)
